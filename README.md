@@ -153,12 +153,6 @@ Website được thiết kế responsive hoàn toàn:
 
 Distributed under the MIT License. See `LICENSE` for more information.
 
-## 👥 Tác giả
-
-- **Developer**: [Tên của bạn]
-- **Email**: [Email của bạn]
-- **GitHub**: [GitHub profile]
-
 ## 🙏 Acknowledgments
 
 - Font Awesome cho icons
