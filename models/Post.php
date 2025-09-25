@@ -3,11 +3,13 @@
 class Post {
     public int $postId;
     public string $content;
+    public int $categoryId;
     public DateTime $createdAt;
 
-    public function __construct($postId, $content) {
+    public function __construct($postId,$categoryId, $content) {
         $this->postId = $postId;
         $this->content = $content;
+        $this->categoryId = $categoryId;
         $this->createdAt = new DateTime();
     }
 
