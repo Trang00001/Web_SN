@@ -1,204 +1,70 @@
 <?php
-require_once 'Database.php';
+require_once 'BaseModel.php';
 
-class User {
-    private $conn;
-    private $table = 'users';
+class User extends BaseModel {
+    private ?int $user_id;
+    private string $username;
+    private string $email;
+    private string $password;
 
-    public $id;
-    public $first_name;
-    public $last_name;
-    public $email;
-    public $password;
-    public $birth_date;
-    public $gender;
-    public $avatar;
-    public $bio;
-    public $location;
-    public $created_at;
-    public $is_active;
-
-    public function __construct() {
-        $database = new Database();
-        $this->conn = $database->connect();
+    public function __construct(
+        string $username = '',
+        string $email = '',
+        string $password = '',
+        ?int $user_id = null
+    ) {
+        parent::__construct();
+        $this->username = $username;
+        $this->email    = $email;
+        $this->password = $password;
+        $this->user_id  = $user_id;
     }
 
-    // Create new user
-    public function create() {
-        $query = "INSERT INTO " . $this->table . " 
-                 SET first_name = :first_name,
-                     last_name = :last_name,
-                     email = :email,
-                     password = :password,
-                     birth_date = :birth_date,
-                     gender = :gender";
+    // ===== Getter / Setter =====
+    public function getId(): ?int { return $this->user_id; }
+    public function getUsername(): string { return $this->username; }
+    public function setUsername(string $v): void { $this->username = $v; }
+    public function getEmail(): string { return $this->email; }
+    public function setEmail(string $v): void { $this->email = $v; }
+    public function getPassword(): string { return $this->password; }
+    public function setPassword(string $v): void { $this->password = $v; }
 
-        $stmt = $this->conn->prepare($query);
-
-        // Sanitize
-        $this->first_name = htmlspecialchars(strip_tags($this->first_name));
-        $this->last_name = htmlspecialchars(strip_tags($this->last_name));
-        $this->email = htmlspecialchars(strip_tags($this->email));
-        $this->password = password_hash($this->password, PASSWORD_DEFAULT);
-        $this->birth_date = htmlspecialchars(strip_tags($this->birth_date));
-        $this->gender = htmlspecialchars(strip_tags($this->gender));
-
-        // Bind parameters
-        $stmt->bindParam(':first_name', $this->first_name);
-        $stmt->bindParam(':last_name', $this->last_name);
-        $stmt->bindParam(':email', $this->email);
-        $stmt->bindParam(':password', $this->password);
-        $stmt->bindParam(':birth_date', $this->birth_date);
-        $stmt->bindParam(':gender', $this->gender);
-
-        if($stmt->execute()) {
-            return true;
-        }
-
-        return false;
+    // ===== Nghiệp vụ =====
+    public function save(): bool {
+        $u = mysqli_real_escape_string($this->db->conn, $this->username);
+        $e = mysqli_real_escape_string($this->db->conn, $this->email);
+        $p = password_hash($this->password, PASSWORD_BCRYPT);
+        $sql = "INSERT INTO User(username,email,password) VALUES('$u','$e','$p')";
+        return $this->db->execute($sql);
     }
 
-    // Login user
-    public function login($email, $password) {
-        $query = "SELECT id, first_name, last_name, email, password, avatar, bio, location 
-                 FROM " . $this->table . " 
-                 WHERE email = :email AND is_active = 1";
-
-        $stmt = $this->conn->prepare($query);
-        $stmt->bindParam(':email', $email);
-        $stmt->execute();
-
-        if($stmt->rowCount() > 0) {
-            $row = $stmt->fetch(PDO::FETCH_ASSOC);
-            
-            if(password_verify($password, $row['password'])) {
-                $this->id = $row['id'];
-                $this->first_name = $row['first_name'];
-                $this->last_name = $row['last_name'];
-                $this->email = $row['email'];
-                $this->avatar = $row['avatar'];
-                $this->bio = $row['bio'];
-                $this->location = $row['location'];
-                
-                return true;
-            }
-        }
-
-        return false;
+    public function updateProfile(): bool {
+        if (!$this->user_id) return false;
+        $u = mysqli_real_escape_string($this->db->conn, $this->username);
+        $e = mysqli_real_escape_string($this->db->conn, $this->email);
+        $sql = "UPDATE User SET username='$u', email='$e' WHERE user_id={$this->user_id}";
+        return $this->db->execute($sql);
     }
 
-    // Get user by ID
-    public function getUserById($id) {
-        $query = "SELECT id, first_name, last_name, email, avatar, bio, location, created_at
-                 FROM " . $this->table . " 
-                 WHERE id = :id AND is_active = 1";
-
-        $stmt = $this->conn->prepare($query);
-        $stmt->bindParam(':id', $id);
-        $stmt->execute();
-
-        if($stmt->rowCount() > 0) {
-            return $stmt->fetch(PDO::FETCH_ASSOC);
-        }
-
-        return false;
+    public function delete(): bool {
+        if (!$this->user_id) return false;
+        return $this->db->execute("DELETE FROM User WHERE user_id={$this->user_id}");
     }
 
-    // Search users
-    public function searchUsers($keyword, $limit = 10) {
-        $query = "SELECT id, first_name, last_name, email, avatar, bio
-                 FROM " . $this->table . " 
-                 WHERE (first_name LIKE :keyword OR last_name LIKE :keyword OR email LIKE :keyword)
-                 AND is_active = 1
-                 LIMIT :limit";
-
-        $stmt = $this->conn->prepare($query);
-        $keyword = "%{$keyword}%";
-        $stmt->bindParam(':keyword', $keyword);
-        $stmt->bindParam(':limit', $limit, PDO::PARAM_INT);
-        $stmt->execute();
-
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    public static function findById(int $id): ?User {
+        $db = new Database();
+        $rows = $db->select("SELECT * FROM User WHERE user_id=$id LIMIT 1");
+        if (!$rows) return null;
+        $r = $rows[0];
+        return new User($r['username'], $r['email'], $r['password'], (int)$r['user_id']);
     }
 
-    // Update user profile
-    public function updateProfile() {
-        $query = "UPDATE " . $this->table . " 
-                 SET first_name = :first_name,
-                     last_name = :last_name,
-                     bio = :bio,
-                     location = :location,
-                     avatar = :avatar,
-                     updated_at = CURRENT_TIMESTAMP
-                 WHERE id = :id";
-
-        $stmt = $this->conn->prepare($query);
-
-        // Sanitize
-        $this->first_name = htmlspecialchars(strip_tags($this->first_name));
-        $this->last_name = htmlspecialchars(strip_tags($this->last_name));
-        $this->bio = htmlspecialchars(strip_tags($this->bio));
-        $this->location = htmlspecialchars(strip_tags($this->location));
-        $this->avatar = htmlspecialchars(strip_tags($this->avatar));
-
-        // Bind parameters
-        $stmt->bindParam(':first_name', $this->first_name);
-        $stmt->bindParam(':last_name', $this->last_name);
-        $stmt->bindParam(':bio', $this->bio);
-        $stmt->bindParam(':location', $this->location);
-        $stmt->bindParam(':avatar', $this->avatar);
-        $stmt->bindParam(':id', $this->id);
-
-        if($stmt->execute()) {
-            return true;
-        }
-
-        return false;
-    }
-
-    // Check if email exists
-    public function emailExists($email) {
-        $query = "SELECT id FROM " . $this->table . " WHERE email = :email";
-        
-        $stmt = $this->conn->prepare($query);
-        $stmt->bindParam(':email', $email);
-        $stmt->execute();
-
-        return $stmt->rowCount() > 0;
-    }
-
-    // Get user's friends
-    public function getFriends($user_id, $limit = 50) {
-        $query = "SELECT u.id, u.first_name, u.last_name, u.avatar, u.bio
-                 FROM users u
-                 INNER JOIN friends f ON (
-                     (f.user1_id = :user_id AND f.user2_id = u.id) OR
-                     (f.user2_id = :user_id AND f.user1_id = u.id)
-                 )
-                 WHERE f.status = 'accepted' AND u.is_active = 1
-                 LIMIT :limit";
-
-        $stmt = $this->conn->prepare($query);
-        $stmt->bindParam(':user_id', $user_id);
-        $stmt->bindParam(':limit', $limit, PDO::PARAM_INT);
-        $stmt->execute();
-
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
-    }
-
-    // Get friend count
-    public function getFriendCount($user_id) {
-        $query = "SELECT COUNT(*) as count
-                 FROM friends 
-                 WHERE (user1_id = :user_id OR user2_id = :user_id) 
-                 AND status = 'accepted'";
-
-        $stmt = $this->conn->prepare($query);
-        $stmt->bindParam(':user_id', $user_id);
-        $stmt->execute();
-
-        $result = $stmt->fetch(PDO::FETCH_ASSOC);
-        return $result['count'];
+    public static function findByEmail(string $email): ?User {
+        $db = new Database();
+        $e  = mysqli_real_escape_string($db->conn, $email);
+        $rows = $db->select("SELECT * FROM User WHERE email='$e' LIMIT 1");
+        if (!$rows) return null;
+        $r = $rows[0];
+        return new User($r['username'], $r['email'], $r['password'], (int)$r['user_id']);
     }
 }
-?>

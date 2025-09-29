@@ -2,7 +2,7 @@
 require_once __DIR__ . '/../config/config.php';
 
 class Database {
-    private $conn;
+    public $conn;
 
     public function __construct() {
         $this->conn = mysqli_connect(HOST, USER, PASSWORD, DB);
