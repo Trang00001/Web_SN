@@ -153,16 +153,3 @@ Website được thiết kế responsive hoàn toàn:
 
 Distributed under the MIT License. See `LICENSE` for more information.
 
-## 🙏 Acknowledgments
-
-- Font Awesome cho icons
-- Gradient backgrounds inspiration
-- Modern social media UI/UX patterns
-
-## 📞 Hỗ trợ
-
-Nếu bạn gặp vấn đề hoặc có câu hỏi, vui lòng tạo issue trong GitHub repository hoặc liên hệ qua email.
-
----
-
-**Happy Coding! 🚀**
