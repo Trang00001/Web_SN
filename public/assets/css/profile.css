@@ -1,0 +1,6 @@
+/* Style cơ bản cho hồ sơ */
+.profile-card .avatar {
+  width: 120px; height: 120px; border-radius: 50%; object-fit: cover;
+  border: 3px solid rgba(0,0,0,.05);
+}
+.profile-card .card { border-radius: 16px; }

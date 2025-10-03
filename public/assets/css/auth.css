@@ -1,0 +1,7 @@
+/* Style cơ bản cho form đăng nhập/đăng ký */
+.auth-wrapper { padding-top: 48px; padding-bottom: 48px; }
+.auth-wrapper .card { border: 0; border-radius: 16px; }
+.auth-wrapper .card-body { padding: 28px; }
+.auth-modal .modal-content { border-radius: 16px; }
+.auth-modal .modal-header { border: 0; }
+.auth-modal .modal-footer { border: 0; }
