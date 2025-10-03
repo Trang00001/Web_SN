@@ -1,0 +1,73 @@
+/* ====== RESET & BASE ====== */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: 'Segoe UI', Roboto, sans-serif;
+  background-color: #f8f9fa; /* phù hợp với Bootstrap */
+  color: #212529;
+  line-height: 1.6;
+}
+
+/* ====== GLOBAL LAYOUT ====== */
+a {
+  color: var(--bs-primary);
+  text-decoration: none;
+}
+a:hover {
+  text-decoration: underline;
+}
+
+.container-main {
+  padding-top: 70px; /* chừa chỗ cho navbar fixed-top */
+  padding-bottom: 40px;
+}
+
+/* ====== NAVBAR / FOOTER ====== */
+.navbar-brand img {
+  height: 40px;
+}
+footer {
+  padding: 20px 0;
+  background: #fff;
+  border-top: 1px solid #e5e5e5;
+  text-align: center;
+  color: #6c757d;
+  font-size: 0.9rem;
+}
+
+/* ====== COMPONENTS ====== */
+.card-profile {
+  max-width: 320px;
+  margin: 0 auto;
+}
+
+.post-card img {
+  max-height: 450px;
+  object-fit: cover;
+}
+
+/* Toast notification (Bootstrap override) */
+.toast-container {
+  top: 1rem;
+  right: 1rem;
+  z-index: 1080;
+}
+
+/* Skeleton loading (placeholder) */
+.skeleton {
+  background: linear-gradient(90deg,#e0e0e0 25%,#f0f0f0 37%,#e0e0e0 63%);
+  background-size: 400% 100%;
+  animation: skeleton-loading 1.4s ease infinite;
+}
+@keyframes skeleton-loading {
+  0% {background-position: 100% 0;}
+  100% {background-position: -100% 0;}
+}
