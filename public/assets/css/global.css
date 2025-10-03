@@ -1,73 +1,43 @@
-/* ====== RESET & BASE ====== */
-*,
-*::before,
-*::after {
+/* global.css */
+
+/* Reset cơ bản */
+* {
+  margin: 0;
+  padding: 0;
   box-sizing: border-box;
 }
 
-html {
-  scroll-behavior: smooth;
-}
-
 body {
-  font-family: 'Segoe UI', Roboto, sans-serif;
-  background-color: #f8f9fa; /* phù hợp với Bootstrap */
-  color: #212529;
-  line-height: 1.6;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #f5f6f7;
+  color: #333;
+  line-height: 1.5;
 }
 
-/* ====== GLOBAL LAYOUT ====== */
+/* Link mặc định */
 a {
-  color: var(--bs-primary);
   text-decoration: none;
+  color: #007bff;
 }
+
 a:hover {
   text-decoration: underline;
 }
 
-.container-main {
-  padding-top: 70px; /* chừa chỗ cho navbar fixed-top */
-  padding-bottom: 40px;
+/* Auth page */
+body.auth-page {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #833AB4, #FD1D1D, #FCAF45);
 }
 
-/* ====== NAVBAR / FOOTER ====== */
-.navbar-brand img {
-  height: 40px;
-}
-footer {
-  padding: 20px 0;
+.auth-container {
   background: #fff;
-  border-top: 1px solid #e5e5e5;
-  text-align: center;
-  color: #6c757d;
-  font-size: 0.9rem;
-}
-
-/* ====== COMPONENTS ====== */
-.card-profile {
-  max-width: 320px;
-  margin: 0 auto;
-}
-
-.post-card img {
-  max-height: 450px;
-  object-fit: cover;
-}
-
-/* Toast notification (Bootstrap override) */
-.toast-container {
-  top: 1rem;
-  right: 1rem;
-  z-index: 1080;
-}
-
-/* Skeleton loading (placeholder) */
-.skeleton {
-  background: linear-gradient(90deg,#e0e0e0 25%,#f0f0f0 37%,#e0e0e0 63%);
-  background-size: 400% 100%;
-  animation: skeleton-loading 1.4s ease infinite;
-}
-@keyframes skeleton-loading {
-  0% {background-position: 100% 0;}
-  100% {background-position: -100% 0;}
+  border-radius: 12px;
+  padding: 2rem;
+  width: 100%;
+  max-width: 400px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
 }
