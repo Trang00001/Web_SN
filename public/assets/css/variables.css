@@ -1,0 +1,46 @@
+/* ==============================
+🎨 Variables CSS - Dùng chung
+============================== */
+
+:root {
+/* Primary & Secondary */
+--color-primary: #4267B2;   
+--color-secondary: #FCAF45; 
+
+/* Accent (Highlight) */
+--color-accent-red: #FD1D1D;
+--color-accent-purple: #833AB4;
+
+/* Neutral (Nền & Text) */
+--color-bg-light: #FFFFFF;
+--color-bg-dark: #18191A;
+--color-text-dark: rgba(0, 0, 0, 0.87);
+--color-text-dark-secondary: rgba(0, 0, 0, 0.54);
+--color-text-dark-disabled: rgba(0, 0, 0, 0.38);
+--color-text-light: rgba(255, 255, 255, 0.87);
+--color-text-light-secondary: rgba(255, 255, 255, 0.54);
+--color-text-light-disabled: rgba(255, 255, 255, 0.38);
+
+/* Font */
+--font-family: 'Roboto', sans-serif;
+--font-size-base: 16px;
+--font-size-sm: 14px;
+--font-size-lg: 18px;
+
+/* Spacing (khoảng cách) */
+--spacing-xs: 4px;
+--spacing-sm: 8px;
+--spacing-md: 16px;
+--spacing-lg: 24px;
+--spacing-xl: 32px;
+
+/* Border Radius */
+--radius-sm: 4px;
+--radius-md: 8px;
+--radius-lg: 16px;
+
+/* Shadow */
+--shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.1);
+--shadow-md: 0 2px 4px rgba(0, 0, 0, 0.15);
+--shadow-lg: 0 4px 8px rgba(0, 0, 0, 0.2);
+}

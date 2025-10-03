@@ -1,16 +1,9 @@
 <?php
-// pages/home.php
-
-// Nội dung trang chủ
+$title = "Trang chủ";
 ob_start();
 ?>
-<div class="container mt-4">
-    <h1>Trang chủ</h1>
-    <p>Chào mừng bạn đến với mạng xã hội mini!</p>
-</div>
+  <h1>Chào mừng bạn đến với MySocial</h1>
+  <p>Đây là trang chủ.</p>
 <?php
 $content = ob_get_clean();
-
-// Gọi layout main
-include __DIR__ . '/../../layouts/main.php';
-
+require_once __DIR__ .'/../../layouts/main.php';

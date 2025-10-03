@@ -1,0 +1,45 @@
+/* Navbar */
+.navbar {
+  background-color: var(--color-primary) !important;
+}
+
+.navbar .nav-link,
+.navbar .navbar-brand {
+  color: var(--color-text-light) !important;
+}
+
+/* Link active */
+.navbar .nav-link.active {
+  color: var(--color-secondary) !important;
+  font-weight: bold;
+  text-decoration: underline;
+}
+
+/* Hover effect */
+.navbar .nav-link:hover {
+  color: var(--color-secondary) !important;
+}
+
+
+.search-bar input {
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-secondary);
+}
+
+.footer {
+  background-color: var(--color-bg-dark);
+  color: var(--color-text-light);
+}
+html, body {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+}
+
+main {
+  flex: 1; /* chiếm hết khoảng trống còn lại */
+}
