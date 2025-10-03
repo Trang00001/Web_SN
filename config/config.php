@@ -3,7 +3,7 @@
 define("HOST", "localhost");
 define("DB", "social_network");
 define("USER", "root");
-define("PASSWORD", "");
+define("PASSWORD", "binhvo2005");
 
 // Base URL của dự án (chỉnh lại cho đúng tên folder bạn đặt trong htdocs)
 define("BASE_URL", "http://localhost/SN_WEB/");
