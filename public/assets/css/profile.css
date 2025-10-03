@@ -1,0 +1,8 @@
+/* public/assets/css/profile.css */
+.profile-page{
+  background: #f7f9fb;
+  min-height: 100vh;
+}
+.profile-card img{
+  box-shadow: 0 2px 10px rgba(0,0,0,.07);
+}
