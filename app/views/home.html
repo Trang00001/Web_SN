@@ -10,40 +10,6 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <!-- Custom CSS -->
     <link rel="stylesheet" href="../../public/assets/css/bootstrap-custom.css">
-    <style>
-        body {
-            background-color: #f8f9fa;
-        }
-        
-        /* Navigation */
-        .navbar-custom {
-            background: #4a7c59 !important;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-        
-        /* Avatar styles - updated to green theme */
-        .avatar-sm {
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            background: #4a7c59;
-        }
-        
-        .avatar-md {
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            background: #4a7c59;
-        }
-        
-        .contact-avatar {
-            position: relative;
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background: #4a7c59;
-        }
-    </style>
 </head>
 <body>
     <!-- Navigation -->
@@ -155,35 +121,50 @@
     </div>
 
     <!-- Main Content -->
-    <div class="main-content">
+    <div class="container-fluid">
         <div class="row">
-            <div class="col-lg-8">
-                <!-- Post Creator -->
-                <div class="card card-custom">
+            <!-- Sidebar Left -->
+            <div class="col-lg-3 d-none d-lg-block">
+                <div class="card card-custom sticky-top">
                     <div class="card-body">
-                        <div class="post-creator d-flex align-items-center mb-3">
-                            <div class="avatar-md me-3"></div>
-                            <div class="post-input flex-fill" data-bs-toggle="modal" data-bs-target="#postModal">
-                                Bạn đang nghĩ gì?
-                            </div>
-                        </div>
-                        <div class="post-actions">
-                            <div class="post-action" data-action="photo">
-                                <i class="fas fa-camera text-success me-2"></i>
-                                <span>Ảnh/Video</span>
-                            </div>
-                            <div class="post-action" data-action="feeling">
-                                <i class="fas fa-smile text-warning me-2"></i>
-                                <span>Cảm xúc</span>
-                            </div>
-                            <div class="post-action" data-action="location">
-                                <i class="fas fa-map-marker-alt text-danger me-2"></i>
-                                <span>Địa điểm</span>
-                            </div>
-                        </div>
+                        <ul class="nav flex-column nav-pills">
+                            <li class="nav-item mb-2">
+                                <a class="nav-link active" href="home.html">
+                                    <i class="fas fa-home me-3"></i>Trang chủ
+                                </a>
+                            </li>
+                            <li class="nav-item mb-2">
+                                <a class="nav-link" href="../pages/profile/profile.php">
+                                    <i class="fas fa-user me-3"></i>Hồ sơ cá nhân
+                                </a>
+                            </li>
+                            <li class="nav-item mb-2">
+                                <a class="nav-link" href="../pages/friends/index.php">
+                                    <i class="fas fa-users me-3"></i>Bạn bè
+                                </a>
+                            </li>
+                            <li class="nav-item mb-2">
+                                <a class="nav-link" href="../pages/messages/index.php">
+                                    <i class="fas fa-envelope me-3"></i>Tin nhắn
+                                </a>
+                            </li>
+                            <li class="nav-item mb-2">
+                                <a class="nav-link" href="../pages/notifications/index.php">
+                                    <i class="fas fa-bell me-3"></i>Thông báo
+                                </a>
+                            </li>
+                            <li class="nav-item mb-2">
+                                <a class="nav-link" href="../pages/search/explore.php">
+                                    <i class="fas fa-search me-3"></i>Khám phá
+                                </a>
+                            </li>
+                        </ul>
                     </div>
                 </div>
-
+            </div>
+            
+            <!-- Content chính -->
+            <div class="col-12 col-lg-6">
                 <!-- Stories -->
                 <div class="card card-custom">
                     <div class="card-header">
@@ -208,6 +189,32 @@
                             <div class="story-item">
                                 <div class="story-avatar" style="background: linear-gradient(45deg, #4facfe, #00f2fe);"></div>
                                 <small>Lê C</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Post Creator -->
+                <div class="card card-custom">
+                    <div class="card-body">
+                        <div class="post-creator d-flex align-items-center mb-3">
+                            <div class="avatar-md me-3"></div>
+                            <div class="post-input flex-fill" data-bs-toggle="modal" data-bs-target="#postModal">
+                                Bạn đang nghĩ gì?
+                            </div>
+                        </div>
+                        <div class="post-actions">
+                            <div class="post-action" data-action="photo">
+                                <i class="fas fa-camera text-success me-2"></i>
+                                <span>Ảnh/Video</span>
+                            </div>
+                            <div class="post-action" data-action="feeling">
+                                <i class="fas fa-smile text-warning me-2"></i>
+                                <span>Cảm xúc</span>
+                            </div>
+                            <div class="post-action" data-action="location">
+                                <i class="fas fa-map-marker-alt text-danger me-2"></i>
+                                <span>Địa điểm</span>
                             </div>
                         </div>
                     </div>
@@ -361,111 +368,107 @@
                     </div>
                 </div>
             </div>
-        </div>
-    </div>
 
-    <!-- Right Sidebar -->
-    <div class="right-sidebar d-none d-lg-block">
-        <!-- Online Friends -->
-        <div class="card card-custom">
-            <div class="card-header">
-                <h6 class="mb-0">
-                    <i class="fas fa-circle text-success me-2" style="font-size: 8px;"></i>
-                    Bạn bè đang online
-                </h6>
-            </div>
-            <div class="card-body">
-                <div class="d-flex align-items-center mb-3">
-                    <div class="contact-avatar me-3">
-                        <div class="online-indicator"></div>
+            <!-- Right Sidebar -->
+            <div class="col-lg-3 d-none d-lg-block">
+                <!-- Online Friends -->
+                <div class="card card-custom">
+                    <div class="card-header">
+                        <h6 class="mb-0">
+                            <i class="fas fa-circle text-success me-2" style="font-size: 8px;"></i>
+                            Bạn bè đang online
+                        </h6>
                     </div>
-                    <span>Nguyễn Văn A</span>
-                </div>
-                <div class="d-flex align-items-center mb-3">
-                    <div class="contact-avatar me-3" style="background: linear-gradient(45deg, #f093fb, #f5576c);">
-                        <div class="online-indicator"></div>
+                    <div class="card-body">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="contact-avatar me-3">
+                                <div class="online-indicator"></div>
+                            </div>
+                            <span>Nguyễn Văn A</span>
+                        </div>
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="contact-avatar me-3" style="background: linear-gradient(45deg, #f093fb, #f5576c);">
+                                <div class="online-indicator"></div>
+                            </div>
+                            <span>Trần Thị B</span>
+                        </div>
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="contact-avatar me-3" style="background: linear-gradient(45deg, #4facfe, #00f2fe);">
+                                <div class="online-indicator"></div>
+                            </div>
+                            <span>Lê Minh C</span>
+                        </div>
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="contact-avatar me-3" style="background: linear-gradient(45deg, #43e97b, #38f9d7);">
+                                <div class="online-indicator"></div>
+                            </div>
+                            <span>Phạm Thị D</span>
+                        </div>
+                        <div class="d-flex align-items-center">
+                            <div class="contact-avatar me-3" style="background: linear-gradient(45deg, #fa709a, #fee140);">
+                                <div class="online-indicator"></div>
+                            </div>
+                            <span>Hoàng Văn E</span>
+                        </div>
                     </div>
-                    <span>Trần Thị B</span>
                 </div>
-                <div class="d-flex align-items-center mb-3">
-                    <div class="contact-avatar me-3" style="background: linear-gradient(45deg, #4facfe, #00f2fe);">
-                        <div class="online-indicator"></div>
-                    </div>
-                    <span>Lê Minh C</span>
-                </div>
-                <div class="d-flex align-items-center mb-3">
-                    <div class="contact-avatar me-3" style="background: linear-gradient(45deg, #43e97b, #38f9d7);">
-                        <div class="online-indicator"></div>
-                    </div>
-                    <span>Phạm Thị D</span>
-                </div>
-                <div class="d-flex align-items-center">
-                    <div class="contact-avatar me-3" style="background: linear-gradient(45deg, #fa709a, #fee140);">
-                        <div class="online-indicator"></div>
-                    </div>
-                    <span>Hoàng Văn E</span>
-                </div>
-            </div>
-        </div>
 
-        <!-- Trending Topics -->
-        <div class="card card-custom">
-            <div class="card-header">
-                <h6 class="mb-0">
-                    <i class="fas fa-fire text-danger me-2"></i>
-                    Xu hướng
-                </h6>
-            </div>
-            <div class="card-body">
-                <div class="mb-3 cursor-pointer">
-                    <div class="fw-bold">#TechTalk</div>
-                    <small class="text-muted">1.2k bài</small>
-                </div>
-                <div class="mb-3 cursor-pointer">
-                    <div class="fw-bold">#WebDevelopment</div>
-                    <small class="text-muted">856 bài</small>
-                </div>
-                <div class="mb-3 cursor-pointer">
-                    <div class="fw-bold">#Photography</div>
-                    <small class="text-muted">623 bài</small>
-                </div>
-                <div class="cursor-pointer">
-                    <div class="fw-bold">#Travel</div>
-                    <small class="text-muted">445 bài</small>
+                <!-- Trending Topics -->
+                <div class="card card-custom">
+                    <div class="card-header">
+                        <h6 class="mb-0">
+                            <i class="fas fa-fire text-danger me-2"></i>
+                            Xu hướng
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3 cursor-pointer">
+                            <div class="fw-bold">#TechTalk</div>
+                            <small class="text-muted">1.2k bài</small>
+                        </div>
+                        <div class="mb-3 cursor-pointer">
+                            <div class="fw-bold">#WebDevelopment</div>
+                            <small class="text-muted">856 bài</small>
+                        </div>
+                        <div class="mb-3 cursor-pointer">
+                            <div class="fw-bold">#Photography</div>
+                            <small class="text-muted">623 bài</small>
+                        </div>
+                        <div class="cursor-pointer">
+                            <div class="fw-bold">#Travel</div>
+                            <small class="text-muted">445 bài</small>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
     <!-- Post Modal -->
-    <div class="modal fade" id="postModal" tabindex="-1">
+    <div class="modal fade" id="postModal" tabindex="-1" style="z-index: 9999;">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title">Tạo bài viết</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
-                <div class="modal-body">
-                    <div class="d-flex align-items-center mb-3">
-                        <div class="avatar-sm me-3"></div>
-                        <strong>Người dùng hiện tại</strong>
+                <form action="pages/posts/create_post.php" method="POST" enctype="multipart/form-data">
+                    <div class="modal-body">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="avatar-sm me-3"></div>
+                            <strong>Người dùng hiện tại</strong>
+                        </div>
+                        <textarea name="content" class="form-control mb-3" rows="4" placeholder="Bạn đang nghĩ gì?" required></textarea>
+                        <div class="mb-3">
+                            <input type="file" class="form-control" name="image" accept="image/*">
+                            <small class="text-muted">Đính kèm ảnh (tùy chọn)</small>
+                        </div>
                     </div>
-                    <textarea class="form-control mb-3" rows="4" placeholder="Bạn đang nghĩ gì?"></textarea>
-                    <div class="d-flex gap-2 flex-wrap">
-                        <button class="btn btn-outline-success btn-sm">
-                            <i class="fas fa-camera me-1"></i>Ảnh/Video
-                        </button>
-                        <button class="btn btn-outline-warning btn-sm">
-                            <i class="fas fa-smile me-1"></i>Cảm xúc
-                        </button>
-                        <button class="btn btn-outline-danger btn-sm">
-                            <i class="fas fa-map-marker-alt me-1"></i>Địa điểm
-                        </button>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                        <button type="submit" class="btn btn-primary-custom">Đăng bài</button>
                     </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-primary-custom">Đăng bài</button>
-                </div>
+                </form>
             </div>
         </div>
     </div>
