@@ -146,7 +146,8 @@ class SocialNetwork {
                 this.addLocation();
                 break;
             default:
-                console.log('Unknown action:', actionType);
+                // Unknown action type
+                break;
         }
     }
 
@@ -479,7 +480,10 @@ class SocialNetwork {
 
     saveReaction(postId, reactionType, isLiked) {
         // In real app, this would make API call
-        console.log(`Post ${postId}: ${reactionType} ${isLiked ? 'added' : 'removed'}`);
+        // Store reaction state for demo purposes
+        const reactions = JSON.parse(localStorage.getItem('reactions') || '{}');
+        reactions[`${postId}_${reactionType}`] = isLiked;
+        localStorage.setItem('reactions', JSON.stringify(reactions));
     }
 
     checkAuthStatus() {

@@ -1,192 +1,345 @@
-﻿/**
- * Posts JavaScript - Social Network
- * Xử lý tương tác với posts: like, comment
- */
-
-document.addEventListener('DOMContentLoaded', function() {
-    initializePostInteractions();
-});
-
 /**
- * Initialize post interactions
+ * Modern Posts JavaScript - TechConnect
+ * Clean and maintainable code for social media interactions
  */
-function initializePostInteractions() {
-    // Like button handlers
-    document.addEventListener('click', function(e) {
-        if (e.target.closest('.like-btn')) {
-            e.preventDefault();
-            handleLikeToggle(e.target.closest('.like-btn'));
-        }
-    });
 
-    // Comment toggle handlers
-    document.addEventListener('click', function(e) {
-        if (e.target.closest('.comment-toggle-btn')) {
-            e.preventDefault();
-            handleCommentToggle(e.target.closest('.comment-toggle-btn'));
-        }
-    });
-
-    // Submit comment handlers
-    document.addEventListener('click', function(e) {
-        if (e.target.closest('.comment-submit-btn')) {
-            e.preventDefault();
-            handleCommentSubmit(e.target.closest('.comment-submit-btn'));
-        }
-    });
-
-    // Enter key on comment input
-    document.addEventListener('keypress', function(e) {
-        if (e.target.classList.contains('comment-input') && e.key === 'Enter' && !e.shiftKey) {
-            e.preventDefault();
-            const submitBtn = e.target.parentNode.querySelector('.comment-submit-btn');
-            if (submitBtn && e.target.value.trim()) {
-                handleCommentSubmit(submitBtn);
-            }
-        }
-    });
-}
-
-/**
- * Handle like button toggle
- */
-function handleLikeToggle(likeBtn) {
-    const icon = likeBtn.querySelector('i');
-    const postCard = likeBtn.closest('.post-card');
-    const countElement = postCard.querySelector('.likes-count');
-    const isLiked = likeBtn.classList.contains('liked');
-    
-    if (isLiked) {
-        // Unlike
-        likeBtn.classList.remove('liked');
-        icon.className = 'far fa-heart';
-        icon.style.color = '#6c757d';
-        likeBtn.querySelector('.like-text').textContent = 'Thích';
-        const currentCount = parseInt(countElement.textContent) || 0;
-        countElement.textContent = Math.max(0, currentCount - 1);
-    } else {
-        // Like
-        likeBtn.classList.add('liked');
-        icon.className = 'fas fa-heart';
-        icon.style.color = '#e74c3c';
-        likeBtn.querySelector('.like-text').textContent = 'Đã thích';
-        const currentCount = parseInt(countElement.textContent) || 0;
-        countElement.textContent = currentCount + 1;
+class SocialApp {
+    constructor() {
+        this.init();
     }
-    
-    // Add animation
-    likeBtn.style.transform = 'scale(1.2)';
-    setTimeout(() => {
-        likeBtn.style.transform = 'scale(1)';
-    }, 200);
-    
-    console.log('Like toggled:', isLiked ? 'Unliked' : 'Liked');
-}
 
-/**
- * Handle comment section toggle
- */
-function handleCommentToggle(toggleBtn) {
-    const postCard = toggleBtn.closest('.post-card');
-    const commentsSection = postCard.querySelector('.post-comments');
-    
-    if (commentsSection) {
-        const isVisible = commentsSection.style.display !== 'none';
-        commentsSection.style.display = isVisible ? 'none' : 'block';
+    init() {
+        this.bindEvents();
+        this.initAnimations();
+        console.log('SocialApp initialized');
+    }
+
+    bindEvents() {
+        console.log('Binding events...');
         
-        const icon = toggleBtn.querySelector('i');
-        if (icon) {
-            icon.className = isVisible ? 'fas fa-comment' : 'fas fa-comment-dots';
+        // Sử dụng cách tiếp cận đơn giản như trong test file
+        document.addEventListener('click', (e) => {
+            console.log('Click detected on:', e.target.tagName, e.target.className);
+            
+            // Like button
+            if (e.target.closest('.like-btn')) {
+                e.preventDefault();
+                console.log('Like button clicked!');
+                this.toggleLike(e.target.closest('.like-btn'));
+                return;
+            }
+            
+            // Comment button  
+            if (e.target.closest('.comment-btn')) {
+                e.preventDefault();
+                console.log('Comment button clicked!');
+                this.toggleComments(e.target.closest('.comment-btn'));
+                return;
+            }
+            
+            // Share button
+            if (e.target.closest('.share-btn')) {
+                e.preventDefault();
+                console.log('Share button clicked!');
+                this.sharePost(e.target.closest('.share-btn'));
+                return;
+            }
+        });
+
+        // Comment submission với Enter
+        document.addEventListener('keypress', (e) => {
+            if (e.target.classList.contains('comment-input') && e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                console.log('Enter pressed in comment input');
+                this.submitComment(e.target);
+            }
+        });
+        
+        console.log('Events bound successfully');
+    }
+
+    toggleLike(button) {
+        if (!button) return;
+        
+        console.log('Toggle like called');
+        const isLiked = button.classList.contains('liked');
+        const icon = button.querySelector('i');
+        const text = button.querySelector('span');
+        const postCard = button.closest('.post-card');
+        const likeCount = postCard.querySelector('.like-count');
+        
+        let count = parseInt(likeCount.textContent.match(/\d+/)[0]) || 0;
+        
+        if (isLiked) {
+            button.classList.remove('liked');
+            icon.className = 'far fa-heart';
+            text.textContent = 'Thích';
+            count = Math.max(0, count - 1);
+            this.showToast('Đã bỏ thích', 'info');
+        } else {
+            button.classList.add('liked');
+            icon.className = 'fas fa-heart';
+            text.textContent = 'Đã thích';
+            count++;
+            this.showToast('Đã thích bài viết', 'success');
         }
         
-        // Focus on comment input if showing
-        if (!isVisible) {
-            const commentInput = commentsSection.querySelector('.comment-input');
-            if (commentInput) {
-                setTimeout(() => commentInput.focus(), 100);
+        likeCount.textContent = count + ' lượt thích';
+        this.animateButton(button, 'like');
+        console.log('Like toggled, new count:', count);
+    }
+
+    toggleComments(button) {
+        if (!button) return;
+        
+        console.log('Toggle comments called');
+        const postCard = button.closest('.post-card');
+        const commentsSection = postCard.querySelector('.comments-section');
+        
+        if (commentsSection) {
+            const isVisible = commentsSection.classList.contains('show');
+            if (isVisible) {
+                commentsSection.classList.remove('show');
+                this.showToast('Đã ẩn bình luận', 'info');
+            } else {
+                commentsSection.classList.add('show');
+                this.showToast('Hiển thị bình luận', 'info');
+                // Focus vào comment input
+                const commentInput = commentsSection.querySelector('.comment-input');
+                if (commentInput) {
+                    setTimeout(() => commentInput.focus(), 300);
+                }
             }
+            console.log('Comments toggled:', { isVisible: !isVisible });
         }
     }
-    
-    console.log('Comments toggled');
-}
 
-/**
- * Handle comment submission
- */
-function handleCommentSubmit(submitBtn) {
-    const commentInput = submitBtn.parentNode.querySelector('.comment-input');
-    const commentsList = submitBtn.closest('.post-comments').querySelector('.comments-list');
-    const commentText = commentInput.value.trim();
-    
-    if (!commentText) {
-        alert('Vui lòng nhập nội dung bình luận');
-        return;
+    sharePost(button) {
+        console.log('Share post called');
+        const postCard = button.closest('.post-card');
+        const postContent = postCard.querySelector('.post-content').textContent.substring(0, 100) + '...';
+        
+        if (navigator.share) {
+            navigator.share({
+                title: 'TechConnect - Chia sẻ bài viết',
+                text: postContent,
+                url: window.location.href
+            });
+        } else {
+            navigator.clipboard.writeText(window.location.href);
+            this.showToast('Đã sao chép link bài viết', 'success');
+        }
+        
+        this.animateButton(button, 'share');
     }
-    
-    // Create new comment element
-    const newComment = document.createElement('div');
-    newComment.className = 'comment-item d-flex mb-3';
-    newComment.innerHTML = `
-        <div class="avatar-sm me-3" style="background: #4a7c59; border-radius: 50%; width: 35px; height: 35px; display: flex; align-items: center; justify-content: center;">
-            <i class="fas fa-user text-white"></i>
-        </div>
-        <div class="comment-content flex-grow-1">
-            <div class="d-flex align-items-center mb-1">
-                <strong class="me-2 text-success">Bạn</strong>
+
+    submitComment(input) {
+        if (!input) return;
+        
+        console.log('Submit comment called');
+        const text = input.value.trim();
+        
+        if (!text) {
+            this.showToast('Vui lòng nhập bình luận!', 'warning');
+            return;
+        }
+
+        const commentsSection = input.closest('.comments-section');
+        const commentsList = commentsSection.querySelector('.comments-list');
+        const postCard = input.closest('.post-card');
+        
+        // Create new comment
+        const newComment = document.createElement('div');
+        newComment.className = 'comment-item';
+        newComment.innerHTML = `
+            <div class="bg-primary rounded-circle d-flex align-items-center justify-content-center me-2" 
+                 style="width: 32px; height: 32px;">
+                <span class="text-white small fw-bold">U</span>
+            </div>
+            <div class="comment-content">
+                <div class="bg-light rounded p-2">
+                    <small class="fw-bold text-primary">Demo User</small>
+                    <div>${text}</div>
+                </div>
                 <small class="text-muted">Vừa xong</small>
             </div>
-            <div class="comment-text p-2 bg-light rounded">${commentText}</div>
-        </div>
-    `;
-    
-    // Add to comments list with animation
-    newComment.style.opacity = '0';
-    newComment.style.transform = 'translateY(20px)';
-    commentsList.appendChild(newComment);
-    
-    // Animate in
-    setTimeout(() => {
-        newComment.style.transition = 'all 0.3s ease';
-        newComment.style.opacity = '1';
-        newComment.style.transform = 'translateY(0)';
-    }, 10);
-    
-    // Clear input
-    commentInput.value = '';
-    
-    // Update comment count
-    const postCard = submitBtn.closest('.post-card');
-    const commentCount = postCard.querySelector('.comments-count');
-    if (commentCount) {
-        const currentCount = parseInt(commentCount.textContent) || 0;
-        commentCount.textContent = currentCount + 1;
+        `;
+        
+        commentsList.appendChild(newComment);
+        input.value = '';
+        
+        // Update comment count
+        const commentCount = postCard.querySelector('.comment-count');
+        let count = parseInt(commentCount.textContent.match(/\d+/)[0]) || 0;
+        commentCount.textContent = (count + 1) + ' bình luận';
+        
+        this.showToast('Đã thêm bình luận', 'success');
+        console.log('Comment added:', text);
     }
-    
-    // Scroll to new comment
-    setTimeout(() => {
-        newComment.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-    }, 300);
-    
-    console.log('Comment added:', commentText);
+
+    animateButton(button, type) {
+        button.style.transform = 'scale(1.2)';
+        
+        if (type === 'like') {
+            button.style.background = 'rgba(231, 76, 60, 0.1)';
+        } else if (type === 'share') {
+            button.style.background = 'rgba(102, 126, 234, 0.1)';
+        }
+        
+        setTimeout(() => {
+            button.style.transform = 'scale(1)';
+            button.style.background = '';
+        }, 200);
+    }
+
+    showToast(message, type = 'info') {
+        const toast = document.createElement('div');
+        toast.className = `toast align-items-center text-white bg-${type === 'success' ? 'success' : type === 'warning' ? 'warning' : 'primary'} border-0`;
+        toast.style.cssText = `
+            position: fixed;
+            top: 100px;
+            right: 20px;
+            z-index: 9999;
+            min-width: 250px;
+        `;
+        
+        toast.innerHTML = `
+            <div class="d-flex">
+                <div class="toast-body">
+                    <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'warning' ? 'exclamation-triangle' : 'info-circle'} me-2"></i>
+                    ${message}
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" onclick="this.parentElement.parentElement.remove()"></button>
+            </div>
+        `;
+        
+        document.body.appendChild(toast);
+        
+        // Auto remove after 3 seconds
+        setTimeout(() => {
+            if (toast.parentElement) {
+                toast.remove();
+            }
+        }, 3000);
+    }
+
+    initAnimations() {
+        // Stagger animation for cards
+        const cards = document.querySelectorAll('.tech-card, .post-card');
+        cards.forEach((card, index) => {
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(30px)';
+            
+            setTimeout(() => {
+                card.style.transition = 'all 0.6s cubic-bezier(0.4, 0, 0.2, 1)';
+                card.style.opacity = '1';
+                card.style.transform = 'translateY(0)';
+            }, index * 100);
+        });
+    }
 }
+
+// Initialize app when DOM is ready
+let socialAppInstance;
+document.addEventListener('DOMContentLoaded', () => {
+    socialAppInstance = new SocialApp();
+    new PostManager();
+    
+    // Export for debugging and global access
+    window.socialApp = socialAppInstance;
+    console.log('Social app initialized and exported to window.socialApp');
+});
+
+// Global functions for backward compatibility
+window.showCreatePostModal = function(type = 'text') {
+    const modal = new bootstrap.Modal(document.getElementById('createPostModal'));
+    modal.show();
+};
+
+window.createPost = function() {
+    const content = document.querySelector('#createPostModal textarea').value;
+    if (content.trim()) {
+        socialAppInstance.showToast('Bài viết đã được tạo thành công!', 'success');
+        bootstrap.Modal.getInstance(document.getElementById('createPostModal')).hide();
+        setTimeout(() => location.reload(), 500);
+    } else {
+        socialAppInstance.showToast('Vui lòng nhập nội dung bài viết!', 'warning');
+    }
+};
+
+// Global function for comments (updated to use new approach)
+window.submitComment = function(postId) {
+    const input = document.querySelector(`#comments-${postId} .comment-input`);
+    if (socialAppInstance && input) {
+        socialAppInstance.submitComment(input);
+    }
+};
+
+// Global function for image modal
+window.openImageModal = function(imageSrc) {
+    const modal = new bootstrap.Modal(document.getElementById('imageModal'));
+    document.getElementById('modalImage').src = imageSrc;
+    modal.show();
+};
 
 /**
- * Utility function to format time
+ * Post Manager - PROTOTYPE VERSION
+ * Đơn giản để dễ điều chỉnh
  */
-function timeAgo(date) {
-    const now = new Date();
-    const diff = now - date;
-    const minutes = Math.floor(diff / 60000);
-    
-    if (minutes < 1) return 'Vừa xong';
-    if (minutes < 60) return `${minutes} phút trước`;
-    
-    const hours = Math.floor(minutes / 60);
-    if (hours < 24) return `${hours} giờ trước`;
-    
-    const days = Math.floor(hours / 24);
-    return `${days} ngày trước`;
-}
+class PostManager {
+    constructor() {
+        this.bindEvents();
+    }
 
-console.log('Posts.js loaded successfully');
+    bindEvents() {
+        // Xử lý nút tạo bài viết
+        document.addEventListener('click', (e) => {
+            if (e.target.closest('[onclick*="showCreatePostModal"]')) {
+                e.preventDefault();
+                this.showModal();
+            }
+        });
+
+        // Xử lý submit
+        const submitBtn = document.querySelector('#createPostModal .btn-primary');
+        if (submitBtn) {
+            submitBtn.addEventListener('click', () => this.createPost());
+        }
+    }
+
+    showModal() {
+        const modal = new bootstrap.Modal(document.getElementById('createPostModal'));
+        modal.show();
+    }
+
+    async createPost() {
+        const textarea = document.querySelector('#createPostModal textarea');
+        const content = textarea.value.trim();
+        
+        if (!content) {
+            alert('Vui lòng nhập nội dung!');
+            return;
+        }
+
+        try {
+            const response = await fetch('/public/api/posts/create.php', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({content})
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                alert('Đăng bài thành công!');
+                bootstrap.Modal.getInstance(document.getElementById('createPostModal')).hide();
+                textarea.value = '';
+                location.reload(); // Đơn giản - reload trang
+            } else {
+                alert('Lỗi: ' + result.error);
+            }
+        } catch (error) {
+            alert('Có lỗi xảy ra!');
+        }
+    }
+}
