@@ -1,43 +1,24 @@
-// ====== GLOBAL JS ======
+document.addEventListener("DOMContentLoaded", function () {
+  const currentPath = window.location.pathname.replace(/\/index\.html$/, "/");
 
-// Bootstrap tooltip & toast khởi tạo tự động
-document.addEventListener('DOMContentLoaded', () => {
-  // Tooltip
-  const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-  tooltipTriggerList.forEach(el => new bootstrap.Tooltip(el));
+  const navLinks = document.querySelectorAll(".navbar .nav-link");
 
-  // Toast container: show bằng JS
-  window.showToast = (selector) => {
-    const toastEl = document.querySelector(selector);
-    if (toastEl) {
-      const toast = new bootstrap.Toast(toastEl);
-      toast.show();
+  navLinks.forEach((link) => {
+    let linkPath = link.getAttribute("href");
+
+    // Nếu link là tương đối thì chuẩn hóa
+    if (!linkPath.startsWith("/")) {
+      linkPath = "/" + linkPath;
     }
-  };
+
+    // Chuẩn hóa /index.html
+    linkPath = linkPath.replace(/\/index\.html$/, "/");
+
+    // So sánh: nếu currentPath kết thúc bằng linkPath thì active
+    if (currentPath.endsWith(linkPath)) {
+      link.classList.add("active");
+    } else {
+      link.classList.remove("active");
+    }
+  });
 });
-
-// ====== MODAL AUTH ======
-// Đóng/mở modal login/register dùng Bootstrap
-function openLoginModal() {
-  const modal = new bootstrap.Modal(document.getElementById('modalLogin'));
-  modal.show();
-}
-function openRegisterModal() {
-  const modal = new bootstrap.Modal(document.getElementById('modalRegister'));
-  modal.show();
-}
-window.openLoginModal = openLoginModal;
-window.openRegisterModal = openRegisterModal;
-
-// ====== AJAX HELPER ======
-async function ajaxRequest(url, method = 'GET', data = null) {
-  const options = { method };
-  if (data) {
-    options.headers = { 'Content-Type': 'application/json' };
-    options.body = JSON.stringify(data);
-  }
-  const res = await fetch(url, options);
-  if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
-  return res.json();
-}
-window.ajaxRequest = ajaxRequest;
