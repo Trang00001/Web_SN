@@ -1,0 +1,482 @@
+/* ==============================================
+   MAIN THEME STYLES - TechConnect
+   Layout, Navigation, Sidebar, Global Components
+   ============================================== */
+
+/* CSS Variables */
+:root {
+    --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    --accent-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    --success-gradient: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+    
+    --bg-main: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    --bg-card: rgba(255, 255, 255, 0.9);
+    --bg-card-hover: rgba(255, 255, 255, 0.95);
+    
+    --shadow-light: 0 4px 20px rgba(102, 126, 234, 0.08);
+    --shadow-medium: 0 8px 32px rgba(102, 126, 234, 0.12);
+    --shadow-heavy: 0 12px 40px rgba(102, 126, 234, 0.16);
+    
+    --text-primary: #2d3436;
+    --text-secondary: #636e72;
+    --text-muted: #b2bec3;
+    
+    --border-radius: 16px;
+    --border-radius-lg: 24px;
+    --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ==============================================
+   GLOBAL STYLES
+   ============================================== */
+body {
+    background: var(--bg-main) !important;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
+    color: var(--text-primary) !important;
+    line-height: 1.6;
+}
+
+/* ==============================================
+   LAYOUT CONTAINER
+   ============================================== */
+.main-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 2rem 1rem;
+}
+
+.content-grid {
+    display: grid;
+    grid-template-columns: 280px 1fr 320px;
+    gap: 2rem;
+    align-items: start;
+}
+
+@media (max-width: 1200px) {
+    .content-grid {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+    .left-sidebar, .right-sidebar {
+        display: none;
+    }
+}
+
+/* ==============================================
+   NAVIGATION BAR
+   ============================================== */
+.modern-navbar {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid rgba(102, 126, 234, 0.1);
+    box-shadow: var(--shadow-light);
+    transition: var(--transition);
+}
+
+.navbar-brand {
+    background: var(--primary-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-weight: 800;
+    font-size: 1.5rem;
+    text-decoration: none;
+}
+
+/* Search Bar */
+.search-modern {
+    background: var(--bg-card);
+    border: 1px solid rgba(102, 126, 234, 0.1);
+    border-radius: 50px;
+    padding: 0.75rem 1.5rem;
+    transition: var(--transition);
+    backdrop-filter: blur(10px);
+}
+
+.search-modern:focus {
+    border-color: var(--primary-gradient);
+    box-shadow: 0 0 20px rgba(102, 126, 234, 0.1);
+    outline: none;
+}
+
+/* ==============================================
+   CARD COMPONENTS
+   ============================================== */
+.tech-card,
+.sidebar-card {
+    background: var(--bg-card);
+    backdrop-filter: blur(20px);
+    border-radius: var(--border-radius-lg);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: var(--shadow-light);
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    transition: var(--transition);
+    position: relative;
+    overflow: hidden;
+}
+
+.tech-card::before,
+.sidebar-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: var(--primary-gradient);
+    opacity: 0;
+    transition: var(--transition);
+}
+
+.tech-card:hover,
+.sidebar-card:hover {
+    transform: translateY(-8px);
+    box-shadow: var(--shadow-heavy);
+    background: var(--bg-card-hover);
+}
+
+.tech-card:hover::before,
+.sidebar-card:hover::before {
+    opacity: 1;
+}
+
+/* ==============================================
+   USER AVATAR SYSTEM
+   ============================================== */
+.user-avatar {
+    width: 50px;
+    height: 50px;
+    border-radius: var(--border-radius);
+    background: var(--primary-gradient);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 700;
+    margin-right: 1rem;
+    box-shadow: var(--shadow-light);
+}
+
+.user-avatar-sm {
+    width: 35px;
+    height: 35px;
+    font-size: 0.9rem;
+}
+
+.user-avatar-lg {
+    width: 80px;
+    height: 80px;
+    font-size: 2rem;
+}
+
+/* ==============================================
+   SIDEBAR NAVIGATION
+   ============================================== */
+.menu-item,
+.sidebar-item {
+    display: flex;
+    align-items: center;
+    padding: 1rem;
+    border-radius: var(--border-radius);
+    margin-bottom: 0.5rem;
+    text-decoration: none;
+    color: var(--text-primary) !important;
+    transition: var(--transition);
+    background: transparent;
+    position: relative;
+    overflow: hidden;
+}
+
+.menu-item::before,
+.sidebar-item::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background: var(--primary-gradient);
+    transform: scaleY(0);
+    transition: var(--transition);
+}
+
+.menu-item:hover,
+.sidebar-item:hover {
+    background: var(--primary-gradient);
+    color: white !important;
+    transform: translateX(8px);
+    text-decoration: none;
+}
+
+.menu-item:hover::before,
+.sidebar-item:hover::before {
+    transform: scaleY(1);
+}
+
+.menu-item i {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 1rem;
+    background: var(--accent-gradient);
+    color: white;
+    transition: var(--transition);
+}
+
+.menu-item:hover i,
+.sidebar-item:hover i {
+    background: rgba(255, 255, 255, 0.2);
+    transform: scale(1.1);
+}
+
+/* ==============================================
+   STATS & TRENDING COMPONENTS
+   ============================================== */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.stat-card {
+    background: var(--success-gradient);
+    color: white;
+    padding: 1.5rem;
+    border-radius: var(--border-radius);
+    text-align: center;
+    transition: var(--transition);
+}
+
+.stat-card:hover {
+    transform: translateY(-4px) scale(1.02);
+}
+
+.stat-number {
+    font-size: 1.8rem;
+    font-weight: 800;
+    display: block;
+    margin-bottom: 0.25rem;
+}
+
+.trending-item {
+    display: flex;
+    align-items: center;
+    padding: 1rem;
+    border-radius: var(--border-radius);
+    margin-bottom: 0.8rem;
+    background: linear-gradient(45deg, rgba(102, 126, 234, 0.08), rgba(240, 147, 251, 0.08));
+    transition: var(--transition);
+    border-left: 4px solid transparent;
+}
+
+.trending-item:hover {
+    transform: translateX(8px);
+    background: linear-gradient(45deg, rgba(102, 126, 234, 0.15), rgba(240, 147, 251, 0.15));
+    border-left-color: var(--primary-gradient);
+}
+
+.trending-icon {
+    width: 35px;
+    height: 35px;
+    border-radius: 10px;
+    background: var(--secondary-gradient);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 1rem;
+    transition: var(--transition);
+}
+
+.trending-item:hover .trending-icon {
+    transform: rotate(10deg) scale(1.1);
+}
+
+/* ==============================================
+   FRIENDS COMPONENTS
+   ============================================== */
+.friend-item {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem 0;
+    border-radius: var(--border-radius);
+    transition: var(--transition);
+    margin-bottom: 0.5rem;
+}
+
+.friend-item:hover {
+    background: rgba(102, 126, 234, 0.05);
+    transform: translateX(4px);
+}
+
+.online-status {
+    position: relative;
+}
+
+.online-status::after {
+    content: '';
+    position: absolute;
+    bottom: 2px;
+    right: 2px;
+    width: 10px;
+    height: 10px;
+    background: #2ecc71;
+    border: 2px solid white;
+    border-radius: 50%;
+}
+
+/* ==============================================
+   BUTTON SYSTEM
+   ============================================== */
+.btn-modern {
+    border-radius: var(--border-radius);
+    padding: 0.75rem 1.5rem;
+    font-weight: 600;
+    transition: var(--transition);
+    border: none;
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-primary-gradient {
+    background: var(--primary-gradient);
+    color: white;
+}
+
+.btn-primary-gradient:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-medium);
+    color: white;
+}
+
+.btn-outline-modern {
+    border: 2px solid transparent;
+    background: linear-gradient(white, white) padding-box,
+                var(--primary-gradient) border-box;
+    color: var(--text-primary);
+}
+
+.btn-outline-modern:hover {
+    background: var(--primary-gradient);
+    color: white;
+    transform: translateY(-2px);
+}
+
+.btn-primary,
+.btn-outline-primary {
+    border-radius: var(--border-radius);
+    transition: var(--transition);
+}
+
+.btn-primary:hover,
+.btn-outline-primary:hover {
+    transform: translateY(-2px);
+}
+
+/* ==============================================
+   MODAL COMPONENTS
+   ============================================== */
+.modal-content {
+    border-radius: var(--border-radius-lg);
+    border: none;
+    box-shadow: var(--shadow-heavy);
+}
+
+.modal-header {
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    background: #f8f9fa;
+}
+
+.modal-title {
+    color: var(--text-primary) !important;
+    font-weight: 600;
+}
+
+.modal-body {
+    background: white;
+    color: var(--text-primary);
+}
+
+.modal-footer {
+    border-top: 1px solid rgba(0, 0, 0, 0.1);
+    background: #f8f9fa;
+}
+
+/* Override Bootstrap modal text colors */
+.modal .text-muted {
+    color: var(--text-secondary) !important;
+}
+
+.modal h6, .modal .fw-medium, .modal .fw-bold {
+    color: var(--text-primary) !important;
+}
+
+/* ==============================================
+   TEXT COLOR OVERRIDES
+   ============================================== */
+.sidebar-card h6,
+.tech-card h6 {
+    color: var(--text-primary) !important;
+}
+
+.sidebar-card .text-muted,
+.tech-card .text-muted {
+    color: var(--text-secondary) !important;
+}
+
+.sidebar-card .fw-medium,
+.tech-card .fw-medium {
+    color: var(--text-primary) !important;
+}
+
+/* ==============================================
+   ANIMATIONS
+   ============================================== */
+@keyframes slideInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.animate-slide-up {
+    animation: slideInUp 0.6s ease-out;
+}
+
+.animate-fade-in {
+    animation: fadeIn 0.4s ease-out;
+}
+
+/* ==============================================
+   RESPONSIVE DESIGN
+   ============================================== */
+@media (max-width: 768px) {
+    .main-container {
+        padding: 1rem 0.5rem;
+    }
+    
+    .tech-card,
+    .sidebar-card {
+        padding: 1rem;
+        border-radius: var(--border-radius);
+    }
+    
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+}
