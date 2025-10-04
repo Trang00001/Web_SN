@@ -10,5 +10,6 @@ abstract class BaseModel implements ModelInterface {
 
     public function __construct() {
         $this->db = new Database();
+
     }
 }

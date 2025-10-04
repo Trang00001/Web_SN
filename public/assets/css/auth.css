@@ -1,0 +1,15 @@
+/* public/assets/css/auth.css */
+:root{
+  --card-radius: 1rem;
+}
+.auth-page{
+  background: linear-gradient(180deg, #f8fafc, #eef2f7);
+  min-height: 100vh;
+}
+.card{
+  border: 1px solid #eef1f4;
+}
+.form-control:focus{
+  box-shadow: none;
+  border-color: #86b7fe;
+}
