@@ -61,7 +61,7 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     function loadFriendTab(tab) {
-     fetch('/WEB/Web_SN/app/views/components/item/friend-item.php?tab=' + tab)
+     fetch('/Web_SN/app/views/components/item/friend-item.php?tab=' + tab)
             .then(res => res.text())
             .then(html => content.innerHTML = html)
             .catch(err => content.innerHTML = `<div class="text-danger">Lỗi tải dữ liệu</div>`);
