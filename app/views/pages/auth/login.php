@@ -42,7 +42,7 @@
             </form>
             <div class="text-center mt-3">
               <span class="text-muted">Chưa có tài khoản?</span>
-              <a href="/auth/register" class="text-decoration-none">Đăng ký</a>
+              <a href="../auth/register.php" class="text-decoration-none">Đăng ký</a>
             </div>
           </div>
         </div>
@@ -60,3 +60,13 @@
 </body>
 </html>
 
+<script>
+window.addEventListener('DOMContentLoaded', () => {
+  const form = document.getElementById('formLoginPage');
+  form.addEventListener('submit', function(e) {
+    e.preventDefault(); // Ngăn form submit mặc định
+    // Chuyển thẳng sang trang Home
+    window.location.href = "../posts/home.php";
+  });
+});
+</script>

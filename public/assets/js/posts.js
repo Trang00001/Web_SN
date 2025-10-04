@@ -322,7 +322,7 @@ class PostManager {
         }
 
         try {
-            const response = await fetch('/public/api/posts/create.php', {
+            const response = await fetch('/WEB-SN/public/api/posts/create.php', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify({content})
