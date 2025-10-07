@@ -1,42 +1,29 @@
 <?php
-// Giả lập dữ liệu tin nhắn
-$messages = [
-    [
-        "avatar" => "https://i.pravatar.cc/40?img=1",
-        "name" => "Nguyễn Văn A",
-        "content" => "Xin chào, bạn có rảnh không?",
-        "time" => "10:30 AM"
-    ],
-    [
-        "avatar" => "https://i.pravatar.cc/40?img=2",
-        "name" => "Trần Thị B",
-        "content" => "Hôm nay học thế nào rồi?",
-        "time" => "11:15 AM"
-    ],
-    [
-        "avatar" => "https://i.pravatar.cc/40?img=3",
-        "name" => "Lê Văn C",
-        "content" => "Nhớ gửi mình file bài tập nhé!",
-        "time" => "12:05 PM"
-    ]
-];
+function renderMessage($avatar, $content, $time, $isMine = false) {
+  if ($isMine) {
+    // Tin nhắn của mình (bên phải)
+    echo '
+    <div class="d-flex mb-3 justify-content-end">
+      <div>
+        <div class="bg-primary text-white p-2 rounded shadow-sm" style="max-width:70%;">'
+          . htmlspecialchars($content) .
+        '</div>
+        <small class="text-muted d-block text-end">' . htmlspecialchars($time) . '</small>
+      </div>
+      <img src="' . htmlspecialchars($avatar) . '" class="rounded-circle ms-2" width="40" height="40">
+    </div>';
+  } else {
+    // Tin nhắn của người khác (bên trái)
+    echo '
+    <div class="d-flex mb-3">
+      <img src="' . htmlspecialchars($avatar) . '" class="rounded-circle me-2" width="40" height="40">
+      <div>
+        <div class="bg-white p-2 rounded shadow-sm border" style="max-width:70%;">'
+          . htmlspecialchars($content) .
+        '</div>
+        <small class="text-muted d-block">' . htmlspecialchars($time) . '</small>
+      </div>
+    </div>';
+  }
+}
 ?>
-
-<?php foreach ($messages as $msg): ?>
-<div class="d-flex align-items-start p-2 border-bottom bg-white">
-    <!-- Avatar -->
-    <img src="<?= $msg['avatar'] ?>"
-         alt="<?= $msg['name'] ?>"
-         class="rounded-circle me-3"
-         width="40" height="40">
-
-    <!-- Nội dung tin nhắn -->
-    <div class="flex-grow-1">
-        <div class="d-flex justify-content-between">
-            <strong><?= $msg['name'] ?></strong>
-            <small class="text-muted"><?= $msg['time'] ?></small>
-        </div>
-        <p class="mb-0 text-muted"><?= $msg['content'] ?></p>
-    </div>
-</div>
-<?php endforeach; ?>

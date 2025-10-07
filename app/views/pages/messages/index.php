@@ -1,3 +1,7 @@
+<?php
+$title = "Tin nhắn";
+ob_start();
+?>
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -9,7 +13,7 @@
 
 <div class="container py-4">
   <h3 class="mb-4">Tin nhắn</h3>
-  
+
   <div class="card shadow-sm">
     <div class="card-body p-0">
 
@@ -42,3 +46,7 @@
 
 </body>
 </html>
+<?php
+$content = ob_get_clean();
+require_once __DIR__ .'/../../layouts/main.php';
+?>

@@ -71,5 +71,6 @@ document.addEventListener("DOMContentLoaded", function () {
     document.querySelector("#friend-nav button.active").click();
 });
 </script>
+<script src="/Web_SN/public/assets/js/friends.js"></script>
 </body>
 </html>

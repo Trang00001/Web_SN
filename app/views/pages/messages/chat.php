@@ -1,44 +1,48 @@
+<?php
+$id = $_GET['id'] ?? 1;
+
+// Dữ liệu demo cho từng người
+$users = [
+  1 => ["name" => "Nguyễn Văn A", "avatar" => "https://i.pravatar.cc/40?img=1"],
+  2 => ["name" => "Trần Thị B", "avatar" => "https://i.pravatar.cc/40?img=2"],
+  3 => ["name" => "Lê Văn C", "avatar" => "https://i.pravatar.cc/40?img=3"]
+];
+
+$user = $users[$id];
+?>
 <!DOCTYPE html>
 <html lang="vi">
 <head>
   <meta charset="UTF-8">
-  <title>Chat</title>
+  <title>Chat với <?= htmlspecialchars($user['name']) ?></title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body class="bg-light">
 
 <div class="container py-4">
-  <h3 class="mb-4">Cuộc trò chuyện với Nguyễn Văn A</h3>
-  
-  <!-- Khung chat -->
-  <div class="card shadow-sm">
-    <div class="card-body" style="height: 400px; overflow-y: auto; background-color: #f8f9fa;">
-      <!-- Tin nhắn demo -->
-      <div class="d-flex mb-3">
-        <img src="https://i.pravatar.cc/40?img=1" class="rounded-circle me-2" width="40" height="40">
-        <div>
-          <div class="bg-white p-2 rounded shadow-sm">Xin chào!</div>
-          <small class="text-muted">10:30 AM</small>
-        </div>
-      </div>
+  <h3 class="mb-4">Cuộc trò chuyện với <?= htmlspecialchars($user['name']) ?></h3>
 
-      <div class="d-flex mb-3 justify-content-end">
-        <div>
-          <div class="bg-primary text-white p-2 rounded shadow-sm">Chào bạn!</div>
-          <small class="text-muted d-block text-end">10:32 AM</small>
-        </div>
-      </div>
+  <div class="card shadow-sm">
+    <!-- Khung chat -->
+    <div class="card-body" id="chat-box" style="height: 400px; overflow-y: auto; background-color: #f8f9fa;">
+      <?php
+      include __DIR__ . "/../../components/item/message-item.php";
+      renderMessage($user['avatar'], "Xin chào!", "10:30 AM", false);
+      renderMessage("https://i.pravatar.cc/40?img=5", "Chào bạn!", "10:32 AM", true);
+      ?>
     </div>
-    
-    <!-- Nhập tin nhắn -->
+
+    <!-- Ô nhập tin nhắn -->
     <div class="card-footer">
       <div class="input-group">
-        <input type="text" class="form-control" placeholder="Nhập tin nhắn...">
-        <button class="btn btn-primary">Gửi</button>
+        <input id="message-input" type="text" class="form-control" placeholder="Nhập tin nhắn...">
+        <button id="send-btn" class="btn btn-primary">Gửi</button>
       </div>
     </div>
   </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="/Web_SN/public/assets/js/messages.js"></script>
 </body>
 </html>
