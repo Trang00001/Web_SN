@@ -44,11 +44,13 @@ CREATE TABLE PostCategory (
 CREATE TABLE SavedPost (
     AccountID INT,
     PostID INT,
+    CategoryID INT,
     Type ENUM('Saved', 'Hidden'),
     SavedTime DATETIME DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (AccountID, PostID),
     FOREIGN KEY (AccountID) REFERENCES Account(AccountID),
-    FOREIGN KEY (PostID) REFERENCES Post(PostID)
+    FOREIGN KEY (PostID) REFERENCES Post(PostID),
+    FOREIGN KEY (CategoryID) REFERENCES PostCategory(CategoryID)
 );
 
 -- 6. Image

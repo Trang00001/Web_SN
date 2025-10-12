@@ -178,22 +178,38 @@ END //
 DELIMITER ;
 
 DELIMITER //
-CREATE PROCEDURE sp_SavePost(IN p_accountID INT, IN p_postID INT)
+CREATE PROCEDURE sp_SavePost(
+    IN p_accountID INT,
+    IN p_postID INT,
+    IN p_categoryID INT
+)
 BEGIN
-    INSERT INTO SavedPost (AccountID, PostID, Type)
-    VALUES (p_accountID, p_postID, 'Saved')
-    ON DUPLICATE KEY UPDATE Type = 'Saved';
+    INSERT INTO SavedPost (AccountID, PostID, CategoryID, Type)
+    VALUES (p_accountID, p_postID, p_categoryID, 'Saved')
+    ON DUPLICATE KEY UPDATE
+        Type = 'Saved',
+        CategoryID = p_categoryID,
+        SavedTime = CURRENT_TIMESTAMP;
 END //
 DELIMITER ;
 
+
 DELIMITER //
-CREATE PROCEDURE sp_HidePost(IN p_accountID INT, IN p_postID INT)
+CREATE PROCEDURE sp_HidePost(
+    IN p_accountID INT,
+    IN p_postID INT,
+    IN p_categoryID INT
+)
 BEGIN
-    INSERT INTO SavedPost (AccountID, PostID, Type)
-    VALUES (p_accountID, p_postID, 'Hidden')
-    ON DUPLICATE KEY UPDATE Type = 'Hidden';
+    INSERT INTO SavedPost (AccountID, PostID, CategoryID, Type)
+    VALUES (p_accountID, p_postID, p_categoryID, 'Hidden')
+    ON DUPLICATE KEY UPDATE
+        Type = 'Hidden',
+        CategoryID = p_categoryID,
+        SavedTime = CURRENT_TIMESTAMP;
 END //
 DELIMITER ;
+
 
 
 -- =============================
