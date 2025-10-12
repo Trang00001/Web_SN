@@ -1,52 +1,39 @@
 <?php
-require_once 'BaseModel.php';
+require_once __DIR__ . '/../../core/Database.php';
 
-class Comment extends BaseModel {
-    private ?int $comment_id;
-    private int $post_id;
-    private int $user_id;
-    private string $content;
+class Comment {
+    private $commentID;
+    private $postID;
+    private $accountID;
+    private $content;
+    private $db;
 
-    public function __construct(
-        int $post_id = 0,
-        int $user_id = 0,
-        string $content = '',
-        ?int $comment_id = null
-    ) {
-        parent::__construct();
-        $this->post_id    = $post_id;
-        $this->user_id    = $user_id;
-        $this->content    = $content;
-        $this->comment_id = $comment_id;
+    public function __construct($postID, $accountID, $content = "", $commentID = null) {
+        $this->postID = $postID;
+        $this->accountID = $accountID;
+        $this->content = $content;
+        $this->commentID = $commentID;
+        $this->db = new Database();
     }
 
-    // ===== Getter / Setter =====
-    public function getId(): ?int { return $this->comment_id; }
-    public function getPostId(): int { return $this->post_id; }
-    public function setPostId(int $v): void { $this->post_id = $v; }
-    public function getUserId(): int { return $this->user_id; }
-    public function setUserId(int $v): void { $this->user_id = $v; }
-    public function getContent(): string { return $this->content; }
-    public function setContent(string $v): void { $this->content = $v; }
+    // Getter & Setter
+    public function getCommentID() { return $this->commentID; }
+    public function getPostID() { return $this->postID; }
+    public function getAccountID() { return $this->accountID; }
+    public function getContent() { return $this->content; }
 
-    // ===== Nghiệp vụ =====
-    public function save(): bool {
-        $p = $this->post_id;
-        $u = $this->user_id;
-        $c = mysqli_real_escape_string($this->db->conn, $this->content);
-        $sql = "INSERT INTO Comment(post_id,user_id,content) VALUES($p,$u,'$c')";
-        return $this->db->execute($sql);
+    public function setCommentID($commentID) { $this->commentID = $commentID; }
+    public function setPostID($postID) { $this->postID = $postID; }
+    public function setAccountID($accountID) { $this->accountID = $accountID; }
+    public function setContent($content) { $this->content = $content; }
+
+    // Functions
+    public function add() {
+        return $this->db->callProcedureExecute("sp_AddComment", [$this->postID, $this->accountID, $this->content]);
     }
 
-    public function delete(): bool {
-        if (!$this->comment_id) return false;
-        return $this->db->execute("DELETE FROM Comment WHERE comment_id={$this->comment_id}");
-    }
-
-    public static function getByPost(int $postId): array {
-        $db = new Database();
-        return $db->select(
-            "SELECT * FROM Comment WHERE post_id=$postId ORDER BY comment_id ASC"
-        );
+    public function getByPost() {
+        return $this->db->callProcedureSelect("sp_GetCommentsByPostId", [$this->postID]);
     }
 }
+?>

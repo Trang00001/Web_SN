@@ -1,81 +1,51 @@
 <?php
-require_once 'BaseModel.php';
+require_once __DIR__ . '/../../core/Database.php';
 
-class Post extends BaseModel {
-    private ?int $post_id;
-    private int $user_id;
-    private string $content;
-    private ?string $media_url;
-    private ?int $category_id;
+class Post {
+    private $postID;
+    private $authorID;
+    private $content;
+    private $db;
 
-    public function __construct(
-        int $user_id = 0,
-        string $content = '',
-        ?string $media_url = null,
-        ?int $category_id = null,
-        ?int $post_id = null
-    ) {
-        parent::__construct();
-        $this->user_id    = $user_id;
-        $this->content    = $content;
-        $this->media_url  = $media_url;
-        $this->category_id = $category_id;
-        $this->post_id    = $post_id;
+    public function __construct($authorID, $content = "", $postID = null) {
+        $this->authorID = $authorID;
+        $this->content = $content;
+        $this->postID = $postID;
+        $this->db = new Database();
     }
 
-    // ===== Getter / Setter =====
-    public function getId(): ?int { return $this->post_id; }
-    public function getUserId(): int { return $this->user_id; }
-    public function setUserId(int $v): void { $this->user_id = $v; }
-    public function getContent(): string { return $this->content; }
-    public function setContent(string $v): void { $this->content = $v; }
-    public function getMediaUrl(): ?string { return $this->media_url; }
-    public function setMediaUrl(?string $v): void { $this->media_url = $v; }
-    public function getCategoryId(): ?int { return $this->category_id; }
-    public function setCategoryId(?int $v): void { $this->category_id = $v; }
+    // Getter & Setter
+    public function getPostID() { return $this->postID; }
+    public function getAuthorID() { return $this->authorID; }
+    public function getContent() { return $this->content; }
 
-    // ===== Nghiệp vụ =====
-    public function save(): bool {
-        $u = $this->user_id;
-        $c = mysqli_real_escape_string($this->db->conn, $this->content);
-        $m = $this->media_url ? "'" . mysqli_real_escape_string($this->db->conn, $this->media_url) . "'" : "NULL";
-        $cat = $this->category_id ? $this->category_id : "NULL";
-        $sql = "INSERT INTO Post(user_id,content,media_url,category_id)
-                VALUES($u,'$c',$m,$cat)";
-        return $this->db->execute($sql);
+    public function setPostID($postID) { $this->postID = $postID; }
+    public function setAuthorID($authorID) { $this->authorID = $authorID; }
+    public function setContent($content) { $this->content = $content; }
+
+    // Functions
+    public function create() {
+        return $this->db->callProcedureExecute("sp_CreatePost", [$this->authorID, $this->content]);
     }
 
-    public function update(): bool {
-        if (!$this->post_id) return false;
-        $c = mysqli_real_escape_string($this->db->conn, $this->content);
-        $m = $this->media_url ? "'" . mysqli_real_escape_string($this->db->conn, $this->media_url) . "'" : "NULL";
-        $cat = $this->category_id ? $this->category_id : "NULL";
-        $sql = "UPDATE Post SET content='$c', media_url=$m, category_id=$cat
-                WHERE post_id={$this->post_id}";
-        return $this->db->execute($sql);
+    public function update() {
+        return $this->db->callProcedureExecute("sp_UpdatePost", [$this->postID, $this->content]);
     }
 
-    public function delete(): bool {
-        if (!$this->post_id) return false;
-        return $this->db->execute("DELETE FROM Post WHERE post_id={$this->post_id}");
+    public function delete() {
+        return $this->db->callProcedureExecute("sp_DeletePost", [$this->postID]);
     }
 
-    public static function findById(int $id): ?Post {
-        $db = new Database();
-        $rows = $db->select("SELECT * FROM Post WHERE post_id=$id LIMIT 1");
-        if (!$rows) return null;
-        $r = $rows[0];
-        return new Post(
-            (int)$r['user_id'],
-            $r['content'],
-            $r['media_url'],
-            $r['category_id'] !== null ? (int)$r['category_id'] : null,
-            (int)$r['post_id']
-        );
+    public function getAll() {
+        return $this->db->callProcedureSelect("sp_GetAllPosts");
     }
 
-    public static function findByUser(int $userId): array {
-        $db = new Database();
-        return $db->select("SELECT * FROM Post WHERE user_id=$userId ORDER BY post_id DESC");
+    public function getById() {
+        return $this->db->callProcedureSelect("sp_GetPostById", [$this->postID]);
+    }
+
+    public function getByUser() {
+        return $this->db->callProcedureSelect("sp_GetUserPosts", [$this->authorID]);
     }
 }
+?>

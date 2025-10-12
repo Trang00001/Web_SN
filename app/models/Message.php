@@ -1,54 +1,43 @@
 <?php
-require_once 'BaseModel.php';
+require_once __DIR__ . '/../../core/Database.php';
 
-class Message extends BaseModel {
-    private ?int $message_id;
-    private int $sender_id;
-    private int $receiver_id;
-    private string $content;
-    private ?string $created_at;
+class Message {
+    private $messageID;
+    private $chatBoxID;
+    private $senderID;
+    private $content;
+    private $db;
 
-    public function __construct(
-        int $sender_id = 0,
-        int $receiver_id = 0,
-        string $content = '',
-        ?string $created_at = null,
-        ?int $message_id = null
-    ) {
-        parent::__construct();
-        $this->sender_id  = $sender_id;
-        $this->receiver_id = $receiver_id;
-        $this->content    = $content;
-        $this->created_at = $created_at;
-        $this->message_id = $message_id;
+    public function __construct($chatBoxID, $senderID, $content = "", $messageID = null) {
+        $this->chatBoxID = $chatBoxID;
+        $this->senderID = $senderID;
+        $this->content = $content;
+        $this->messageID = $messageID;
+        $this->db = new Database();
     }
 
-    // ===== Getter / Setter =====
-    public function getId(): ?int { return $this->message_id; }
-    public function getSenderId(): int { return $this->sender_id; }
-    public function setSenderId(int $v): void { $this->sender_id = $v; }
-    public function getReceiverId(): int { return $this->receiver_id; }
-    public function setReceiverId(int $v): void { $this->receiver_id = $v; }
-    public function getContent(): string { return $this->content; }
-    public function setContent(string $v): void { $this->content = $v; }
-    public function getCreatedAt(): ?string { return $this->created_at; }
+    // Getter & Setter
+    public function getMessageID() { return $this->messageID; }
+    public function getChatBoxID() { return $this->chatBoxID; }
+    public function getSenderID() { return $this->senderID; }
+    public function getContent() { return $this->content; }
 
-    // ===== Nghiệp vụ =====
-    public function send(): bool {
-        $s = $this->sender_id;
-        $r = $this->receiver_id;
-        $c = mysqli_real_escape_string($this->db->conn, $this->content);
-        $sql = "INSERT INTO Message(sender_id, receiver_id, content) VALUES($s, $r, '$c')";
-        return $this->db->execute($sql);
+    public function setMessageID($messageID) { $this->messageID = $messageID; }
+    public function setChatBoxID($chatBoxID) { $this->chatBoxID = $chatBoxID; }
+    public function setSenderID($senderID) { $this->senderID = $senderID; }
+    public function setContent($content) { $this->content = $content; }
+
+    // Functions
+    public function send() {
+        return $this->db->callProcedureExecute("sp_SendMessage", [$this->chatBoxID, $this->senderID, $this->content]);
     }
 
-    public static function conversation(int $userA, int $userB): array {
-        $db = new Database();
-        return $db->select(
-            "SELECT * FROM Message
-             WHERE (sender_id=$userA AND receiver_id=$userB)
-                OR (sender_id=$userB AND receiver_id=$userA)
-             ORDER BY created_at ASC"
-        );
+    public function delete() {
+        return $this->db->callProcedureExecute("sp_DeleteMessage", [$this->messageID]);
+    }
+
+    public function getMessagesByChat() {
+        return $this->db->callProcedureSelect("sp_GetMessagesByChatId", [$this->chatBoxID]);
     }
 }
+?>

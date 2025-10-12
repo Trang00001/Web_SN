@@ -1,52 +1,51 @@
 <?php
-require_once 'BaseModel.php';
+require_once __DIR__ . '/../../core/Database.php';
 
-class Notification extends BaseModel {
-    private ?int $notification_id;
-    private int $user_id;
-    private string $type;        // 'like','comment','share','friend_request'
-    private int $reference_id;
-    private ?string $created_at;
+class Notification {
+    private $notificationID;
+    private $receiverID;
+    private $type;
+    private $content;
+    private $isRead;
+    private $db;
 
-    public function __construct(
-        int $user_id = 0,
-        string $type = '',
-        int $reference_id = 0,
-        ?string $created_at = null,
-        ?int $notification_id = null
-    ) {
-        parent::__construct();
-        $this->user_id        = $user_id;
-        $this->type           = $type;
-        $this->reference_id   = $reference_id;
-        $this->created_at     = $created_at;
-        $this->notification_id = $notification_id;
+    public function __construct($receiverID, $type = "", $content = "", $isRead = false, $notificationID = null) {
+        $this->receiverID = $receiverID;
+        $this->type = $type;
+        $this->content = $content;
+        $this->isRead = $isRead;
+        $this->notificationID = $notificationID;
+        $this->db = new Database();
     }
 
-    // ===== Getter / Setter =====
-    public function getId(): ?int { return $this->notification_id; }
-    public function getUserId(): int { return $this->user_id; }
-    public function setUserId(int $v): void { $this->user_id = $v; }
-    public function getType(): string { return $this->type; }
-    public function setType(string $v): void { $this->type = $v; }
-    public function getReferenceId(): int { return $this->reference_id; }
-    public function setReferenceId(int $v): void { $this->reference_id = $v; }
-    public function getCreatedAt(): ?string { return $this->created_at; }
+    // Getter & Setter
+    public function getNotificationID() { return $this->notificationID; }
+    public function getReceiverID() { return $this->receiverID; }
+    public function getType() { return $this->type; }
+    public function getContent() { return $this->content; }
+    public function getIsRead() { return $this->isRead; }
 
-    // ===== Nghiệp vụ =====
-    public function save(): bool {
-        $u = $this->user_id;
-        $t = mysqli_real_escape_string($this->db->conn, $this->type);
-        $r = $this->reference_id;
-        $sql = "INSERT INTO Notification(user_id, type, reference_id)
-                VALUES($u, '$t', $r)";
-        return $this->db->execute($sql);
+    public function setNotificationID($notificationID) { $this->notificationID = $notificationID; }
+    public function setReceiverID($receiverID) { $this->receiverID = $receiverID; }
+    public function setType($type) { $this->type = $type; }
+    public function setContent($content) { $this->content = $content; }
+    public function setIsRead($isRead) { $this->isRead = $isRead; }
+
+    // Functions
+    public function create() {
+        return $this->db->callProcedureExecute("sp_CreateNotification", [$this->receiverID, $this->type, $this->content]);
     }
 
-    public static function getForUser(int $uid): array {
-        $db = new Database();
-        return $db->select(
-            "SELECT * FROM Notification WHERE user_id=$uid ORDER BY created_at DESC"
-        );
+    public function getAll() {
+        return $this->db->callProcedureSelect("sp_GetNotifications", [$this->receiverID]);
+    }
+
+    public function markAsRead() {
+        return $this->db->callProcedureExecute("sp_MarkNotificationAsRead", [$this->notificationID]);
+    }
+
+    public function delete() {
+        return $this->db->callProcedureExecute("sp_DeleteNotification", [$this->notificationID]);
     }
 }
+?>

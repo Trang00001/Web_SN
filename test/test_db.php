@@ -1,17 +1,21 @@
 <?php
-require_once __DIR__ . "'/../core/Database.php";
+require_once __DIR__ . '/../models/Account.php';
 
-// Khởi tạo DB
-$db = new Database();
+// Tạo tài khoản mới
+$acc = new Account();
+$acc->setEmail("test@example.com");
+$acc->setPasswordHash(password_hash("123456", PASSWORD_DEFAULT));
+$acc->setUsername("tester");
 
-// Dùng hàm select() có sẵn
-$data = $db->select("SELECT * FROM user LIMIT 5"); // đổi tên bảng đúng theo schema
-
-if (!empty($data)) {
-    echo "✅ Kết nối DB & SELECT thành công<br>";
-    echo "<pre>";
-    print_r($data);
-    echo "</pre>";
+if ($acc->create()) {
+    echo "✅ Tạo tài khoản thành công<br>";
 } else {
-    echo "⚠️ Không có dữ liệu hoặc query lỗi";
+    echo "❌ Lỗi khi tạo tài khoản<br>";
 }
+
+// Lấy thông tin theo email
+$data = $acc->getByEmail("test@example.com");
+echo "<pre>";
+print_r($data);
+echo "</pre>";
+?>
