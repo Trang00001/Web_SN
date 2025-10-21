@@ -1,6 +1,46 @@
 USE SocialNetworkDB;
 
 -- =============================
+-- DROP ALL EXISTING PROCEDURES
+-- =============================
+DROP PROCEDURE IF EXISTS sp_RegisterUser;
+DROP PROCEDURE IF EXISTS sp_LoginUser;
+DROP PROCEDURE IF EXISTS sp_CheckEmailExists;
+DROP PROCEDURE IF EXISTS sp_GetUserProfile;
+DROP PROCEDURE IF EXISTS sp_UpdateUserProfile;
+DROP PROCEDURE IF EXISTS sp_DeleteUser;
+DROP PROCEDURE IF EXISTS sp_CreatePost;
+DROP PROCEDURE IF EXISTS sp_UpdatePost;
+DROP PROCEDURE IF EXISTS sp_DeletePost;
+DROP PROCEDURE IF EXISTS sp_GetAllPosts;
+DROP PROCEDURE IF EXISTS sp_GetPostById;
+DROP PROCEDURE IF EXISTS sp_GetUserPosts;
+DROP PROCEDURE IF EXISTS sp_AddLike;
+DROP PROCEDURE IF EXISTS sp_RemoveLike;
+DROP PROCEDURE IF EXISTS sp_AddComment;
+DROP PROCEDURE IF EXISTS sp_GetCommentsForPost;
+DROP PROCEDURE IF EXISTS sp_AddPostImage;
+DROP PROCEDURE IF EXISTS sp_SavePost;
+DROP PROCEDURE IF EXISTS sp_HidePost;
+DROP PROCEDURE IF EXISTS sp_SendFriendRequest;
+DROP PROCEDURE IF EXISTS sp_CancelFriendRequest;
+DROP PROCEDURE IF EXISTS sp_AcceptFriendRequest;
+DROP PROCEDURE IF EXISTS sp_RejectFriendRequest;
+DROP PROCEDURE IF EXISTS sp_RemoveFriend;
+DROP PROCEDURE IF EXISTS sp_GetFriendRequests;
+DROP PROCEDURE IF EXISTS sp_GetFriends;
+DROP PROCEDURE IF EXISTS sp_CreateChatBox;
+DROP PROCEDURE IF EXISTS sp_SendMessage;
+DROP PROCEDURE IF EXISTS sp_GetChatHistory;
+DROP PROCEDURE IF EXISTS sp_MarkMessageAsRead;
+DROP PROCEDURE IF EXISTS sp_CreateNotification;
+DROP PROCEDURE IF EXISTS sp_GetNotifications;
+DROP PROCEDURE IF EXISTS sp_MarkNotificationAsRead;
+DROP PROCEDURE IF EXISTS sp_DeleteNotification;
+DROP PROCEDURE IF EXISTS sp_SearchUsers;
+DROP PROCEDURE IF EXISTS sp_SearchPosts;
+
+-- =============================
 -- 1️⃣ NHÓM XÁC THỰC & TÀI KHOẢN
 -- =============================
 
@@ -93,9 +133,10 @@ DELIMITER ;
 -- =============================
 
 DELIMITER //
-CREATE PROCEDURE sp_CreatePost(IN p_authorID INT, IN p_content TEXT)
+CREATE PROCEDURE sp_CreatePost(IN p_authorID INT, IN p_content TEXT, OUT p_postID INT)
 BEGIN
     INSERT INTO Post (AuthorID, Content) VALUES (p_authorID, p_content);
+    SET p_postID = LAST_INSERT_ID();
 END //
 DELIMITER ;
 
@@ -116,7 +157,15 @@ DELIMITER ;
 DELIMITER //
 CREATE PROCEDURE sp_GetAllPosts()
 BEGIN
-    SELECT p.PostID, p.Content, p.PostTime, a.Username, pr.AvatarURL
+    SELECT 
+        p.PostID,
+        p.Content,
+        p.PostTime AS CreatedAt,
+        (SELECT i.ImageURL FROM Image i WHERE i.PostID = p.PostID LIMIT 1) AS ImageUrl,
+        a.Username,
+        pr.AvatarURL,
+        (SELECT COUNT(*) FROM PostLike pl WHERE pl.PostID = p.PostID) AS LikeCount,
+        (SELECT COUNT(*) FROM Comment c WHERE c.PostID = p.PostID) AS CommentCount
     FROM Post p
     JOIN Account a ON p.AuthorID = a.AccountID
     LEFT JOIN Profile pr ON a.AccountID = pr.AccountID
@@ -162,6 +211,14 @@ CREATE PROCEDURE sp_AddComment(IN p_postID INT, IN p_accountID INT, IN p_content
 BEGIN
     INSERT INTO Comment (PostID, AccountID, Content)
     VALUES (p_postID, p_accountID, p_content);
+END //
+DELIMITER ;
+
+-- Thêm ảnh vào bài viết
+DELIMITER //
+CREATE PROCEDURE sp_AddPostImage(IN p_postID INT, IN p_imageURL VARCHAR(255))
+BEGIN
+    INSERT INTO Image (PostID, ImageURL) VALUES (p_postID, p_imageURL);
 END //
 DELIMITER ;
 

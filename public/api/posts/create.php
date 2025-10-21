@@ -1,43 +1,118 @@
 <?php
 /**
- * API tạo bài viết - PROTOTYPE VERSION
- * Đơn giản để dễ điều chỉnh sau này
+ * API Create Post - Backend Endpoint
+ * Lưu bài viết vào database thông qua Post Model
+ * 
+ * @method POST
+ * @requires Authentication (session user_id)
+ * @input JSON: { "content": string, "media_url": string (optional) }
+ * @output JSON: { "success": boolean, "post_id": int, "message": string }
  */
 
 session_start();
+require_once '../../../app/models/Post.php';
+require_once '../../../app/models/Image.php';
 
-// Response đơn giản
+// Set response header
 header('Content-Type: application/json');
 
-// Chỉ kiểm tra cơ bản
+// Validate HTTP method
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    echo json_encode(['error' => 'Method not allowed']);
+    http_response_code(405);
+    echo json_encode([
+        'success' => false,
+        'error' => 'Method not allowed'
+    ]);
     exit;
 }
 
+// Parse input
 $input = json_decode(file_get_contents('php://input'), true);
-$content = trim($input['content'] ?? '');
 
-if (empty($content)) {
-    echo json_encode(['error' => 'Nội dung không được để trống']);
+// Validate input
+if (!$input) {
+    http_response_code(400);
+    echo json_encode([
+        'success' => false,
+        'error' => 'Invalid JSON'
+    ]);
     exit;
 }
 
-// Tạo bài viết đơn giản - chỉ lưu trong session
-$newPost = [
-    'post_id' => time(),
-    'username' => $_SESSION['username'] ?? 'Demo User',
-    'content' => $content,
-    'created_at' => 'Vừa xong',
-    'like_count' => 0,
-    'comment_count' => 0
-];
+$content = trim($input['content'] ?? '');
+$imageURLs = $input['image_urls'] ?? []; // Array of uploaded image URLs
 
-// Lưu vào session (tạm thời)
-if (!isset($_SESSION['new_posts'])) {
-    $_SESSION['new_posts'] = [];
+// Validate content
+if (empty($content)) {
+    http_response_code(400);
+    echo json_encode([
+        'success' => false,
+        'error' => 'Nội dung không được để trống'
+    ]);
+    exit;
 }
-array_unshift($_SESSION['new_posts'], $newPost);
 
-echo json_encode(['success' => true, 'post' => $newPost]);
+// Check content length
+if (strlen($content) > 5000) {
+    http_response_code(400);
+    echo json_encode([
+        'success' => false,
+        'error' => 'Nội dung quá dài (tối đa 5000 ký tự)'
+    ]);
+    exit;
+}
+
+// Check authentication (AUTO-LOGIN FOR TESTING)
+$authorID = $_SESSION['user_id'] ?? null;
+
+if (!$authorID) {
+    // Auto-login for testing
+    $_SESSION['user_id'] = 1;
+    $_SESSION['username'] = 'Alice';
+    $_SESSION['email'] = 'alice@test.com';
+    $authorID = 1;
+}
+
+// Create post object
+try {
+    $post = new Post($authorID, $content);
+    
+    // Save to database via stored procedure
+    $result = $post->create();
+    
+    if ($result) {
+        // Get the created post ID
+        $postID = $post->getPostID();
+        
+        // Add images if provided
+        $imageCount = 0;
+        if (!empty($imageURLs) && is_array($imageURLs)) {
+            foreach ($imageURLs as $imageURL) {
+                $image = new Image($postID, trim($imageURL));
+                if ($image->addImage()) {
+                    $imageCount++;
+                }
+            }
+        }
+        
+        echo json_encode([
+            'success' => true,
+            'post_id' => $postID,
+            'image_count' => $imageCount,
+            'message' => 'Đăng bài thành công'
+        ]);
+    } else {
+        http_response_code(500);
+        echo json_encode([
+            'success' => false,
+            'error' => 'Không thể lưu bài viết vào database'
+        ]);
+    }
+} catch (Exception $e) {
+    http_response_code(500);
+    echo json_encode([
+        'success' => false,
+        'error' => 'Lỗi server: ' . $e->getMessage()
+    ]);
+}
 ?>

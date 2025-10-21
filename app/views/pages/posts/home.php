@@ -1,45 +1,25 @@
 <?php
 /**
- * Trang chủ - PROTOTYPE VERSION
- * Đơn giản để dễ điều chỉnh
+ * Trang chủ - MVC Pattern
+ * Sử dụng PostController để xử lý logic
  */
 
 session_start();
 ob_start();
 
-// User demo đơn giản
+// AUTO-LOGIN FOR TESTING - Remove in production
 if (!isset($_SESSION['user_id'])) {
-    $_SESSION['user_id'] = 1;
-    $_SESSION['username'] = 'Demo User';
+    $_SESSION['user_id'] = 1;      // Alice
+    $_SESSION['username'] = 'Alice';
+    $_SESSION['email'] = 'alice@test.com';
 }
 
-// Lấy bài viết mới từ session (nếu có)
-$newPosts = $_SESSION['new_posts'] ?? [];
+// Load Controller thay vì Model
+require_once __DIR__ . '/../../../controllers/PostController.php';
 
-// Mock data cơ bản
-$defaultPosts = [
-    [
-        'post_id' => 1,
-        'username' => 'Alice Johnson',
-        'content' => 'Chào mọi người! Hôm nay thật là một ngày tuyệt vời 🌟',
-        'media_url' => 'https://picsum.photos/500/400?random=1',
-        'like_count' => 15,
-        'comment_count' => 3,
-        'created_at' => '2 giờ trước'
-    ],
-    [
-        'post_id' => 2,
-        'username' => 'Bob Smith',
-        'content' => 'Vừa hoàn thành dự án mới! 💪',
-        'media_url' => null,
-        'like_count' => 28,
-        'comment_count' => 7,
-        'created_at' => '4 giờ trước'
-    ]
-];
-
-// Kết hợp bài viết mới với mock data
-$posts = array_merge($newPosts, $defaultPosts);
+// Lấy posts qua Controller - tất cả logic đã được xử lý ở đây
+$postController = new PostController();
+$posts = $postController->getAllPosts();
 ?>
 
 <!DOCTYPE html>
@@ -94,22 +74,38 @@ $posts = array_merge($newPosts, $defaultPosts);
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
-                    <div class="d-flex align-items-center mb-3">
-                        <div class="bg-primary rounded-circle d-flex align-items-center justify-content-center me-3" 
-                             style="width: 40px; height: 40px;">
-                            <span class="text-white fw-bold"><?= strtoupper(substr($_SESSION['username'] ?? 'U', 0, 1)) ?></span>
+                    <form id="create-post-form">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="bg-primary rounded-circle d-flex align-items-center justify-content-center me-3" 
+                                 style="width: 40px; height: 40px;">
+                                <span class="text-white fw-bold"><?= strtoupper(substr($_SESSION['username'] ?? 'U', 0, 1)) ?></span>
+                            </div>
+                            <div>
+                                <h6 class="mb-0"><?= htmlspecialchars($_SESSION['username'] ?? 'User') ?></h6>
+                                <small class="text-muted">Công khai</small>
+                            </div>
                         </div>
-                        <div>
-                            <h6 class="mb-0"><?= htmlspecialchars($_SESSION['username'] ?? 'User') ?></h6>
-                            <small class="text-muted">Công khai</small>
+                        <textarea class="form-control border-0 fs-5" rows="4" 
+                                  placeholder="Bạn đang nghĩ gì?" 
+                                  id="post-content-textarea"
+                                  name="content"
+                                  style="resize: none; box-shadow: none;"></textarea>
+                        
+                        <!-- Image Preview Area -->
+                        <div id="image-preview-container" class="mt-3" style="display: none;">
+                            <div class="d-flex flex-wrap gap-2" id="image-preview-list"></div>
                         </div>
-                    </div>
-                    <textarea class="form-control border-0 fs-5" rows="4" 
-                              placeholder="Bạn đang nghĩ gì?" 
-                              style="resize: none; box-shadow: none;"></textarea>
+                        
+                        <!-- Add Photo Button -->
+                        <label for="post-image-input" class="d-flex align-items-center gap-2 mt-3 p-2 border rounded" style="cursor: pointer; margin-bottom: 0;">
+                            <i class="fas fa-image text-success fs-5"></i>
+                            <span>Ảnh/Video</span>
+                        </label>
+                        <input type="file" id="post-image-input" class="d-none" multiple accept="image/*">
+                    </form>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-primary w-100" id="post-submit-btn">Đăng</button>
+                    <button type="submit" form="create-post-form" class="btn btn-primary w-100" id="post-submit-btn">Đăng</button>
                 </div>
             </div>
         </div>
@@ -131,7 +127,7 @@ $posts = array_merge($newPosts, $defaultPosts);
 
     <!-- JavaScript -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="../../../../public/assets/js/posts.js"></script>
+    <script src="../../../../public/assets/js/posts.js?v=20251021v4"></script>
 </body>
 </html>
 

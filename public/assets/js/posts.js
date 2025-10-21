@@ -58,35 +58,72 @@ class SocialApp {
         console.log('Events bound successfully');
     }
 
-    toggleLike(button) {
+    async toggleLike(button) {
         if (!button) return;
         
         console.log('Toggle like called');
         const isLiked = button.classList.contains('liked');
-        const icon = button.querySelector('i');
-        const text = button.querySelector('span');
         const postCard = button.closest('.post-card');
-        const likeCount = postCard.querySelector('.like-count');
+        const postID = postCard.dataset.postId;
         
-        let count = parseInt(likeCount.textContent.match(/\d+/)[0]) || 0;
-        
-        if (isLiked) {
-            button.classList.remove('liked');
-            icon.className = 'far fa-heart';
-            text.textContent = 'Thích';
-            count = Math.max(0, count - 1);
-            this.showToast('Đã bỏ thích', 'info');
-        } else {
-            button.classList.add('liked');
-            icon.className = 'fas fa-heart';
-            text.textContent = 'Đã thích';
-            count++;
-            this.showToast('Đã thích bài viết', 'success');
+        if (!postID) {
+            this.showToast('Không tìm thấy ID bài viết', 'error');
+            return;
         }
         
-        likeCount.textContent = count + ' lượt thích';
-        this.animateButton(button, 'like');
-        console.log('Like toggled, new count:', count);
+        const icon = button.querySelector('i');
+        const text = button.querySelector('span');
+        const likeCount = postCard.querySelector('.like-count');
+        
+        // Disable button during API call
+        button.disabled = true;
+        
+        try {
+            // Call API
+            const response = await fetch('http://localhost/WEB-SN/public/api/posts/like.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    post_id: parseInt(postID),
+                    action: isLiked ? 'unlike' : 'like'
+                })
+            });
+            
+            const data = await response.json();
+            
+            if (!response.ok || !data.success) {
+                throw new Error(data.error || 'Có lỗi xảy ra');
+            }
+            
+            // Update UI on success
+            let count = parseInt(likeCount.textContent.match(/\d+/)[0]) || 0;
+            
+            if (isLiked) {
+                button.classList.remove('liked');
+                icon.className = 'far fa-heart';
+                text.textContent = 'Thích';
+                count = Math.max(0, count - 1);
+                this.showToast('Đã bỏ thích', 'info');
+            } else {
+                button.classList.add('liked');
+                icon.className = 'fas fa-heart';
+                text.textContent = 'Đã thích';
+                count++;
+                this.showToast('Đã thích bài viết', 'success');
+            }
+            
+            likeCount.textContent = count + ' lượt thích';
+            this.animateButton(button, 'like');
+            console.log('Like toggled via API, new count:', count);
+            
+        } catch (error) {
+            console.error('Error toggling like:', error);
+            this.showToast(error.message || 'Không thể thích bài viết', 'error');
+        } finally {
+            button.disabled = false;
+        }
     }
 
     toggleComments(button) {
@@ -133,7 +170,7 @@ class SocialApp {
         this.animateButton(button, 'share');
     }
 
-    submitComment(input) {
+    async submitComment(input) {
         if (!input) return;
         
         console.log('Submit comment called');
@@ -147,34 +184,70 @@ class SocialApp {
         const commentsSection = input.closest('.comments-section');
         const commentsList = commentsSection.querySelector('.comments-list');
         const postCard = input.closest('.post-card');
+        const postID = postCard.dataset.postId;
         
-        // Create new comment
-        const newComment = document.createElement('div');
-        newComment.className = 'comment-item';
-        newComment.innerHTML = `
-            <div class="bg-primary rounded-circle d-flex align-items-center justify-content-center me-2" 
-                 style="width: 32px; height: 32px;">
-                <span class="text-white small fw-bold">U</span>
-            </div>
-            <div class="comment-content">
-                <div class="bg-light rounded p-2">
-                    <small class="fw-bold text-primary">Demo User</small>
-                    <div>${text}</div>
+        if (!postID) {
+            this.showToast('Không tìm thấy ID bài viết', 'error');
+            return;
+        }
+        
+        // Disable input during API call
+        input.disabled = true;
+        
+        try {
+            // Call API
+            const response = await fetch('http://localhost/WEB-SN/public/api/posts/comment.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    post_id: parseInt(postID),
+                    content: text
+                })
+            });
+            
+            const data = await response.json();
+            
+            if (!response.ok || !data.success) {
+                throw new Error(data.error || 'Có lỗi xảy ra');
+            }
+            
+            // Create new comment element
+            const commentData = data.comment;
+            const newComment = document.createElement('div');
+            newComment.className = 'comment-item';
+            newComment.innerHTML = `
+                <div class="bg-primary rounded-circle d-flex align-items-center justify-content-center me-2" 
+                     style="width: 32px; height: 32px;">
+                    <span class="text-white small fw-bold">${commentData.username.charAt(0).toUpperCase()}</span>
                 </div>
-                <small class="text-muted">Vừa xong</small>
-            </div>
-        `;
-        
-        commentsList.appendChild(newComment);
-        input.value = '';
-        
-        // Update comment count
-        const commentCount = postCard.querySelector('.comment-count');
-        let count = parseInt(commentCount.textContent.match(/\d+/)[0]) || 0;
-        commentCount.textContent = (count + 1) + ' bình luận';
-        
-        this.showToast('Đã thêm bình luận', 'success');
-        console.log('Comment added:', text);
+                <div class="comment-content">
+                    <div class="bg-light rounded p-2">
+                        <small class="fw-bold text-primary">${commentData.username}</small>
+                        <div>${commentData.content}</div>
+                    </div>
+                    <small class="text-muted">${commentData.created_at}</small>
+                </div>
+            `;
+            
+            commentsList.appendChild(newComment);
+            input.value = '';
+            
+            // Update comment count
+            const commentCount = postCard.querySelector('.comment-count');
+            let count = parseInt(commentCount.textContent.match(/\d+/)[0]) || 0;
+            commentCount.textContent = (count + 1) + ' bình luận';
+            
+            this.showToast('Đã thêm bình luận', 'success');
+            console.log('Comment added via API:', commentData);
+            
+        } catch (error) {
+            console.error('Error submitting comment:', error);
+            this.showToast(error.message || 'Không thể thêm bình luận', 'error');
+        } finally {
+            input.disabled = false;
+        }
     }
 
     animateButton(button, type) {
@@ -194,7 +267,8 @@ class SocialApp {
 
     showToast(message, type = 'info') {
         const toast = document.createElement('div');
-        toast.className = `toast align-items-center text-white bg-${type === 'success' ? 'success' : type === 'warning' ? 'warning' : 'primary'} border-0`;
+        const bgClass = type === 'success' ? 'success' : type === 'warning' ? 'warning' : type === 'error' ? 'danger' : 'primary';
+        toast.className = `toast align-items-center text-white bg-${bgClass} border-0`;
         toast.style.cssText = `
             position: fixed;
             top: 100px;
@@ -241,12 +315,14 @@ class SocialApp {
 
 // Initialize app when DOM is ready
 let socialAppInstance;
+let postManager;
 document.addEventListener('DOMContentLoaded', () => {
     socialAppInstance = new SocialApp();
-    new PostManager();
+    postManager = new PostManager();
     
     // Export for debugging and global access
     window.socialApp = socialAppInstance;
+    window.postManager = postManager;
     console.log('Social app initialized and exported to window.socialApp');
 });
 
@@ -288,23 +364,31 @@ window.openImageModal = function(imageSrc) {
  */
 class PostManager {
     constructor() {
+        this.selectedImages = [];
         this.bindEvents();
+        this.initImageUpload();
     }
 
     bindEvents() {
-        // Xử lý nút tạo bài viết
+        console.log('🔧 Binding events...');
+        
+        // Xử lý form submit
+        document.addEventListener('submit', (e) => {
+            if (e.target.id === 'create-post-form') {
+                console.log('✅ Form submitted!');
+                e.preventDefault();
+                this.createPost();
+            }
+        });
+        
+        // Xử lý nút tạo bài viết (show modal)
         document.addEventListener('click', (e) => {
             if (e.target.closest('[onclick*="showCreatePostModal"]')) {
+                console.log('✅ Show modal button clicked!');
                 e.preventDefault();
                 this.showModal();
             }
         });
-
-        // Xử lý submit
-        const submitBtn = document.querySelector('#createPostModal .btn-primary');
-        if (submitBtn) {
-            submitBtn.addEventListener('click', () => this.createPost());
-        }
     }
 
     showModal() {
@@ -313,8 +397,17 @@ class PostManager {
     }
 
     async createPost() {
-        const textarea = document.querySelector('#createPostModal textarea');
+        console.log('🔴 createPost() called!');
+        
+        const textarea = document.querySelector('#post-content-textarea');
+        if (!textarea) {
+            console.error('❌ Textarea not found!');
+            alert('Lỗi: Không tìm thấy textarea!');
+            return;
+        }
+        
         const content = textarea.value.trim();
+        console.log('📝 Content:', content);
         
         if (!content) {
             alert('Vui lòng nhập nội dung!');
@@ -322,24 +415,116 @@ class PostManager {
         }
 
         try {
+            // Upload images first if any
+            const imageURLs = [];
+            if (this.selectedImages.length > 0) {
+                const uploadBtn = document.querySelector('#post-submit-btn');
+                uploadBtn.disabled = true;
+                uploadBtn.textContent = 'Đang upload ảnh...';
+                
+                for (const file of this.selectedImages) {
+                    const formData = new FormData();
+                    formData.append('image', file);
+                    
+                    const uploadResponse = await fetch('/WEB-SN/public/api/posts/upload_image.php', {
+                        method: 'POST',
+                        body: formData
+                    });
+                    
+                    const uploadResult = await uploadResponse.json();
+                    if (uploadResult.success) {
+                        imageURLs.push(uploadResult.image_url);
+                    }
+                }
+                
+                uploadBtn.textContent = 'Đăng';
+                uploadBtn.disabled = false;
+            }
+            
+            // Create post with images
             const response = await fetch('/WEB-SN/public/api/posts/create.php', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({content})
+                body: JSON.stringify({
+                    content: content,
+                    image_urls: imageURLs
+                })
             });
 
             const result = await response.json();
 
             if (result.success) {
-                alert('Đăng bài thành công!');
+                alert('Đăng bài thành công!' + (result.image_count > 0 ? ` (${result.image_count} ảnh)` : ''));
                 bootstrap.Modal.getInstance(document.getElementById('createPostModal')).hide();
                 textarea.value = '';
-                location.reload(); // Đơn giản - reload trang
+                this.clearImagePreview();
+                location.reload();
             } else {
                 alert('Lỗi: ' + result.error);
             }
         } catch (error) {
-            alert('Có lỗi xảy ra!');
+            alert('Có lỗi xảy ra: ' + error.message);
         }
     }
+    
+    initImageUpload() {
+        // Use event delegation since modal might not be in DOM yet
+        document.addEventListener('change', (e) => {
+            if (e.target && e.target.id === 'post-image-input') {
+                const files = Array.from(e.target.files);
+                this.selectedImages = files;
+                this.showImagePreview(files);
+            }
+        });
+    }
+    
+    showImagePreview(files) {
+        const container = document.getElementById('image-preview-container');
+        const list = document.getElementById('image-preview-list');
+        
+        if (!container || !list) return;
+        
+        list.innerHTML = '';
+        
+        files.forEach((file, index) => {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const div = document.createElement('div');
+                div.className = 'position-relative';
+                div.style.width = '100px';
+                div.style.height = '100px';
+                div.innerHTML = `
+                    <img src="${e.target.result}" class="img-fluid rounded" style="width: 100%; height: 100%; object-fit: cover;">
+                    <button type="button" class="btn btn-sm btn-danger position-absolute top-0 end-0 m-1" onclick="window.postManager.removeImage(${index})">
+                        <i class="fas fa-times"></i>
+                    </button>
+                `;
+                list.appendChild(div);
+            };
+            reader.readAsDataURL(file);
+        });
+        
+        container.style.display = files.length > 0 ? 'block' : 'none';
+    }
+    
+    removeImage(index) {
+        this.selectedImages.splice(index, 1);
+        const input = document.getElementById('post-image-input');
+        input.value = '';
+        this.showImagePreview(this.selectedImages);
+    }
+    
+    clearImagePreview() {
+        this.selectedImages = [];
+        const container = document.getElementById('image-preview-container');
+        const list = document.getElementById('image-preview-list');
+        const input = document.getElementById('post-image-input');
+        
+        if (container) container.style.display = 'none';
+        if (list) list.innerHTML = '';
+        if (input) input.value = '';
+    }
 }
+
+// Export app instance for global access
+window.app = window.socialApp;

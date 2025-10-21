@@ -24,13 +24,11 @@ class Image {
 
     // Functions
     public function addImage() {
-        $query = "INSERT INTO Image (PostID, ImageURL) VALUES (?, ?)";
-        return $this->db->executeQuery($query, [$this->postID, $this->imageURL]);
+        return $this->db->callProcedureExecute("sp_AddPostImage", [$this->postID, $this->imageURL]);
     }
 
     public function getImagesByPost() {
-        $query = "SELECT * FROM Image WHERE PostID = ?";
-        return $this->db->executeQuery($query, [$this->postID]);
+        return $this->db->callProcedureSelect("sp_GetImagesByPost", [$this->postID]);
     }
 }
 ?>

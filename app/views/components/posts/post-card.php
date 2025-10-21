@@ -4,6 +4,9 @@
  * Chỉ chứa HTML/PHP, JavaScript đã tách ra posts.js
  */
 
+// Set timezone to match database
+date_default_timezone_set('Asia/Ho_Chi_Minh');
+
 if (!isset($post)) return;
 
 $post_id = $post['post_id'];
@@ -17,6 +20,55 @@ $show_comments = $show_comments ?? false;
 
 // Kiểm tra user đã like chưa (mock data - fixed state)
 $user_liked = ($post_id % 2 == 0); // Chẵn = liked, lẻ = chưa like
+
+// Load real comments từ database
+$real_comments = [];
+try {
+    require_once __DIR__ . '/../../../models/Comment.php';
+    $commentModel = new Comment($post_id, 0); // accountID không quan trọng cho getByPost()
+    $commentsFromDB = $commentModel->getByPost();
+    
+    if ($commentsFromDB && is_array($commentsFromDB)) {
+        foreach ($commentsFromDB as $commentRow) {
+            // CommentTime là field name từ stored procedure
+            $commentTimeValue = $commentRow['CommentTime'] ?? $commentRow['CreatedAt'] ?? null;
+            
+            if (!$commentTimeValue) {
+                $commentTimeAgo = 'Vừa xong';
+            } else {
+                $commentCreatedAt = strtotime($commentTimeValue);
+                $now = time();
+                $diff = $now - $commentCreatedAt;
+                
+                $minutes = floor(abs($diff) / 60);
+                
+                // Nếu diff âm (timestamp trong tương lai), coi như "Vừa xong"
+                if ($diff < 0 || $diff < 60) {
+                    $commentTimeAgo = 'Vừa xong';
+                } elseif ($diff < 3600) {
+                    $commentTimeAgo = $minutes . ' phút trước';  // "5 phút trước"
+                } elseif ($diff < 86400) {
+                    $hours = floor($diff / 3600);
+                    $commentTimeAgo = $hours . ' giờ trước';
+                } elseif ($diff < 604800) {
+                    $days = floor($diff / 86400);
+                    $commentTimeAgo = $days . ' ngày trước';
+                } else {
+                    // Hiển thị ngày tháng nếu > 7 ngày
+                    $commentTimeAgo = date('d/m/Y', $commentCreatedAt);
+                }
+            }
+            
+            $real_comments[] = [
+                'username' => $commentRow['Username'] ?? 'Anonymous',
+                'content' => $commentRow['Content'] ?? '',
+                'created_at' => $commentTimeAgo
+            ];
+        }
+    }
+} catch (Exception $e) {
+    error_log("Error loading comments for post {$post_id}: " . $e->getMessage());
+}
 ?>
 
 <div class="post-card mb-4" data-post-id="<?= $post_id ?>">
@@ -56,6 +108,7 @@ $user_liked = ($post_id % 2 == 0); // Chẵn = liked, lẻ = chưa like
             <img src="<?= htmlspecialchars($media_url) ?>" 
                  class="img-fluid rounded" 
                  alt="Post media"
+                 onerror="this.onerror=null; this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22400%22 height=%22300%22><rect fill=%22%23ddd%22 width=%22400%22 height=%22300%22/><text x=%2250%25%22 y=%2250%25%22 dominant-baseline=%22middle%22 text-anchor=%22middle%22 fill=%22%23999%22>Image not found</text></svg>'; this.style.cursor='not-allowed';"
                  onclick="openImageModal('<?= htmlspecialchars($media_url) ?>')">
         </div>
         <?php endif; ?>
@@ -89,20 +142,26 @@ $user_liked = ($post_id % 2 == 0); // Chẵn = liked, lẻ = chưa like
     <!-- Comments Section -->
     <div class="comments-section <?= $show_comments ? 'show' : '' ?>" id="comments-<?= $post_id ?>">
         <div class="comments-list">
-            <!-- Mock comments for demo -->
-            <div class="comment-item">
-                <div class="bg-secondary rounded-circle d-flex align-items-center justify-content-center me-2" 
-                     style="width: 32px; height: 32px;">
-                    <span class="text-white small fw-bold">J</span>
-                </div>
-                <div class="comment-content">
-                    <div class="bg-light rounded p-2">
-                        <small class="fw-bold">John Doe</small>
-                        <div>Bài viết hay quá! 👍</div>
+            <?php if (!empty($real_comments)): ?>
+                <?php foreach ($real_comments as $comment): ?>
+                    <div class="comment-item">
+                        <div class="bg-primary rounded-circle d-flex align-items-center justify-content-center me-2" 
+                             style="width: 32px; height: 32px;">
+                            <span class="text-white small fw-bold"><?= strtoupper(substr($comment['username'], 0, 1)) ?></span>
+                        </div>
+                        <div class="comment-content">
+                            <div class="bg-light rounded p-2">
+                                <small class="fw-bold text-primary"><?= htmlspecialchars($comment['username']) ?></small>
+                                <div><?= htmlspecialchars($comment['content']) ?></div>
+                            </div>
+                            <small class="text-muted"><?= $comment['created_at'] ?></small>
+                        </div>
                     </div>
-                    <small class="text-muted">2 phút trước</small>
-                </div>
-            </div>
+                <?php endforeach; ?>
+            <?php else: ?>
+                <!-- Không có comment nào -->
+                <small class="text-muted">Chưa có bình luận nào. Hãy là người đầu tiên!</small>
+            <?php endif; ?>
         </div>
         
         <!-- Comment Input -->

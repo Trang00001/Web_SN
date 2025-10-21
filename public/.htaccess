@@ -2,6 +2,10 @@
 Options -Indexes
 RewriteEngine On
 
+# Exclude API endpoints from rewrite
+RewriteCond %{REQUEST_URI} ^/api/ [OR]
+RewriteCond %{REQUEST_URI} ^/public/api/
+
 # If the request is not a real file or directory, route to index.php
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d

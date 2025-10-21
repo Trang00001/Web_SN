@@ -25,7 +25,12 @@ class Post {
 
     // Functions
     public function create() {
-        return $this->db->callProcedureExecute("sp_CreatePost", [$this->authorID, $this->content]);
+        $result = $this->db->callProcedureWithOutParam("sp_CreatePost", [$this->authorID, $this->content]);
+        if ($result && isset($result['out_param'])) {
+            $this->postID = $result['out_param'];
+            return true;
+        }
+        return false;
     }
 
     public function update() {
