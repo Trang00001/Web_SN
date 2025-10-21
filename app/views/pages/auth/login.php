@@ -1,72 +1,44 @@
 <?php
-// app/views/pages/auth/login.php
-
-?><!DOCTYPE html>
+if (session_status() !== PHP_SESSION_ACTIVE) { session_start(); }
+if (empty($_SESSION['csrf_token'])) { $_SESSION['csrf_token'] = bin2hex(random_bytes(16)); }
+$csrf = $_SESSION['csrf_token'];
+?>
+<!DOCTYPE html>
 <html lang="vi">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Đăng nhập - Social Network</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="<?= $BASE ?>/public/assets/css/auth.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 </head>
-<body class="auth-page">
+<body class="bg-light">
   <div class="container py-5">
     <div class="row justify-content-center">
-      <div class="col-md-6 col-lg-5">
+      <div class="col-md-6">
         <div class="card shadow-sm rounded-4">
-          <div class="card-body p-4 p-md-5">
-            <h1 class="h4 text-center mb-3">Chào mừng trở lại</h1>
-            <p class="text-center text-muted mb-4">Đăng nhập để tiếp tục</p>
-            <form id="formLoginPage" method="post" action="/auth/login" novalidate>
-              <input type="hidden" name="_token" value="<?= htmlspecialchars($_SESSION['_token'] ?? '') ?>">
+          <div class="card-body p-4">
+            <h1 class="h4 mb-4 text-center">Đăng nhập</h1>
+            <form id="formLogin" method="POST" action="/auth/login" novalidate>
+              <input type="hidden" name="csrf" value="<?php echo htmlspecialchars($csrf); ?>">
               <div class="mb-3">
-                <label for="login_email" class="form-label">Email</label>
-                <input type="email" class="form-control" id="login_email" name="email" placeholder="name@example.com" required>
-                <div class="invalid-feedback">Vui lòng nhập email hợp lệ.</div>
+                <label for="email" class="form-label">Email</label>
+                <input class="form-control" type="email" id="email" name="email" placeholder="name@example.com" required>
               </div>
               <div class="mb-3">
-                <label for="login_password" class="form-label">Mật khẩu</label>
-                <input type="password" class="form-control" id="login_password" name="password" minlength="6" required>
-                <div class="invalid-feedback">Mật khẩu tối thiểu 6 ký tự.</div>
+                <label for="password" class="form-label">Mật khẩu</label>
+                <input class="form-control" type="password" id="password" name="password" placeholder="••••••" required minlength="6">
               </div>
-              <div class="d-flex justify-content-between align-items-center mb-3">
-                <div class="form-check">
-                  <input class="form-check-input" type="checkbox" value="1" id="rememberMe" name="remember">
-                  <label class="form-check-label" for="rememberMe">Ghi nhớ tôi</label>
-                </div>
-                <a href="/auth/forgot" class="small text-decoration-none">Quên mật khẩu?</a>
+              <div class="d-grid gap-2">
+                <button class="btn btn-primary" type="submit">Đăng nhập</button>
+                <a class="btn btn-outline-secondary" href="/auth/register">Tạo tài khoản</a>
+                <a class="btn btn-link" href="/auth/forgot">Quên mật khẩu?</a>
               </div>
-              <button type="submit" class="btn btn-primary w-100">Đăng nhập</button>
             </form>
-            <div class="text-center mt-3">
-              <span class="text-muted">Chưa có tài khoản?</span>
-              <a href="../auth/register.php" class="text-decoration-none">Đăng ký</a>
-            </div>
           </div>
         </div>
       </div>
     </div>
   </div>
-
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-  <script src="<?= $BASE ?>/public/assets/js/validation.js"></script>
-  <script>
-    window.addEventListener('DOMContentLoaded', () => {
-      window.attachBasicValidation('#formLoginPage', {confirm: false});
-    });
-  </script>
 </body>
 </html>
-
-<script>
-window.addEventListener('DOMContentLoaded', () => {
-  const form = document.getElementById('formLoginPage');
-  form.addEventListener('submit', function(e) {
-    e.preventDefault(); // Ngăn form submit mặc định
-    // Chuyển thẳng sang trang Home
-    window.location.href = "../posts/home.php";
-  });
-});
-</script>
