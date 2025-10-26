@@ -4,7 +4,9 @@
  * Đơn giản để dễ điều chỉnh
  */
 
-session_start();
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 ob_start();
 
 // User demo đơn giản

@@ -10,7 +10,7 @@ $_SESSION['_token'] = $csrf;
         <h5 class="modal-title"><i class="fa-solid fa-user-plus me-2"></i>Đăng ký</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
-      <form id="formRegister" method="post" action="/auth/register" novalidate>
+  <form id="formRegister" method="post" action="<?php echo htmlspecialchars(defined('BASE_URL') ? BASE_URL : ''); ?>/auth/register" novalidate>
         <input type="hidden" name="_token" value="<?= htmlspecialchars($csrf) ?>">
         <div class="modal-body">
           <div class="mb-3">

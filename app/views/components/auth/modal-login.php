@@ -11,7 +11,7 @@ $_SESSION['_token'] = $csrf;
         <h5 class="modal-title"><i class="fa-solid fa-right-to-bracket me-2"></i>Đăng nhập</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
-      <form id="formLogin" method="post" action="/auth/login" novalidate>
+  <form id="formLogin" method="post" action="<?php echo htmlspecialchars(defined('BASE_URL') ? BASE_URL : ''); ?>/auth/login" novalidate>
         <input type="hidden" name="_token" value="<?= htmlspecialchars($csrf) ?>">
         <div class="modal-body">
           <div class="mb-3">
@@ -29,7 +29,7 @@ $_SESSION['_token'] = $csrf;
               <input class="form-check-input" type="checkbox" value="1" id="rememberMe" name="remember">
               <label class="form-check-label" for="rememberMe">Ghi nhớ tôi</label>
             </div>
-            <a href="/auth/forgot" class="text-decoration-none small">Quên mật khẩu?</a>
+            <a href="<?php echo htmlspecialchars(defined('BASE_URL') ? BASE_URL : ''); ?>/auth/forgot" class="text-decoration-none small">Quên mật khẩu?</a>
           </div>
         </div>
         <div class="modal-footer">

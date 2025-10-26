@@ -37,13 +37,16 @@ class AuthController {
     private string $assetBase;
 
     public function __construct() {
-        $this->assetBase = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/') . '/assets';
+        $scriptPath = dirname($_SERVER['SCRIPT_NAME']);
+        $this->assetBase = rtrim($scriptPath, '/') . '/assets';
         ensure_session_started();
     }
 
     // -------- Views --------
     public function showLogin() {
-        $BASE = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/..');
+        $scriptPath = dirname($_SERVER['SCRIPT_NAME']);
+        $BASE = rtrim($scriptPath, '/');
+        $BASE = dirname($BASE); // Go up one level
         $BASE_ASSETS = $this->assetBase;
         csrf_token();
         $title = "Đăng nhập";
@@ -51,7 +54,9 @@ class AuthController {
     }
 
     public function showRegister() {
-        $BASE = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/..');
+        $scriptPath = dirname($_SERVER['SCRIPT_NAME']);
+        $BASE = rtrim($scriptPath, '/');
+        $BASE = dirname($BASE); // Go up one level
         $BASE_ASSETS = $this->assetBase;
         csrf_token();
         $title = "Đăng ký";
@@ -59,7 +64,8 @@ class AuthController {
     }
 
     public function showForgot() {
-        $BASE = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/..');
+        $BASE = dirname(dirname($_SERVER['SCRIPT_NAME']));
+        $BASE = rtrim($BASE, '/');
         $BASE_ASSETS = $this->assetBase;
         csrf_token();
         $title = "Quên mật khẩu";
@@ -85,29 +91,50 @@ class AuthController {
         $password = $_POST['password'] ?? '';
         $confirm = $_POST['confirm_password'] ?? '';
         $csrf = $_POST['csrf'] ?? $_POST['csrf_token'] ?? '';
+        
+        $response = ['success' => false, 'message' => ''];
 
         if (!check_csrf($csrf)) {
             http_response_code(400);
-            echo "CSRF token không hợp lệ."; return;
+            $response['message'] = "CSRF token không hợp lệ.";
         }
-        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) { echo "Email không hợp lệ"; return; }
-        if (strlen($username) < 3) { echo "Username tối thiểu 3 ký tự"; return; }
-        if (strlen($password) < 6) { echo "Mật khẩu tối thiểu 6 ký tự"; return; }
-        if ($password !== $confirm) { echo "Mật khẩu nhập lại không khớp"; return; }
-
-        $hash = password_hash($password, PASSWORD_DEFAULT);
-        $acc = new Account($email, $hash, $username);
-        try {
-            $acc->register();
-        } catch (Exception $e) {
-            // Duplicate email/username
-            echo "Không thể đăng ký: " . htmlspecialchars($e->getMessage()); return;
+        else if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            $response['message'] = "Email không hợp lệ";
         }
-
-        // Auto login after register
-        $_SESSION['user_email'] = $email;
-        $_SESSION['user_name']  = $username;
-        redirect('/auth/login');
+        else if (strlen($username) < 3) {
+            $response['message'] = "Username tối thiểu 3 ký tự";
+        }
+        else if (strlen($password) < 6) {
+            $response['message'] = "Mật khẩu tối thiểu 6 ký tự";
+        }
+        else if ($password !== $confirm) {
+            $response['message'] = "Mật khẩu nhập lại không khớp";
+        }
+        else {
+            try {
+                $hash = password_hash($password, PASSWORD_DEFAULT);
+                $acc = new Account($email, $hash, $username);
+                $acc->register();
+                
+                // Auto login after register
+                $_SESSION['user_email'] = $email;
+                $_SESSION['user_name']  = $username;
+                
+                $response['success'] = true;
+                $response['message'] = "Đăng ký thành công!";
+                $response['redirect'] = (defined('BASE_URL') ? rtrim(BASE_URL, '/') : '') . '/auth/login';
+            } catch (Exception $e) {
+                $msg = $e->getMessage();
+                if (strpos($msg, 'Email or username already exists') !== false) {
+                    $response['message'] = "Email hoặc tên người dùng đã tồn tại.";
+                } else {
+                    $response['message'] = "Không thể đăng ký: " . htmlspecialchars($msg);
+                }
+            }
+        }
+        
+        header('Content-Type: application/json');
+        echo json_encode($response);
     }
 
     public function login() {
@@ -115,25 +142,39 @@ class AuthController {
         $email = trim($_POST['email'] ?? '');
         $password = $_POST['password'] ?? '';
         $csrf = $_POST['csrf'] ?? $_POST['csrf_token'] ?? '';
+        
+        $response = ['success' => false, 'message' => ''];
 
         if (!check_csrf($csrf)) {
             http_response_code(400);
-            echo "CSRF token không hợp lệ."; return;
+            $response['message'] = "CSRF token không hợp lệ.";
         }
-        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) { echo "Email không hợp lệ"; return; }
-        if ($password === '') { echo "Vui lòng nhập mật khẩu"; return; }
-
-        $acc = new Account();
-        $rows = $acc->findByEmail($email);
-        $user = $rows[0] ?? null;
-
-        if (!$user || !password_verify($password, $user['PasswordHash'])) {
-            echo "Email hoặc mật khẩu không đúng."; return;
+        else if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            $response['message'] = "Email không hợp lệ";
         }
-        $_SESSION['user_id'] = (int)$user['AccountID'];
-        $_SESSION['user_name'] = $user['Username'];
-        $_SESSION['user_email'] = $user['Email'];
-        redirect('/home');
+        else if ($password === '') {
+            $response['message'] = "Vui lòng nhập mật khẩu";
+        }
+        else {
+            $acc = new Account();
+            $rows = $acc->findByEmail($email);
+            $user = $rows[0] ?? null;
+
+            if (!$user || !password_verify($password, $user['PasswordHash'])) {
+                $response['message'] = "Email hoặc mật khẩu không đúng.";
+            } else {
+                $_SESSION['user_id'] = (int)$user['AccountID'];
+                $_SESSION['user_name'] = $user['Username'];
+                $_SESSION['user_email'] = $user['Email'];
+                
+                $response['success'] = true;
+                $response['message'] = "Đăng nhập thành công!";
+                $response['redirect'] = (defined('BASE_URL') ? rtrim(BASE_URL, '/') : '') . '/home';
+            }
+        }
+        
+        header('Content-Type: application/json');
+        echo json_encode($response);
     }
 
     public function forgot() {
@@ -160,7 +201,7 @@ class AuthController {
         if ($updated <= 0) {
             echo "Đặt lại mật khẩu thất bại."; return;
         }
-        redirect('/auth/login');
+    redirect((defined('BASE_URL') ? rtrim(BASE_URL, '/') : '') . '/auth/login');
     }
 
     public function logout() {

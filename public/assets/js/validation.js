@@ -7,11 +7,11 @@
   // Áp dụng trạng thái invalid cho input
   function applyInvalid(input, cond, messageEl) {
     if (cond) {
-      input.classList.add('is-invalid');
-      if (messageEl) messageEl.style.display = 'block';
+      input.classList.add("is-invalid");
+      if (messageEl) messageEl.style.display = "block";
     } else {
-      input.classList.remove('is-invalid');
-      if (messageEl) messageEl.style.display = 'none';
+      input.classList.remove("is-invalid");
+      if (messageEl) messageEl.style.display = "none";
     }
   }
 
@@ -26,7 +26,7 @@
     const pass = form.querySelector('input[type="password"][name="password"]');
     const confirm = form.querySelector('input[name="confirm"]');
 
-    form.addEventListener('submit', function (e) {
+    form.addEventListener("submit", function (e) {
       e.preventDefault(); // Ngăn submit mặc định
 
       let bad = false;
@@ -53,18 +53,8 @@
       }
 
       if (!bad) {
-        // Nếu form login (không cần DB), hardcode kiểm tra email/password
-        const emailVal = email ? email.value : '';
-        const passVal = pass ? pass.value : '';
-
-        if ((emailVal === "admin@example.com" && passVal === "12345678") ||
-            (emailVal === "user@example.com" && passVal === "password")) {
-          // Login thành công → chuyển sang trang Home
-          window.location.href = "/SN_Web/home/index.html";
-        } else {
-          alert("Email hoặc mật khẩu không đúng");
-        }
+        form.submit(); // Submit form nếu validation ok
       }
     });
-  }
+  };
 })();

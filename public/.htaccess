@@ -1,3 +1,14 @@
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteBase /Web_SN/public/
+    
+    # If the request is for an actual file or directory, leave it alone
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    
+    # Otherwise, redirect everything to index.php
+    RewriteRule ^ index.php [L,QSA]
+</IfModule>
 # public/.htaccess
 Options -Indexes
 RewriteEngine On
