@@ -69,6 +69,11 @@ try {
 } catch (Exception $e) {
     error_log("Error loading comments for post {$post_id}: " . $e->getMessage());
 }
+
+// Get images for carousel
+$images = $post['images'] ?? [];
+$imageCount = count($images);
+$hasMultipleImages = $imageCount > 1;
 ?>
 
 <div class="post-card mb-4" data-post-id="<?= $post_id ?>">
@@ -103,13 +108,41 @@ try {
         <p class="post-text"><?= nl2br(htmlspecialchars($content)) ?></p>
         <?php endif; ?>
         
-        <?php if ($media_url): ?>
-        <div class="post-media">
-            <img src="<?= htmlspecialchars($media_url) ?>" 
-                 class="img-fluid rounded" 
-                 alt="Post media"
-                 onerror="this.onerror=null; this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22400%22 height=%22300%22><rect fill=%22%23ddd%22 width=%22400%22 height=%22300%22/><text x=%2250%25%22 y=%2250%25%22 dominant-baseline=%22middle%22 text-anchor=%22middle%22 fill=%22%23999%22>Image not found</text></svg>'; this.style.cursor='not-allowed';"
-                 onclick="openImageModal('<?= htmlspecialchars($media_url) ?>')">
+        <?php if ($imageCount > 0): ?>
+        <!-- Image Carousel -->
+        <div class="post-carousel-container" data-post-id="<?= $post_id ?>">
+            <?php if ($hasMultipleImages): ?>
+            <!-- Navigation Arrows (inside carousel) -->
+            <button class="carousel-nav carousel-nav-prev" onclick="postCarousel.prev(<?= $post_id ?>); event.stopPropagation();">
+                <i class="fas fa-chevron-left"></i>
+            </button>
+            <button class="carousel-nav carousel-nav-next" onclick="postCarousel.next(<?= $post_id ?>); event.stopPropagation();">
+                <i class="fas fa-chevron-right"></i>
+            </button>
+            <?php endif; ?>
+
+            <div class="post-carousel">
+                <?php foreach ($images as $index => $image): ?>
+                <div class="carousel-slide <?= $index === 0 ? 'active' : '' ?>">
+                    <img 
+                        src="<?= htmlspecialchars($image['url']) ?>" 
+                        class="img-fluid w-100" 
+                        alt="Post image <?= $index + 1 ?>"
+                        onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22400%22 height=%22300%22%3E%3Crect fill=%22%23ddd%22 width=%22400%22 height=%22300%22/%3E%3Ctext fill=%22%23999%22 x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 dy=%22.3em%22%3EImage not found%3C/text%3E%3C/svg%3E'"
+                    >
+                </div>
+                <?php endforeach; ?>
+            </div>
+
+            <?php if ($hasMultipleImages): ?>
+            <!-- Dots Indicator -->
+            <div class="carousel-indicators">
+                <?php for ($i = 0; $i < $imageCount; $i++): ?>
+                <span class="dot <?= $i === 0 ? 'active' : '' ?>" 
+                      onclick="postCarousel.goTo(<?= $post_id ?>, <?= $i ?>); event.stopPropagation();"></span>
+                <?php endfor; ?>
+            </div>
+            <?php endif; ?>
         </div>
         <?php endif; ?>
     </div>
@@ -119,7 +152,7 @@ try {
         <div class="like-reactions">
             <span class="like-count"><?= number_format($like_count) ?> lượt thích</span>
         </div>
-        <span class="comment-count"><?= number_format($comment_count) ?> bình luận</span>
+        <span class="comment-count"><?= count($real_comments) ?> bình luận</span>
     </div>
     
     <!-- Post Actions -->
@@ -129,7 +162,7 @@ try {
             <i class="<?= $user_liked ? 'fas' : 'far' ?> fa-heart"></i>
             <span><?= $user_liked ? 'Đã thích' : 'Thích' ?></span>
         </button>
-        <button class="action-btn comment-btn" data-post-id="<?= $post_id ?>">
+        <button class="action-btn comment-btn" data-post-id="<?= $post_id ?>" onclick="openPostDetail(<?= $post_id ?>)">
             <i class="fas fa-comment"></i>
             <span>Bình luận</span>
         </button>
@@ -137,39 +170,5 @@ try {
             <i class="fas fa-share"></i>
             <span>Chia sẻ</span>
         </button>
-    </div>
-    
-    <!-- Comments Section -->
-    <div class="comments-section <?= $show_comments ? 'show' : '' ?>" id="comments-<?= $post_id ?>">
-        <div class="comments-list">
-            <?php if (!empty($real_comments)): ?>
-                <?php foreach ($real_comments as $comment): ?>
-                    <div class="comment-item">
-                        <div class="bg-primary rounded-circle d-flex align-items-center justify-content-center me-2" 
-                             style="width: 32px; height: 32px;">
-                            <span class="text-white small fw-bold"><?= strtoupper(substr($comment['username'], 0, 1)) ?></span>
-                        </div>
-                        <div class="comment-content">
-                            <div class="bg-light rounded p-2">
-                                <small class="fw-bold text-primary"><?= htmlspecialchars($comment['username']) ?></small>
-                                <div><?= htmlspecialchars($comment['content']) ?></div>
-                            </div>
-                            <small class="text-muted"><?= $comment['created_at'] ?></small>
-                        </div>
-                    </div>
-                <?php endforeach; ?>
-            <?php else: ?>
-                <!-- Không có comment nào -->
-                <small class="text-muted">Chưa có bình luận nào. Hãy là người đầu tiên!</small>
-            <?php endif; ?>
-        </div>
-        
-        <!-- Comment Input -->
-        <div class="d-flex mt-3">
-            <input type="text" class="comment-input me-2" 
-                   placeholder="Viết bình luận..." 
-                   data-post-id="<?= $post_id ?>">
-            <button class="btn btn-primary btn-sm" onclick="submitComment(<?= $post_id ?>)">Gửi</button>
-        </div>
     </div>
 </div>

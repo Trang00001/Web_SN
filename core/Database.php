@@ -12,6 +12,14 @@ class Database {
         $this->conn->set_charset("utf8mb4");
     }
 
+    /**
+     * Get the mysqli connection object
+     * @return mysqli
+     */
+    public function getConnection() {
+        return $this->conn;
+    }
+
     // SELECT (trả về dữ liệu)
     public function callProcedureSelect($procedureName, $params = []) {
         $placeholders = $params ? implode(',', array_fill(0, count($params), '?')) : '';

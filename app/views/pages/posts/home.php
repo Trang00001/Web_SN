@@ -20,6 +20,14 @@ require_once __DIR__ . '/../../../controllers/PostController.php';
 // Lấy posts qua Controller - tất cả logic đã được xử lý ở đây
 $postController = new PostController();
 $posts = $postController->getAllPosts();
+
+// Load all images for each post
+require_once __DIR__ . '/../../../models/Image.php';
+foreach ($posts as &$post) {
+    $imageModel = new Image($post['post_id'], '');
+    $post['images'] = $imageModel->getByPostId($post['post_id']);
+}
+unset($post); // Break reference
 ?>
 
 <!DOCTYPE html>
@@ -125,9 +133,52 @@ $posts = $postController->getAllPosts();
         </div>
     </div>
 
+    <!-- Post Detail Modal -->
+    <?php include __DIR__ . '/../../components/modal/post-detail-modal.php'; ?>
+
     <!-- JavaScript -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="../../../../public/assets/js/carousel.js?v=1"></script>
     <script src="../../../../public/assets/js/posts.js?v=20251021v4"></script>
+    
+    <script>
+    /**
+     * Open post detail modal
+     */
+    function openPostDetail(postId) {
+        const modal = new bootstrap.Modal(document.getElementById('postDetailModal'));
+        const modalContent = document.getElementById('postDetailContent');
+        
+        // Show loading
+        modalContent.innerHTML = `
+            <div class="text-center py-5">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <p class="mt-3 text-muted">Đang tải...</p>
+            </div>
+        `;
+        
+        // Show modal
+        modal.show();
+        
+        // Load post detail
+        fetch(`../../../../public/api/posts/get_detail.php?id=${postId}`)
+            .then(response => response.text())
+            .then(html => {
+                modalContent.innerHTML = html;
+            })
+            .catch(error => {
+                console.error('Error loading post detail:', error);
+                modalContent.innerHTML = `
+                    <div class="alert alert-danger m-4">
+                        <i class="fas fa-exclamation-circle"></i>
+                        Không thể tải bài viết. Vui lòng thử lại!
+                    </div>
+                `;
+            });
+    }
+    </script>
 </body>
 </html>
 
