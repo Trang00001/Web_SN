@@ -1,55 +1,59 @@
 <?php
-$allFriends = [
-    "Nguyễn Văn A", "Trần Thị B", "Lê Minh C", "Hoàng Văn D", "Ngô Thị E",
-    "Phạm Thị F", "Lý Văn G", "Đặng Thị H", "Vũ Minh I", "Trịnh Thị J",
-    "Bùi Văn K", "Nguyễn Thị L"
-];
-$suggestedFriends = ["Hoàng Văn D", "Đặng Thị H", "Vũ Minh I", "Trịnh Thị J",
-    "Bùi Văn K", "Nguyễn Thị L"];
-$requests = ["Phạm Thị F","Đặng Thị H", "Vũ Minh I", "Trịnh Thị J",
-    "Bùi Văn K", "Nguyễn Thị L"];
-$tab = $_GET['tab'] ?? 'all';
+// friend-item.php - component hiển thị 1 item friend/request
+
+// Đảm bảo biến bắt buộc tồn tại, nếu không có thì gán mặc định
+$tab = $tab ?? 'all';           // 'all' | 'suggested' | 'requests'
+$friendData = $friendData ?? null; // dữ liệu friend/suggested: AccountID, Username, AvatarURL
+$req = $req ?? null;            // dữ liệu request: RequestID, SenderName, SenderID, AvatarURL
+
+// Avatar mặc định nếu không có
+$defaultAvatar = '/Web_SN/public/assets/images/default-avatar.png';
 ?>
-<div class="row g-3">
-<?php
-if ($tab === 'all') {
-    foreach ($allFriends as $f) {
-        echo '<div class="col-md-6">
-                <div class="card p-2">
-                  <div class="d-flex align-items-center">
-                    <div class="avatar-md rounded-circle me-3" style="background: linear-gradient(45deg,#667eea,#764ba2); width:50px; height:50px;"></div>
-                    <span>'.$f.'</span>
-                  </div>
-                </div>
-              </div>';
-    }
-} elseif ($tab === 'suggested') {
-    foreach ($suggestedFriends as $f) {
-        echo '<div class="col-md-6">
-                <div class="card p-2 d-flex justify-content-between align-items-center">
-                  <div class="d-flex align-items-center">
-                    <div class="avatar-md rounded-circle me-3" style="background: linear-gradient(45deg,#f093fb,#f5576c); width:50px; height:50px;"></div>
-                    <span>'.$f.'</span>
-                  </div>
-                  <button class="btn btn-sm btn-primary">Kết bạn</button>
-                </div>
-              </div>';
-    }
-} elseif ($tab === 'requests') {
-    foreach ($requests as $r) {
-        echo '<div class="col-md-6">
-                <div class="card p-2 d-flex justify-content-between align-items-center">
-                  <div class="d-flex align-items-center">
-                    <div class="avatar-md rounded-circle me-3" style="background: linear-gradient(45deg,#4facfe,#00f2fe); width:50px; height:50px;"></div>
-                    <span>'.$r.'</span>
-                  </div>
-                  <div class="d-flex gap-2">
-                    <button class="btn btn-sm btn-success">Chấp nhận</button>
-                    <button class="btn btn-sm btn-danger">Từ chối</button>
-                  </div>
-                </div>
-              </div>';
-    }
-}
-?>
+
+<div class="col-md-6 mb-3">
+<?php if ($tab === 'all' && $friendData): ?>
+    <div class="card p-3 friend-item d-flex justify-content-between align-items-center">
+        <div class="d-flex align-items-center">
+            <img src="<?= htmlspecialchars($friendData['AvatarURL'] ?? $defaultAvatar) ?>" 
+                 alt="Avatar" class="rounded-circle me-3" width="50" height="50">
+            <span class="fw-bold"><?= htmlspecialchars($friendData['Username'] ?? '') ?></span>
+        </div>
+        <button class="btn btn-sm btn-danger btn-remove-friend" data-id="<?= $friendData['AccountID'] ?>">
+            Xóa bạn
+        </button>
+    </div>
+<?php endif; ?>
+
+
+<!-- <php elseif ($tab === 'suggested' && $friendData): ?>
+    <div class="card p-3 friend-item">
+        <div class="d-flex align-items-center">
+            <img src="<= htmlspecialchars($friendData['AvatarURL'] ?? $defaultAvatar) ?>" 
+                 alt="Avatar" class="rounded-circle me-3" width="50" height="50">
+            <span class="fw-bold"><= htmlspecialchars($friendData['Username'] ?? '') ?></span>
+        </div>
+        <div class="mt-2">
+            <button class="btn btn-sm btn-primary btn-send-request" data-id="<= $friendData['AccountID'] ?? 0 ?>">
+                Kết bạn
+            </button>
+        </div>
+    </div> -->
+
+<?php if ($tab === 'requests' && $req): ?>
+    <div class="card p-3 friend-item">
+        <div class="d-flex align-items-center">
+            <img src="<?= htmlspecialchars($req['AvatarURL'] ?? $defaultAvatar) ?>" 
+                 alt="Avatar" class="rounded-circle me-3" width="50" height="50">
+            <span class="fw-bold"><?= htmlspecialchars($req['SenderName'] ?? '') ?></span>
+        </div>
+        <div class="mt-2 d-flex gap-2">
+            <button class="btn btn-sm btn-success btn-accept-request" data-id="<?= $req['RequestID'] ?? 0 ?>">
+                Chấp nhận
+            </button>
+            <button class="btn btn-sm btn-danger btn-reject-request" data-id="<?= $req['RequestID'] ?? 0 ?>">
+                Từ chối
+            </button>
+        </div>
+    </div>
+<?php endif; ?>
 </div>
