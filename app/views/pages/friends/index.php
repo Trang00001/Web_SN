@@ -1,3 +1,7 @@
+<?php
+session_start();
+ob_start();
+?>
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -33,3 +37,9 @@
 <script src="/Web_SN/public/assets/js/friends.js"></script>
 </body>
 </html>
+<?php
+// Lấy nội dung buffer
+$content = ob_get_clean();
+
+// Áp dụng layout
+require_once __DIR__ . '/../../layouts/main.php';
