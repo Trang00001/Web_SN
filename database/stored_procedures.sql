@@ -348,11 +348,33 @@ END //
 DELIMITER ;
 
 DELIMITER //
-CREATE PROCEDURE sp_GetChatList(IN p_accountID INT)
 BEGIN
-    SELECT * FROM ChatBox
-    WHERE Account1ID = p_accountID OR Account2ID = p_accountID;
-END //
+    SELECT 
+        c.ChatBoxID,
+        c.Account1ID,
+        c.Account2ID,
+        c.Status,
+        c.LastMessageTime,
+        CASE 
+            WHEN c.Account1ID = p_accountID THEN a2.AccountID
+            ELSE a1.AccountID
+        END AS PartnerID,
+        CASE 
+            WHEN c.Account1ID = p_accountID THEN a2.Username
+            ELSE a1.Username
+        END AS Username,
+        CASE 
+            WHEN c.Account1ID = p_accountID THEN p2.AvatarURL
+            ELSE p1.AvatarURL
+        END AS AvatarURL
+    FROM ChatBox c
+    LEFT JOIN Account a1 ON a1.AccountID = c.Account1ID
+    LEFT JOIN Profile p1 ON p1.AccountID = a1.AccountID
+    LEFT JOIN Account a2 ON a2.AccountID = c.Account2ID
+    LEFT JOIN Profile p2 ON p2.AccountID = a2.AccountID
+    WHERE c.Account1ID = p_accountID OR c.Account2ID = p_accountID
+    ORDER BY c.LastMessageTime DESC;
+END
 DELIMITER ;
 
 DELIMITER //

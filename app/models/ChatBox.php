@@ -32,8 +32,14 @@ class ChatBox {
         return $this->db->callProcedureExecute("sp_CreateChatBox", [$this->account1ID, $this->account2ID]);
     }
 
+    // public function getChatList($accountID) {
+    //     return $this->db->callProcedureSelect("sp_GetChatList", [$accountID]);
+    // }
     public function getChatList($accountID) {
-        return $this->db->callProcedureSelect("sp_GetChatList", [$accountID]);
-    }
+    return $this->db->callProcedureSelect("sp_GetChatList", [$accountID]);
+}
+
+
+    
 }
 ?>

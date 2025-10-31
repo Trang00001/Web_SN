@@ -1,42 +1,22 @@
-<?php
-// Giả lập dữ liệu tin nhắn
-$messages = [
-    [
-        "avatar" => "https://i.pravatar.cc/40?img=1",
-        "name" => "Nguyễn Văn A",
-        "content" => "Xin chào, bạn có rảnh không?",
-        "time" => "10:30 AM"
-    ],
-    [
-        "avatar" => "https://i.pravatar.cc/40?img=2",
-        "name" => "Trần Thị B",
-        "content" => "Hôm nay học thế nào rồi?",
-        "time" => "11:15 AM"
-    ],
-    [
-        "avatar" => "https://i.pravatar.cc/40?img=3",
-        "name" => "Lê Văn C",
-        "content" => "Nhớ gửi mình file bài tập nhé!",
-        "time" => "12:05 PM"
-    ]
-];
-?>
+<?php if (!isset($msg)) return; ?>
 
-<?php foreach ($messages as $msg): ?>
-<div class="d-flex align-items-start p-2 border-bottom bg-white">
-    <!-- Avatar -->
-    <img src="<?= $msg['avatar'] ?>"
-         alt="<?= $msg['name'] ?>"
-         class="rounded-circle me-3"
-         width="40" height="40">
+<div class="d-flex mb-3 <?= ($msg['SenderID'] == $userID) ? 'justify-content-end' : '' ?>"
+     data-messageid="<?= $msg['MessageID'] ?>">
+    <!-- Avatar (chỉ hiện với tin nhắn đối tác) -->
+    <?php if ($msg['SenderID'] != $userID): ?>
+        <img src="<?= htmlspecialchars($msg['AvatarURL'] ?? 'https://i.pravatar.cc/40') ?>"
+             alt=""
+             class="rounded-circle me-2"
+             width="40" height="40">
+    <?php endif; ?>
 
-    <!-- Nội dung tin nhắn -->
-    <div class="flex-grow-1">
-        <div class="d-flex justify-content-between">
-            <strong><?= $msg['name'] ?></strong>
-            <small class="text-muted"><?= $msg['time'] ?></small>
+    <!-- Nội dung -->
+    <div>
+        <div class="<?= ($msg['SenderID'] == $userID) ? 'bg-primary text-white' : 'bg-white' ?> p-2 rounded shadow-sm">
+            <?= htmlspecialchars($msg['Content'] ?? '') ?>
         </div>
-        <p class="mb-0 text-muted"><?= $msg['content'] ?></p>
+        <small class="text-muted d-block <?= ($msg['SenderID'] == $userID) ? 'text-end' : '' ?>">
+            <?= htmlspecialchars($msg['SentTime'] ?? '') ?>
+        </small>
     </div>
 </div>
-<?php endforeach; ?>
