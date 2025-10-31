@@ -16,32 +16,64 @@ class Account {
         $this->db = new Database();
     }
 
-    // GETTER & SETTER
-    public function getAccountID() { return $this->accountID; }
-    public function getEmail() { return $this->email; }
-    public function getPasswordHash() { return $this->passwordHash; }
-    public function getUsername() { return $this->username; }
+    // -------- Getters/Setters --------
+    public function getId(){ return $this->accountID; }
+    public function setId($id){ $this->accountID = $id; return $this; }
 
-    public function setAccountID($accountID) { $this->accountID = $accountID; }
-    public function setEmail($email) { $this->email = $email; }
-    public function setPasswordHash($passwordHash) { $this->passwordHash = $passwordHash; }
-    public function setUsername($username) { $this->username = $username; }
+    public function getEmail(){ return $this->email; }
+    public function setEmail($email){ $this->email = $email; return $this; }
 
-    // FUNCTIONS
+    public function getUsername(){ return $this->username; }
+    public function setUsername($username){ $this->username = $username; return $this; }
+
+    public function getPasswordHash(){ return $this->passwordHash; }
+    public function setPasswordHash($hash){ $this->passwordHash = $hash; return $this; }
+
+    // -------- Core actions --------
+
+    // Đăng ký bằng stored procedure
     public function register() {
         return $this->db->callProcedureExecute("sp_RegisterUser", [
             $this->email, $this->passwordHash, $this->username
         ]);
     }
 
+    // Đăng nhập: trả về bản ghi người dùng nếu đúng
+    // Gợi ý: nếu CSDL có sp_LoginUser, dùng trực tiếp; nếu không, fallback truy vấn thường
     public function login() {
-        return $this->db->callProcedureSelect("sp_LoginUser", [
-            $this->email, $this->passwordHash
+        // Thử dùng stored procedure nếu có
+        try {
+            $rows = $this->db->callProcedureSelect("sp_LoginUser", [
+                $this->email, $this->passwordHash
+            ]);
+            return $rows;
+        } catch (Exception $e) {
+            // Fallback: lấy user theo email để nơi gọi tự password_verify
+            $rows = $this->db->select("SELECT * FROM Account WHERE Email = ?", [$this->email]);
+            return $rows;
+        }
+    }
+
+    // Lấy user theo email
+    public function findByEmail($email) {
+        return $this->db->select("SELECT * FROM Account WHERE Email = ?", [$email]);
+    }
+
+    // Cập nhật mật khẩu (bằng email)
+    public function updatePasswordByEmail($email, $passwordHash) {
+        return $this->db->execute("UPDATE Account SET PasswordHash = ? WHERE Email = ?", [
+            $passwordHash, $email
         ]);
     }
 
+    // Xoá tài khoản
     public function delete() {
-        return $this->db->callProcedureExecute("sp_DeleteUser", [$this->accountID]);
+        // nếu có sp_DeleteUser thì gọi; nếu không fallback
+        try {
+            return $this->db->callProcedureExecute("sp_DeleteUser", [$this->accountID]);
+        } catch (Exception $e) {
+            return $this->db->execute("DELETE FROM Account WHERE AccountID = ?", [$this->accountID]);
+        }
     }
 }
 ?>

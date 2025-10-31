@@ -4,7 +4,9 @@
  * Sử dụng PostController để xử lý logic
  */
 
-session_start();
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 ob_start();
 
 // AUTO-LOGIN FOR TESTING - Remove in production
