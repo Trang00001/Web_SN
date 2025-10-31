@@ -40,8 +40,8 @@ unset($post); // Break reference
     <!-- CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link href="../../../../public/assets/css/theme.css" rel="stylesheet">
-    <link href="../../../../public/assets/css/posts.css" rel="stylesheet">
+    <link href="/public/assets/css/theme.css" rel="stylesheet">
+    <link href="/public/assets/css/posts.css" rel="stylesheet">
 </head>
 <body>
 
@@ -138,8 +138,8 @@ unset($post); // Break reference
 
     <!-- JavaScript -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="../../../../public/assets/js/carousel.js?v=1"></script>
-    <script src="../../../../public/assets/js/posts.js?v=20251021v4"></script>
+    <script src="/public/assets/js/carousel.js?v=1"></script>
+    <script src="/public/assets/js/posts.js?v=20251021v4"></script>
     
     <script>
     /**
@@ -163,7 +163,7 @@ unset($post); // Break reference
         modal.show();
         
         // Load post detail
-        fetch(`../../../../public/api/posts/get_detail.php?id=${postId}`)
+        fetch(`/api/posts/get_detail.php?id=${postId}`)
             .then(response => response.text())
             .then(html => {
                 modalContent.innerHTML = html;

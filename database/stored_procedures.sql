@@ -30,6 +30,7 @@ DROP PROCEDURE IF EXISTS sp_RemoveFriend;
 DROP PROCEDURE IF EXISTS sp_GetFriendRequests;
 DROP PROCEDURE IF EXISTS sp_GetFriends;
 DROP PROCEDURE IF EXISTS sp_CreateChatBox;
+DROP PROCEDURE IF EXISTS sp_GetChatList;
 DROP PROCEDURE IF EXISTS sp_SendMessage;
 DROP PROCEDURE IF EXISTS sp_GetChatHistory;
 DROP PROCEDURE IF EXISTS sp_MarkMessageAsRead;
@@ -348,6 +349,7 @@ END //
 DELIMITER ;
 
 DELIMITER //
+CREATE PROCEDURE sp_GetChatList(IN p_accountID INT)
 BEGIN
     SELECT 
         c.ChatBoxID,
@@ -374,7 +376,7 @@ BEGIN
     LEFT JOIN Profile p2 ON p2.AccountID = a2.AccountID
     WHERE c.Account1ID = p_accountID OR c.Account2ID = p_accountID
     ORDER BY c.LastMessageTime DESC;
-END
+END //
 DELIMITER ;
 
 DELIMITER //

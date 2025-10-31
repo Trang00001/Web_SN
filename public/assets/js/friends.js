@@ -12,7 +12,7 @@ document.addEventListener("DOMContentLoaded", function () {
       return;
     }
 
-    fetch(`/Web_SN/app/controllers/FriendController.php?action=${action}`)
+    fetch(`/app/controllers/FriendController.php?action=${action}`)
       .then((res) => res.text())
       .then((html) => (content.innerHTML = html))
       .catch((err) => console.error(err));
@@ -41,7 +41,7 @@ document.addEventListener("DOMContentLoaded", function () {
       action = "send_request";
     if (!action) return;
 
-    fetch(`/Web_SN/app/controllers/FriendController.php?action=${action}`, {
+    fetch(`/app/controllers/FriendController.php?action=${action}`, {
       method: "POST",
       body: new URLSearchParams({ id }),
     })

@@ -33,27 +33,27 @@ $userId = $_SESSION['user_id'] ?? 1;
 <div class="tech-card">
     <h6 class="mb-3 fw-bold">Menu chính</h6>
     
-    <a href="#" class="menu-item">
+    <a href="/home" class="menu-item">
         <i class="fas fa-home"></i>
         <span>Trang chủ</span>
     </a>
     
-    <a href="#" class="menu-item">
+    <a href="/friends" class="menu-item">
         <i class="fas fa-users"></i>
         <span>Bạn bè</span>
     </a>
     
-    <a href="#" class="menu-item">
+    <a href="/messages" class="menu-item">
         <i class="fas fa-envelope"></i>
         <span>Tin nhắn</span>
     </a>
     
-    <a href="#" class="menu-item">
+    <a href="/notifications" class="menu-item">
         <i class="fas fa-bell"></i>
         <span>Thông báo</span>
     </a>
     
-    <a href="#" class="menu-item">
+    <a href="/search" class="menu-item">
         <i class="fas fa-compass"></i>
         <span>Khám phá</span>
     </a>
@@ -63,7 +63,7 @@ $userId = $_SESSION['user_id'] ?? 1;
         <span>Đã lưu</span>
     </a>
     
-    <a href="#" class="menu-item">
+    <a href="/profile" class="menu-item">
         <i class="fas fa-cog"></i>
         <span>Cài đặt</span>
     </a>

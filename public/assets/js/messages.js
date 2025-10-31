@@ -38,7 +38,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const content = input.value.trim();
     if (!content) return;
 
-    fetch("/Web_SN/app/controllers/MessageController.php", {
+    fetch("/app/controllers/MessageController.php", {
       method: "POST",
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
       body: `action=send&chatID=${chatBoxID}&content=${encodeURIComponent(

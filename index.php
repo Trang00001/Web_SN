@@ -1,10 +1,9 @@
 <?php
 /**
- * Entry point của ứng dụng Social Network
- * Redirect thẳng về trang chủ để demo
+ * Entry point - Direct access to home page (bypass login for testing)
  */
 
-// Redirect trực tiếp về trang chủ
-header('Location: app/views/pages/posts/home.php');
+// Redirect directly to home page
+header('Location: /app/views/pages/posts/home.php');
 exit();
 ?>

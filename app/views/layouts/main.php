@@ -14,9 +14,13 @@
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
 
   <!-- CSS Layout -->
-    <link rel="stylesheet" href="/WEB-SN/public/assets/css/variables.css">
-    <link rel="stylesheet" href="/WEB-SN/public/assets/css/layout.css">
-
+    <link rel="stylesheet" href="/public/assets/css/variables.css">
+    <link rel="stylesheet" href="/public/assets/css/layout.css">
+    <link rel="stylesheet" href="/public/assets/css/global.css">
+    <link rel="stylesheet" href="/public/assets/css/theme.css">
+    <link rel="stylesheet" href="/public/assets/css/posts.css">
+    <link rel="stylesheet" href="/public/assets/css/profile.css">
+    <link rel="stylesheet" href="/public/assets/css/messages.css">
     
 </head>
 <body>
@@ -29,7 +33,10 @@
   <?php include __DIR__ . '/../components/layout/footer.php'; ?>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-  <script src="/WEB-SN/public/assets/js/app.js"></script>
+  <script src="/public/assets/js/app.js"></script>
+  <script src="/public/assets/js/main.js"></script>
+  <script src="/public/assets/js/posts.js"></script>
+  <script src="/public/assets/js/carousel.js"></script>
 
 
 </body>

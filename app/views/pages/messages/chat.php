@@ -69,7 +69,7 @@ $messages = $messageModel->getMessagesByChat();
 const chatBoxID = <?= $selectedChatID ?>;
 const userID = <?= $userID ?>;
 </script>
-<script src="/Web_SN/public/assets/js/messages.js"></script>
+<script src="/public/assets/js/messages.js"></script>
 
 <?php
 $content = ob_get_clean();

@@ -64,10 +64,10 @@ $comments = $commentModel->getByPost();
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
     <!-- Custom CSS -->
-    <link rel="stylesheet" href="../../../../public/assets/css/variables.css">
-    <link rel="stylesheet" href="../../../../public/assets/css/global.css">
-    <link rel="stylesheet" href="../../../../public/assets/css/layout.css">
-    <link rel="stylesheet" href="../../../../public/assets/css/posts.css">
+    <link rel="stylesheet" href="/public/assets/css/variables.css">
+    <link rel="stylesheet" href="/public/assets/css/global.css">
+    <link rel="stylesheet" href="/public/assets/css/layout.css">
+    <link rel="stylesheet" href="/public/assets/css/posts.css">
 </head>
 <body>
     <!-- Navbar -->
@@ -77,7 +77,7 @@ $comments = $commentModel->getByPost();
         <div class="row justify-content-center">
             <div class="col-lg-8">
                 <!-- Back button -->
-                <a href="home.php" class="btn btn-link mb-3">
+                <a href="/home" class="btn btn-link mb-3">
                     <i class="fas fa-arrow-left"></i> Quay lại
                 </a>
 
@@ -244,8 +244,8 @@ $comments = $commentModel->getByPost();
 
     <!-- JavaScript -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="../../../../public/assets/js/carousel.js?v=1"></script>
-    <script src="../../../../public/assets/js/posts.js?v=20251021v4"></script>
+    <script src="/public/assets/js/carousel.js?v=1"></script>
+    <script src="/public/assets/js/posts.js?v=20251021v4"></script>
 </body>
 </html>
 
