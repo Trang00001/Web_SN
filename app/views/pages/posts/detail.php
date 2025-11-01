@@ -4,21 +4,20 @@
  * Hiển thị đầy đủ post + comments
  */
 
-session_start();
-ob_start();
+// Load helpers for authentication
+require_once __DIR__ . '/../../../../core/Helpers.php';
 
-// AUTO-LOGIN FOR TESTING - Remove in production
-if (!isset($_SESSION['user_id'])) {
-    $_SESSION['user_id'] = 1;      // Alice
-    $_SESSION['username'] = 'Alice';
-    $_SESSION['email'] = 'alice@test.com';
-}
+// Require authentication
+require_auth();
+
+// session_start() already called in public/index.php
+ob_start();
 
 // Get post_id from URL
 $post_id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
 
 if ($post_id <= 0) {
-    header('Location: home.php');
+    header('Location: /home');
     exit();
 }
 
@@ -64,10 +63,10 @@ $comments = $commentModel->getByPost();
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
     <!-- Custom CSS -->
-    <link rel="stylesheet" href="/public/assets/css/variables.css">
-    <link rel="stylesheet" href="/public/assets/css/global.css">
-    <link rel="stylesheet" href="/public/assets/css/layout.css">
-    <link rel="stylesheet" href="/public/assets/css/posts.css">
+    <link rel="stylesheet" href="/assets/css/variables.css">
+    <link rel="stylesheet" href="/assets/css/global.css">
+    <link rel="stylesheet" href="/assets/css/layout.css">
+    <link rel="stylesheet" href="/assets/css/posts.css">
 </head>
 <body>
     <!-- Navbar -->
@@ -244,8 +243,8 @@ $comments = $commentModel->getByPost();
 
     <!-- JavaScript -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="/public/assets/js/carousel.js?v=1"></script>
-    <script src="/public/assets/js/posts.js?v=20251021v4"></script>
+    <script src="/assets/js/carousel.js?v=1"></script>
+    <script src="/assets/js/posts.js?v=20251021v4"></script>
 </body>
 </html>
 

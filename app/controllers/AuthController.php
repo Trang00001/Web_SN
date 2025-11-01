@@ -160,16 +160,46 @@ class AuthController {
             $rows = $acc->findByEmail($email);
             $user = $rows[0] ?? null;
 
-            if (!$user || !password_verify($password, $user['PasswordHash'])) {
+            // Debug logging
+            error_log("Login attempt for email: {$email}");
+            error_log("User found: " . ($user ? 'YES' : 'NO'));
+            if ($user) {
+                error_log("User data: AccountID={$user['AccountID']}, Username={$user['Username']}, Email={$user['Email']}");
+                error_log("PasswordHash from DB: {$user['PasswordHash']}");
+                error_log("Password from form: {$password}");
+            }
+
+            if (!$user) {
                 $response['message'] = "Email hoặc mật khẩu không đúng.";
             } else {
-                $_SESSION['user_id'] = (int)$user['AccountID'];
-                $_SESSION['user_name'] = $user['Username'];
-                $_SESSION['user_email'] = $user['Email'];
+                // Check if password is hashed or plain text
+                $passwordMatch = false;
                 
-                $response['success'] = true;
-                $response['message'] = "Đăng nhập thành công!";
-                $response['redirect'] = (defined('BASE_URL') ? rtrim(BASE_URL, '/') : '') . '/home';
+                // Try hashed password first
+                if (password_verify($password, $user['PasswordHash'])) {
+                    $passwordMatch = true;
+                    error_log("✅ Password verified with password_verify()");
+                }
+                // Fallback: check plain text (for testing/development)
+                else if ($password === $user['PasswordHash']) {
+                    $passwordMatch = true;
+                    error_log("⚠️ Plain text password match for user: {$email}");
+                }
+                
+                if (!$passwordMatch) {
+                    error_log("❌ Password does not match");
+                    $response['message'] = "Email hoặc mật khẩu không đúng.";
+                } else {
+                    $_SESSION['user_id'] = (int)$user['AccountID'];
+                    $_SESSION['user_name'] = $user['Username'];
+                    $_SESSION['user_email'] = $user['Email'];
+                    
+                    error_log("✅ Login successful for user_id: {$_SESSION['user_id']}");
+                    
+                    $response['success'] = true;
+                    $response['message'] = "Đăng nhập thành công!";
+                    $response['redirect'] = (defined('BASE_URL') ? rtrim(BASE_URL, '/') : '') . '/home';
+                }
             }
         }
         
@@ -177,36 +207,67 @@ class AuthController {
         echo json_encode($response);
     }
 
-    public function forgot() {
+    public function resetPassword() {
         ensure_session_started();
         $email = trim($_POST['email'] ?? '');
         $new = $_POST['new_password'] ?? '';
         $confirm = $_POST['confirm_password'] ?? '';
         $csrf = $_POST['csrf'] ?? $_POST['csrf_token'] ?? '';
 
+        $response = ['success' => false, 'message' => ''];
+
         if (!check_csrf($csrf)) {
             http_response_code(400);
-            echo "CSRF token không hợp lệ."; return;
+            $response['message'] = "CSRF token không hợp lệ.";
         }
-        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) { echo "Email không hợp lệ"; return; }
-        if (strlen($new) < 6) { echo "Mật khẩu tối thiểu 6 ký tự"; return; }
-        if ($new !== $confirm) { echo "Mật khẩu nhập lại không khớp"; return; }
-
-        $acc = new Account();
-        $found = $acc->findByEmail($email);
-        if (!$found) { echo "Không tìm thấy tài khoản với email này."; return; }
-
-        $hash = password_hash($new, PASSWORD_DEFAULT);
-        $updated = $acc->updatePasswordByEmail($email, $hash);
-        if ($updated <= 0) {
-            echo "Đặt lại mật khẩu thất bại."; return;
+        else if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            $response['message'] = "Email không hợp lệ";
         }
-    redirect((defined('BASE_URL') ? rtrim(BASE_URL, '/') : '') . '/auth/login');
+        else if (strlen($new) < 6) {
+            $response['message'] = "Mật khẩu tối thiểu 6 ký tự";
+        }
+        else if ($new !== $confirm) {
+            $response['message'] = "Mật khẩu nhập lại không khớp";
+        }
+        else {
+            try {
+                $acc = new Account();
+                $found = $acc->findByEmail($email);
+                if (!$found) {
+                    $response['message'] = "Không tìm thấy tài khoản với email này.";
+                } else {
+                    $hash = password_hash($new, PASSWORD_DEFAULT);
+                    $updated = $acc->updatePasswordByEmail($email, $hash);
+                    if ($updated <= 0) {
+                        $response['message'] = "Đặt lại mật khẩu thất bại.";
+                    } else {
+                        $response['success'] = true;
+                        $response['message'] = "Đặt lại mật khẩu thành công!";
+                        $response['redirect'] = (defined('BASE_URL') ? rtrim(BASE_URL, '/') : '') . '/login';
+                    }
+                }
+            } catch (Exception $e) {
+                $response['message'] = "Lỗi: " . htmlspecialchars($e->getMessage());
+            }
+        }
+
+        header('Content-Type: application/json');
+        echo json_encode($response);
     }
 
     public function logout() {
         ensure_session_started();
+        $_SESSION = array(); // Clear all session data
+        
+        // Delete session cookie if it exists
+        if (isset($_COOKIE[session_name()])) {
+            setcookie(session_name(), '', time()-3600, '/');
+        }
+        
         session_destroy();
-        echo "Đã đăng xuất";
+        
+        // Redirect to login
+        header('Location: /login');
+        exit();
     }
 }

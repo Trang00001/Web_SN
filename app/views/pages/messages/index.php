@@ -2,8 +2,8 @@
 $title = "Tin nhắn";
 ob_start();
 require_once __DIR__ . '/../../../models/ChatBox.php';
-session_start();
-$userID = $_SESSION['userID'] ?? 1;
+// session_start() already called in public/index.php
+$userID = $_SESSION['user_id'] ?? 1;
 
 $chatBox = new ChatBox(0,0);
 $chatList = $chatBox->getChatList($userID);
@@ -21,7 +21,7 @@ $chatList = $chatBox->getChatList($userID);
           $lastMessage = $chat['LastMessage'] ?? '';
           $lastTime = $chat['LastMessageTime'] ?? '';
       ?>
-      <a href="/chat.php?id=<?= $chat['ChatBoxID'] ?>" 
+      <a href="/messages/chat?id=<?= $chat['ChatBoxID'] ?>" 
          class="list-group-item list-group-item-action d-flex align-items-center">
           <img src="<?= $otherAvatar ?>" class="rounded-circle me-3" width="40" height="40">
           <div class="flex-grow-1">

@@ -7,7 +7,7 @@ $friendData = $friendData ?? null; // dữ liệu friend/suggested: AccountID, U
 $req = $req ?? null;            // dữ liệu request: RequestID, SenderName, SenderID, AvatarURL
 
 // Avatar mặc định nếu không có
-$defaultAvatar = '/Web_SN/public/assets/images/default-avatar.png';
+$defaultAvatar = '/Web_SN/assets/images/default-avatar.png';
 ?>
 
 <div class="col-md-6 mb-3">

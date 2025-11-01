@@ -58,6 +58,12 @@
             <span class="d-none d-lg-inline">Cài đặt</span>
           </a>
         </li>
+        <li class="nav-item mx-1">
+          <a class="nav-link" href="/auth/logout" onclick="return confirm('Bạn có chắc muốn đăng xuất?')">
+            <i class="fa-solid fa-sign-out-alt"></i>
+            <span class="d-none d-lg-inline">Đăng xuất</span>
+          </a>
+        </li>
       </ul>
 
     </div>

@@ -93,6 +93,69 @@ class Database {
         return ['success' => false];
     }
 
+    /**
+     * Execute a SELECT query and return results
+     * @param string $sql SQL query with placeholders
+     * @param array $params Parameters to bind
+     * @return array Results as associative array
+     */
+    public function select($sql, $params = []) {
+        $stmt = $this->conn->prepare($sql);
+        
+        if (!$stmt) {
+            error_log("❌ Prepare failed: " . $this->conn->error);
+            return [];
+        }
+
+        if ($params) {
+            $types = str_repeat('s', count($params));
+            $stmt->bind_param($types, ...$params);
+        }
+
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $data = [];
+        
+        if ($result) {
+            while ($row = $result->fetch_assoc()) {
+                $data[] = $row;
+            }
+        }
+        
+        $stmt->close();
+        return $data;
+    }
+
+    /**
+     * Execute an INSERT/UPDATE/DELETE query
+     * @param string $sql SQL query with placeholders
+     * @param array $params Parameters to bind
+     * @return int Number of affected rows
+     */
+    public function execute($sql, $params = []) {
+        $stmt = $this->conn->prepare($sql);
+        
+        if (!$stmt) {
+            error_log("❌ Prepare failed: " . $this->conn->error);
+            return 0;
+        }
+
+        if ($params) {
+            $types = str_repeat('s', count($params));
+            $stmt->bind_param($types, ...$params);
+        }
+
+        $success = $stmt->execute();
+        $affectedRows = $stmt->affected_rows;
+        
+        if (!$success) {
+            error_log("❌ Execute failed: " . $stmt->error);
+        }
+        
+        $stmt->close();
+        return $affectedRows;
+    }
+
     public function __destruct() {
         if ($this->conn) $this->conn->close();
     }

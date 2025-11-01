@@ -1,53 +1,153 @@
 <?php
-// public/index.php - Simple fallback (Router and Helpers not implemented yet)
+/**
+ * Entry Point - public/index.php
+ * All requests route through here
+ */
+
 declare(strict_types=1);
 
 error_reporting(E_ALL);
 ini_set('display_errors', '1');
 
-// Redirect to home page for now (bypass login)
-header('Location: /app/views/pages/posts/home.php');
-exit();
+// Load core files
+require_once __DIR__ . '/../core/Router.php';
+require_once __DIR__ . '/../core/Helpers.php';
+require_once __DIR__ . '/../config/config.php';
 
 // Auto-loader for app classes
 spl_autoload_register(function($class){
     $paths = [
         __DIR__ . '/../app/controllers/' . $class . '.php',
         __DIR__ . '/../app/models/' . $class . '.php',
-        __DIR__ . '/../app/core/' . $class . '.php',
+        __DIR__ . '/../core/' . $class . '.php',
     ];
     foreach ($paths as $p) {
-        if (file_exists($p)) { require_once $p; return; }
+        if (file_exists($p)) { 
+            require_once $p; 
+            return; 
+        }
     }
 });
 
+// Initialize session
 ensure_session_started();
-csrf_token(); // ensure a token exists
 
-// Define routes
-$router = new Router();
+// Get request URI and method
+$uri = $_SERVER['REQUEST_URI'] ?? '/';
+$method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
 
-// Auth routes
-$router->get('/', function(){ redirect('/auth/login'); });
-$router->get('/auth/login', [AuthController::class, 'showLogin']);
-$router->get('/auth/register', [AuthController::class, 'showRegister']);
-$router->post('/auth/register', [AuthController::class, 'register']);
-$router->post('/auth/login', [AuthController::class, 'login']);
-$router->get('/auth/logout', [AuthController::class, 'logout']);
+// Get clean path
+$path = parse_url($uri, PHP_URL_PATH) ?? '/';
+$path = preg_replace('#^/public#', '', $path); // Remove /public/ prefix
 
-// Main pages
-$router->get('/home', function(){ require __DIR__ . '/../app/views/pages/posts/home.php'; });
-$router->get('/profile', [ProfileController::class, 'index']);
-$router->get('/friends', function(){ require __DIR__ . '/../app/views/pages/friends/index.php'; });
-$router->get('/messages', function(){ require __DIR__ . '/../app/views/pages/messages/index.php'; });
-$router->get('/notifications', function(){ require __DIR__ . '/../app/views/pages/notifications/index.php'; });
-$router->get('/settings', function(){ require __DIR__ . '/../app/views/pages/settings/index.php'; });
+// Debug log
+error_log("Request: $method $path");
 
-// Posts
+// Handle root path - Check authentication FIRST
+if ($path === '/' || $path === '' || $path === '/index.php') {
+    if (!isset($_SESSION['user_id']) || empty($_SESSION['user_id'])) {
+        error_log("User not authenticated, redirecting to /login");
+        header('Location: /login');
+        exit();
+    }
+    error_log("User authenticated (ID: {$_SESSION['user_id']}), redirecting to /home");
+    header('Location: /home');
+    exit();
+}
+
+// Create router instance
+$router = new Router(__DIR__ . '/..');
+
+// Load AuthController
+require_once __DIR__ . '/../app/controllers/AuthController.php';
+
+// Define authentication routes (public access)
+$router->get('/login', function(){ 
+    require __DIR__ . '/../app/views/pages/auth/login.php'; 
+});
+$router->get('/register', function(){ 
+    require __DIR__ . '/../app/views/pages/auth/register.php'; 
+});
+
+// Auth API endpoints - POST requests
+$router->post('/auth/login', function() {
+    $auth = new AuthController();
+    $auth->login();
+});
+$router->post('/auth/register', function() {
+    $auth = new AuthController();
+    $auth->register();
+});
+$router->get('/auth/logout', function() {
+    $auth = new AuthController();
+    $auth->logout();
+});
+$router->post('/auth/forgot', function() {
+    $auth = new AuthController();
+    $auth->resetPassword();
+});
+
+// Friend API endpoints
+require_once __DIR__ . '/../app/controllers/FriendController.php';
+$router->get('/api/friends/all', function() {
+    $controller = new FriendController();
+    $controller->getAllFriends();
+});
+$router->get('/api/friends/requests', function() {
+    $controller = new FriendController();
+    $controller->getFriendRequests();
+});
+$router->post('/api/friends/accept', function() {
+    $controller = new FriendController();
+    $controller->acceptRequest();
+});
+$router->post('/api/friends/reject', function() {
+    $controller = new FriendController();
+    $controller->rejectRequest();
+});
+$router->post('/api/friends/remove', function() {
+    $controller = new FriendController();
+    $controller->removeFriend();
+});
+$router->post('/api/friends/send_request', function() {
+    $controller = new FriendController();
+    $controller->sendRequest();
+});
+
+// Protected pages - require authentication
+$router->get('/home', function(){ 
+    require __DIR__ . '/../app/views/pages/posts/home.php'; 
+});
+$router->get('/friends', function(){ 
+    require __DIR__ . '/../app/views/pages/friends/index.php'; 
+});
+$router->get('/friends/requests', function(){ 
+    require __DIR__ . '/../app/views/pages/friends/requests.php'; 
+});
+$router->get('/messages', function(){ 
+    require __DIR__ . '/../app/views/pages/messages/index.php'; 
+});
+$router->get('/messages/chat', function(){ 
+    require __DIR__ . '/../app/views/pages/messages/chat.php'; 
+});
+$router->get('/profile', function(){ 
+    require __DIR__ . '/../app/views/pages/profile/profile.php'; 
+});
+$router->get('/profile/edit', function(){ 
+    require __DIR__ . '/../app/views/pages/profile/edit_profile.php'; 
+});
+$router->get('/notifications', function(){ 
+    require __DIR__ . '/../app/views/pages/notifications/index.php'; 
+});
+$router->get('/search', function(){ 
+    require __DIR__ . '/../app/views/pages/search/index.php'; 
+});
+
+// Post detail with dynamic ID
 $router->get('/posts/:id', function($id){ 
     $_GET['id'] = $id;
     require __DIR__ . '/../app/views/pages/posts/detail.php'; 
 });
 
-// Dispatch
-$router->dispatch($_SERVER['REQUEST_URI'] ?? '/', $_SERVER['REQUEST_METHOD'] ?? 'GET');
+// Dispatch the request
+$router->dispatch($uri, $method);

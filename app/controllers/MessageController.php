@@ -3,8 +3,13 @@ session_start();
 require_once __DIR__ . '/../models/ChatBox.php';
 require_once __DIR__ . '/../models/Message.php';
 
-// User đã đăng nhập
-$userID = $_SESSION['userID'] ?? 1;
+// Get current user from session
+$userID = $_SESSION['user_id'] ?? 0;
+if (!$userID) {
+    http_response_code(401);
+    echo json_encode(['success' => false, 'message' => 'Unauthorized']);
+    exit;
+}
 
 // 1️⃣ Lấy danh sách chat
 $chatBox = new ChatBox(0,0);

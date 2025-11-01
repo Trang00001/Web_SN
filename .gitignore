@@ -1,0 +1,46 @@
+# IDE and Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Documentation drafts (keep only README.md)
+*.md
+!README.md
+
+# Logs
+*.log
+error_log
+
+# Temporary files
+*.tmp
+*.temp
+*.bak
+*.backup
+
+# Environment files
+.env
+.env.local
+
+# Uploads (user-generated content)
+public/uploads/*
+!public/uploads/.gitkeep
+
+# Cache
+cache/
+tmp/
+
+# Node modules (if using npm/yarn)
+node_modules/
+
+# Composer
+vendor/
+
+# Test files
+*test*.php
+test_*.php

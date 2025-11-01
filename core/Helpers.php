@@ -52,6 +52,23 @@ if (!function_exists('check_csrf')) {
     }
 }
 
+if (!function_exists('require_auth')) {
+    function require_auth() {
+        ensure_session_started();
+        if (!isset($_SESSION['user_id']) || empty($_SESSION['user_id'])) {
+            redirect('/login');
+            exit();
+        }
+    }
+}
+
+if (!function_exists('is_logged_in')) {
+    function is_logged_in() {
+        ensure_session_started();
+        return isset($_SESSION['user_id']) && !empty($_SESSION['user_id']);
+    }
+}
+
 // Add JS-friendly URL helpers to all views
 if (!function_exists('inject_js_urls')) {
     function inject_js_urls() {

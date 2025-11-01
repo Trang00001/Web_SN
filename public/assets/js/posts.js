@@ -80,7 +80,7 @@ class SocialApp {
         
         try {
             // Call API
-            const response = await fetch('/public/api/posts/like.php', {
+            const response = await fetch('/api/posts/like.php', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -196,7 +196,7 @@ class SocialApp {
         
         try {
             // Call API
-            const response = await fetch('/public/api/posts/comment.php', {
+            const response = await fetch('/api/posts/comment.php', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -426,7 +426,7 @@ class PostManager {
                     const formData = new FormData();
                     formData.append('image', file);
                     
-                    const uploadResponse = await fetch('/public/api/posts/upload_image.php', {
+                    const uploadResponse = await fetch('/api/posts/upload_image.php', {
                         method: 'POST',
                         body: formData
                     });
@@ -442,7 +442,7 @@ class PostManager {
             }
             
             // Create post with images
-            const response = await fetch('/public/api/posts/create.php', {
+            const response = await fetch('/api/posts/create.php', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify({

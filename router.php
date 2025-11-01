@@ -1,7 +1,7 @@
 <?php
 /**
  * Router script for PHP built-in server
- * This allows proper routing and static file serving
+ * Uses Router class from core/Router.php
  */
 
 $uri = urldecode(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH));
@@ -11,15 +11,20 @@ if ($uri !== '/' && file_exists(__DIR__ . $uri)) {
     return false; // Let PHP built-in server handle static files
 }
 
-// Route dynamic requests
-if ($uri === '/' || $uri === '') {
-    require __DIR__ . '/index.php';
-    return true;
-}
+// Load Router class
+require_once __DIR__ . '/core/Router.php';
 
-// Custom routes mapping
+$router = new Router(__DIR__);
+
+// Define all routes
 $routes = [
     '/home' => '/app/views/pages/posts/home.php',
+    '/login' => '/app/views/pages/auth/login.php',
+    '/register' => '/app/views/pages/auth/register.php',
+    '/auth/login' => '/app/api/auth.php?action=login',
+    '/auth/register' => '/app/api/auth.php?action=register',
+    '/auth/logout' => '/app/api/auth.php?action=logout',
+    '/auth/forgot' => '/app/api/auth.php?action=forgot',
     '/friends' => '/app/views/pages/friends/index.php',
     '/friends/requests' => '/app/views/pages/friends/requests.php',
     '/messages' => '/app/views/pages/messages/index.php',
@@ -31,42 +36,15 @@ $routes = [
     '/search' => '/app/views/pages/search/index.php',
 ];
 
-// Check custom routes
-if (isset($routes[$uri])) {
-    $file = __DIR__ . $routes[$uri];
-    if (file_exists($file)) {
-        chdir(dirname($file));
-        require $file;
-        return true;
-    }
+// Add static routes
+$router->addStaticRoutes($routes);
+
+// Route root to index.php
+if ($uri === '/' || $uri === '') {
+    require __DIR__ . '/index.php';
+    return true;
 }
 
-// Check if requested PHP file exists
-$phpFile = __DIR__ . $uri;
-if (preg_match('/\.php$/', $uri)) {
-    if (file_exists($phpFile)) {
-        // Change directory to the file's directory for relative includes
-        chdir(dirname($phpFile));
-        require $phpFile;
-        return true;
-    }
-}
-
-// Check public directory
-$publicFile = __DIR__ . '/public' . $uri;
-if (file_exists($publicFile)) {
-    if (preg_match('/\.php$/', $uri)) {
-        require $publicFile;
-        return true;
-    }
-    return false; // Static file in public
-}
-
-// 404 Not Found
-http_response_code(404);
-echo "<!DOCTYPE html><html><head><title>404 Not Found</title></head>";
-echo "<body><h1>404 Not Found</h1>";
-echo "<p>The requested resource <code>" . htmlspecialchars($uri) . "</code> was not found.</p>";
-echo "<p><a href='/'>Go to homepage</a></p>";
-echo "</body></html>";
+// Dispatch request
+$router->dispatch($uri, $_SERVER['REQUEST_METHOD']);
 return true;

@@ -1,11 +1,11 @@
 <?php
 $title = "Chi tiết chat";
 ob_start();
-session_start();
+// session_start() already called in public/index.php
 require_once __DIR__ . '/../../../models/ChatBox.php';
 require_once __DIR__ . '/../../../models/Message.php';
 
-$userID = $_SESSION['userID'] ?? 1;
+$userID = $_SESSION['user_id'] ?? 1;
 $selectedChatID = $_GET['id'] ?? null;
 
 if (!$selectedChatID) {
@@ -69,7 +69,7 @@ $messages = $messageModel->getMessagesByChat();
 const chatBoxID = <?= $selectedChatID ?>;
 const userID = <?= $userID ?>;
 </script>
-<script src="/public/assets/js/messages.js"></script>
+<script src="/assets/js/messages.js"></script>
 
 <?php
 $content = ob_get_clean();

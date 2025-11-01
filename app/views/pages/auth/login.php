@@ -42,31 +42,58 @@ $csrf = $_SESSION['csrf_token'];
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <?php include __DIR__ . '/../../components/layout/toast.php'; ?>
   <script>
-    document.getElementById('formLogin').addEventListener('submit', function(e) {
+    document.getElementById('formLogin').addEventListener('submit', async function(e) {
       e.preventDefault();
       const form = e.target;
       
-      const formData = new FormData(form);
-      fetch(form.action, {
-        method: 'POST',
-        body: formData
-      })
-      .then(res => res.json())
-      .then(data => {
+      try {
+        const formData = new FormData(form);
+        
+        // Debug: log the action URL
+        console.log('Form action:', form.action);
+        console.log('Submitting to:', '/auth/login');
+        
+        const response = await fetch('/auth/login', {
+          method: 'POST',
+          body: formData
+        });
+        
+        console.log('Response status:', response.status);
+        const data = await response.json();
+        console.log('Response data:', data);
+        
         if (data.success) {
-          showSuccessToast(data.message);
+          if (typeof showSuccessToast === 'function') {
+            showSuccessToast(data.message);
+          } else {
+            alert(data.message);
+          }
           if (data.redirect) {
+            console.log('Redirecting to:', data.redirect);
+            // Ensure redirect URL is absolute
+            const redirectUrl = data.redirect.startsWith('http') 
+              ? data.redirect 
+              : window.location.origin + data.redirect;
+            console.log('Full redirect URL:', redirectUrl);
             setTimeout(() => {
-              window.location.href = data.redirect;
+              window.location.href = redirectUrl;
             }, 1500);
           }
         } else {
-          showErrorToast(data.message);
+          if (typeof showErrorToast === 'function') {
+            showErrorToast(data.message);
+          } else {
+            alert('Lỗi: ' + data.message);
+          }
         }
-      })
-      .catch(error => {
-        showErrorToast('Có lỗi xảy ra, vui lòng thử lại');
-      });
+      } catch (error) {
+        console.error('Login error:', error);
+        if (typeof showErrorToast === 'function') {
+          showErrorToast('Có lỗi xảy ra, vui lòng thử lại');
+        } else {
+          alert('Có lỗi xảy ra: ' + error.message);
+        }
+      }
     });
   </script>
 </body>

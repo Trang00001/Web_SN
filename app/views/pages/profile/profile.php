@@ -8,7 +8,7 @@ ob_start();
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Hồ sơ - Social Network</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="<?= $BASE ?>/public/assets/css/profile.css">
+  <link rel="stylesheet" href="<?= $BASE ?>/assets/css/profile.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 </head>
 <body class="profile-page">

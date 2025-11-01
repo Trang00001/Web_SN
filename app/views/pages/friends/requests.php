@@ -3,7 +3,7 @@
 $tab = 'requests'; // bắt buộc
 $currentUserID = $currentUserID ?? 1; // user hiện tại
 $requests = $requests ?? []; // mảng lời mời đến
-$defaultAvatar = '/Web_SN/public/assets/images/default-avatar.png';
+$defaultAvatar = '/Web_SN/assets/images/default-avatar.png';
 ?>
 
 <div class="row g-3">
