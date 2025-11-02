@@ -114,6 +114,16 @@ $router->post('/api/friends/send_request', function() {
     $controller->sendRequest();
 });
 
+// Message API endpoints
+$router->get('/api/messages/fetch', function() {
+    $_GET['action'] = 'fetch';
+    require __DIR__ . '/../app/controllers/MessageController.php';
+});
+$router->post('/api/messages/send', function() {
+    $_POST['action'] = 'send';
+    require __DIR__ . '/../app/controllers/MessageController.php';
+});
+
 // Protected pages - require authentication
 $router->get('/home', function(){ 
     require __DIR__ . '/../app/views/pages/posts/home.php'; 

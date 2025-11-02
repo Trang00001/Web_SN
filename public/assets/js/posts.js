@@ -3,6 +3,16 @@
  * Clean and maintainable code for social media interactions
  */
 
+// Wrap in IIFE to avoid redeclaration
+(function() {
+    'use strict';
+    
+    // Only declare if not already declared
+    if (typeof window.SocialApp !== 'undefined') {
+        console.log('SocialApp already exists, skipping redeclaration');
+        return;
+    }
+
 class SocialApp {
     constructor() {
         this.init();
@@ -46,12 +56,25 @@ class SocialApp {
             }
         });
 
-        // Comment submission với Enter
+        // Comment submission với Enter (hỗ trợ cả 2 class)
         document.addEventListener('keypress', (e) => {
-            if (e.target.classList.contains('comment-input') && e.key === 'Enter' && !e.shiftKey) {
+            if ((e.target.classList.contains('comment-input') || e.target.classList.contains('comment-textarea')) 
+                && e.key === 'Enter' && !e.shiftKey) {
                 e.preventDefault();
                 console.log('Enter pressed in comment input');
                 this.submitComment(e.target);
+            }
+        });
+
+        // Comment form submission (hỗ trợ cả 2 class)
+        document.addEventListener('submit', (e) => {
+            if (e.target.classList.contains('comment-form') || e.target.classList.contains('comment-form-submit')) {
+                e.preventDefault();
+                console.log('Comment form submitted');
+                const commentInput = e.target.querySelector('.comment-input') || e.target.querySelector('.comment-textarea');
+                if (commentInput) {
+                    this.submitComment(commentInput);
+                }
             }
         });
         
@@ -181,14 +204,58 @@ class SocialApp {
             return;
         }
 
-        const commentsSection = input.closest('.comments-section');
-        const commentsList = commentsSection.querySelector('.comments-list');
-        const postCard = input.closest('.post-card');
-        const postID = postCard.dataset.postId;
+        // Tìm form để lấy post_id
+        const form = input.closest('form');
+        const postID = form ? form.dataset.postId : null;
+        
+        // Fallback: tìm từ post-card nếu không có form
+        if (!postID) {
+            const postCard = input.closest('.post-card');
+            if (postCard) {
+                postID = postCard.dataset.postId;
+            }
+        }
         
         if (!postID) {
             this.showToast('Không tìm thấy ID bài viết', 'error');
             return;
+        }
+
+        // Tìm comments section - có thể là sibling của form hoặc trong cùng container
+        let commentsSection = null;
+        let commentsList = null;
+        
+        // Tìm từ form lên parent rồi tìm .post-detail-comments
+        const formParent = form.parentElement;
+        if (formParent) {
+            // Tìm sibling .post-detail-comments (form và comments cùng level)
+            commentsSection = formParent.querySelector('.post-detail-comments');
+            
+            // Nếu không tìm thấy, tìm trong modal body
+            if (!commentsSection) {
+                const modalBody = form.closest('.modal-body');
+                if (modalBody) {
+                    commentsSection = modalBody.querySelector('.post-detail-comments');
+                }
+            }
+            
+            // Fallback: tìm trong post-card
+            if (!commentsSection) {
+                commentsSection = form.closest('.comments-section');
+            }
+        }
+        
+        if (commentsSection) {
+            // Trong modal, comments nằm trực tiếp trong .post-detail-comments
+            commentsList = commentsSection.querySelector('.comments-list') || commentsSection;
+            console.log('Found commentsSection:', commentsSection);
+            console.log('Found commentsList:', commentsList);
+        }
+        
+        if (!commentsList) {
+            console.error('Không tìm thấy comments section');
+            this.showToast('Không tìm thấy vùng hiển thị bình luận', 'error');
+            return; // Thêm return để không tiếp tục
         }
         
         // Disable input during API call
@@ -209,35 +276,68 @@ class SocialApp {
             
             const data = await response.json();
             
+            console.log('API Response:', data);
+            
             if (!response.ok || !data.success) {
                 throw new Error(data.error || 'Có lỗi xảy ra');
             }
             
             // Create new comment element
             const commentData = data.comment;
-            const newComment = document.createElement('div');
-            newComment.className = 'comment-item';
-            newComment.innerHTML = `
-                <div class="bg-primary rounded-circle d-flex align-items-center justify-content-center me-2" 
-                     style="width: 32px; height: 32px;">
-                    <span class="text-white small fw-bold">${commentData.username.charAt(0).toUpperCase()}</span>
-                </div>
-                <div class="comment-content">
-                    <div class="bg-light rounded p-2">
-                        <small class="fw-bold text-primary">${commentData.username}</small>
-                        <div>${commentData.content}</div>
-                    </div>
-                    <small class="text-muted">${commentData.created_at}</small>
-                </div>
-            `;
             
-            commentsList.appendChild(newComment);
+            console.log('Comment data:', commentData);
+            console.log('Will append to:', commentsList);
+            
+            // Chỉ append comment nếu tìm thấy commentsList
+            if (commentsList) {
+                // Xóa thông báo "Chưa có bình luận" nếu có
+                const emptyMessage = commentsList.querySelector('p.text-muted.text-center');
+                if (emptyMessage) {
+                    console.log('Removing empty message:', emptyMessage);
+                    emptyMessage.remove();
+                }
+                
+                const newComment = document.createElement('div');
+                newComment.className = 'comment-item';
+                newComment.innerHTML = `
+                    <div class="d-flex gap-2">
+                        <div class="bg-secondary rounded-circle d-flex align-items-center justify-content-center" 
+                             style="width: 36px; height: 36px; flex-shrink: 0;">
+                            <span class="text-white fw-bold small">${commentData.username.charAt(0).toUpperCase()}</span>
+                        </div>
+                        <div class="flex-grow-1">
+                            <div class="d-flex justify-content-between align-items-start mb-1">
+                                <h6 class="mb-0 small fw-bold">${commentData.username}</h6>
+                                <small class="text-muted">${commentData.created_at}</small>
+                            </div>
+                            <p class="mb-0 small">${commentData.content}</p>
+                        </div>
+                    </div>
+                `;
+                
+                console.log('Appending new comment:', newComment);
+                commentsList.appendChild(newComment);
+                console.log('Comment appended successfully!');
+                
+                // Scroll to new comment
+                newComment.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            } else {
+                console.error('commentsList is null, cannot append');
+            }
+            
             input.value = '';
             
-            // Update comment count
-            const commentCount = postCard.querySelector('.comment-count');
-            let count = parseInt(commentCount.textContent.match(/\d+/)[0]) || 0;
-            commentCount.textContent = (count + 1) + ' bình luận';
+            // Update comment count (tìm trong post-card hoặc modal)
+            const postCard = input.closest('.post-card');
+            const modal = input.closest('.modal');
+            
+            if (postCard) {
+                const commentCount = postCard.querySelector('.comment-count');
+                if (commentCount) {
+                    let count = parseInt(commentCount.textContent.match(/\d+/)[0]) || 0;
+                    commentCount.textContent = (count + 1) + ' bình luận';
+                }
+            }
             
             this.showToast('Đã thêm bình luận', 'success');
             console.log('Comment added via API:', commentData);
@@ -356,6 +456,67 @@ window.openImageModal = function(imageSrc) {
     const modal = new bootstrap.Modal(document.getElementById('imageModal'));
     document.getElementById('modalImage').src = imageSrc;
     modal.show();
+};
+
+// Global function for opening post detail modal
+window.openPostDetail = async function(postId) {
+    console.log('Opening post detail for post:', postId);
+    
+    const modal = document.getElementById('postDetailModal');
+    const modalContent = document.getElementById('postDetailContent');
+    
+    if (!modal || !modalContent) {
+        console.error('Post detail modal not found');
+        return;
+    }
+    
+    // Show modal with loading
+    const bsModal = new bootstrap.Modal(modal);
+    bsModal.show();
+    
+    // Show loading
+    modalContent.innerHTML = `
+        <div class="text-center py-5">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <p class="mt-3 text-muted">Đang tải...</p>
+        </div>
+    `;
+    
+    try {
+        // Fetch post detail
+        const response = await fetch(`/api/posts/get_detail.php?post_id=${postId}`);
+        
+        if (!response.ok) {
+            throw new Error('Failed to load post detail');
+        }
+        
+        const html = await response.text();
+        
+        // Update modal content
+        modalContent.innerHTML = html;
+        
+        console.log('Post detail loaded successfully');
+        
+        // Re-initialize event listeners for the modal content
+        // This is important for comment functionality
+        if (typeof socialAppInstance !== 'undefined') {
+            console.log('Social app instance available for modal');
+        }
+        
+    } catch (error) {
+        console.error('Error loading post detail:', error);
+        modalContent.innerHTML = `
+            <div class="text-center py-5">
+                <i class="fas fa-exclamation-triangle fa-3x text-danger mb-3"></i>
+                <p class="text-muted">Không thể tải chi tiết bài viết</p>
+                <button class="btn btn-primary" onclick="openPostDetail(${postId})">
+                    <i class="fas fa-redo"></i> Thử lại
+                </button>
+            </div>
+        `;
+    }
 };
 
 /**
@@ -528,3 +689,9 @@ class PostManager {
 
 // Export app instance for global access
 window.app = window.socialApp;
+
+// Export classes globally
+window.SocialApp = SocialApp;
+window.PostManager = PostManager;
+
+})(); // End IIFE

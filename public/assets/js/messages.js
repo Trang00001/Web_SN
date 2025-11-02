@@ -38,10 +38,10 @@ document.addEventListener("DOMContentLoaded", function () {
     const content = input.value.trim();
     if (!content) return;
 
-    fetch("/app/controllers/MessageController.php", {
+    fetch("/api/messages/send", {
       method: "POST",
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body: `action=send&chatID=${chatBoxID}&content=${encodeURIComponent(
+      body: `chatID=${chatBoxID}&content=${encodeURIComponent(
         content
       )}`,
     })

@@ -17,8 +17,8 @@ if (!isset($_SESSION['user_id'])) {
     $_SESSION['username'] = 'Alice';
 }
 
-// Get post_id
-$post_id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
+// Get post_id (accept both 'id' and 'post_id' parameter)
+$post_id = isset($_GET['post_id']) ? (int)$_GET['post_id'] : (isset($_GET['id']) ? (int)$_GET['id'] : 0);
 
 if ($post_id <= 0) {
     echo '<div class="alert alert-danger m-4">Post không tồn tại</div>';
@@ -212,7 +212,7 @@ $hasMultipleImages = $imageCount > 1;
             <div class="bg-primary rounded-circle d-flex align-items-center justify-content-center" 
                  style="width: 40px; height: 40px; flex-shrink: 0;">
                 <span class="text-white fw-bold">
-                    <?= strtoupper(substr($_SESSION['username'], 0, 1)) ?>
+                    <?= strtoupper(substr($_SESSION['username'] ?? $_SESSION['user_name'] ?? 'U', 0, 1)) ?>
                 </span>
             </div>
             <div class="flex-grow-1">

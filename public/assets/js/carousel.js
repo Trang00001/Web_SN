@@ -4,6 +4,16 @@
  * Version: 1.0
  */
 
+// Wrap in IIFE to avoid redeclaration
+(function() {
+    'use strict';
+    
+    // Only initialize if not already initialized
+    if (typeof window.PostCarousel !== 'undefined') {
+        console.log('PostCarousel already exists, skipping redeclaration');
+        return;
+    }
+
 class PostCarousel {
     constructor() {
         this.carousels = new Map(); // postId -> currentIndex
@@ -153,3 +163,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // Export for use in other files
 window.postCarousel = postCarousel;
+window.PostCarousel = PostCarousel;
+
+})(); // End IIFE

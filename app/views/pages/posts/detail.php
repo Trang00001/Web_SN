@@ -177,7 +177,7 @@ $comments = $commentModel->getByPost();
                                     <div class="bg-primary rounded-circle d-flex align-items-center justify-content-center" 
                                          style="width: 40px; height: 40px; flex-shrink: 0;">
                                         <span class="text-white fw-bold">
-                                            <?= strtoupper(substr($_SESSION['username'], 0, 1)) ?>
+                                            <?= strtoupper(substr($_SESSION['username'] ?? $_SESSION['user_name'] ?? 'U', 0, 1)) ?>
                                         </span>
                                     </div>
                                     <div class="flex-grow-1">

@@ -1,5 +1,5 @@
 <?php
-session_start();
+// Session already started in public/index.php
 require_once __DIR__ . '/../models/ChatBox.php';
 require_once __DIR__ . '/../models/Message.php';
 
@@ -75,6 +75,15 @@ if ($action === 'send' && isset($_POST['chatID'], $_POST['content'])) {
 
 
 // ===================== NORMAL PAGE LOAD =====================
+// If we reach here, it means this is a page load request, not an API call
+// API calls should have exited above
+if ($action !== null) {
+    // Unknown action
+    http_response_code(400);
+    echo json_encode(['success' => false, 'error' => 'Unknown action']);
+    exit;
+}
+
 $selectedChatID = $_GET['id'] ?? null;
 $messages = [];
 $chatPartner = null;
