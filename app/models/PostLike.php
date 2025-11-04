@@ -31,5 +31,23 @@ class PostLike {
     public function unlike() {
         return $this->db->callProcedureExecute("sp_RemoveLike", [$this->accountID, $this->postID]);
     }
+
+    /**
+     * Kiểm tra user đã like post này chưa
+     * @return bool
+     */
+    public function isLiked() {
+        try {
+            $result = $this->db->select(
+                "SELECT COUNT(*) as count FROM PostLike WHERE AccountID = ? AND PostID = ?",
+                [$this->accountID, $this->postID]
+            );
+            
+            return $result && isset($result[0]['count']) && $result[0]['count'] > 0;
+        } catch (Exception $e) {
+            error_log("PostLike::isLiked() - Error: " . $e->getMessage());
+            return false;
+        }
+    }
 }
 ?>

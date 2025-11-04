@@ -29,8 +29,11 @@ if ($post_id <= 0) {
 require_once __DIR__ . '/../../../app/controllers/PostController.php';
 $postController = new PostController();
 
+// Lấy userId từ session
+$userId = $_SESSION['user_id'] ?? null;
+
 // Get single post
-$posts = $postController->getAllPosts();
+$posts = $postController->getAllPosts($userId);
 $currentPost = null;
 foreach ($posts as $post) {
     if ($post['post_id'] == $post_id) {
@@ -158,18 +161,23 @@ $hasMultipleImages = $imageCount > 1;
 <!-- Post Stats -->
 <div class="post-detail-stats">
     <div class="d-flex justify-content-between">
-        <span><i class="fas fa-heart text-danger"></i> <?= $currentPost['like_count'] ?> lượt thích</span>
-        <span><?= count($comments) ?> bình luận</span>
+        <span class="like-count"><i class="fas fa-heart text-danger"></i> <?= $currentPost['like_count'] ?> lượt thích</span>
+        <span class="comment-count"><?= count($comments) ?> bình luận</span>
     </div>
 </div>
 
 <!-- Post Actions -->
 <div class="post-detail-actions">
     <div class="d-flex justify-content-around py-2">
-        <button class="btn btn-link text-decoration-none like-btn" data-post-id="<?= $currentPost['post_id'] ?>">
-            <i class="far fa-heart"></i> Thích
+        <button class="btn btn-link text-decoration-none post-action like-btn <?= $currentPost['user_liked'] ? 'liked' : '' ?>" 
+                data-post-id="<?= $currentPost['post_id'] ?>"
+                data-action="like">
+            <i class="<?= $currentPost['user_liked'] ? 'fas' : 'far' ?> fa-heart"></i> 
+            <span class="like-text"><?= $currentPost['user_liked'] ? 'Bỏ thích' : 'Thích' ?></span>
         </button>
-        <button class="btn btn-link text-decoration-none">
+        <button class="btn btn-link text-decoration-none post-action share-btn" 
+                data-post-id="<?= $currentPost['post_id'] ?>"
+                data-action="share">
             <i class="far fa-share-square"></i> Chia sẻ
         </button>
     </div>

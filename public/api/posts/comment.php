@@ -98,9 +98,17 @@ try {
     $result = $comment->add();
     
     if ($result) {
-        // Get user info for response
-        $username = $_SESSION['username'] ?? 'User';
-        $avatar = $_SESSION['avatar'] ?? '/public/assets/images/default-avatar.png';
+        // Get user info from database for accurate data
+        $account = new Account();
+        $userData = $account->getAccountById($userID);
+        
+        $username = 'User';
+        $avatar = '/public/assets/images/default-avatar.png';
+        
+        if ($userData) {
+            $username = $userData['Username'] ?? $username;
+            $avatar = $userData['Avatar'] ?? $avatar;
+        }
         
         echo json_encode([
             'success' => true,

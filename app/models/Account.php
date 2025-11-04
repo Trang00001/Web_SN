@@ -59,6 +59,12 @@ class Account {
         return $this->db->select("SELECT * FROM Account WHERE Email = ?", [$email]);
     }
 
+    // Lấy user theo ID
+    public function getAccountById($accountID) {
+        $rows = $this->db->select("SELECT * FROM Account WHERE AccountID = ?", [$accountID]);
+        return $rows ? $rows[0] : null;
+    }
+
     // Cập nhật mật khẩu (bằng email)
     public function updatePasswordByEmail($email, $passwordHash) {
         return $this->db->execute("UPDATE Account SET PasswordHash = ? WHERE Email = ?", [

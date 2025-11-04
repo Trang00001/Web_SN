@@ -18,8 +18,8 @@ $comment_count = $post['comment_count'] ?? 0;
 $created_at = $post['created_at'] ?? 'Vừa xong';
 $show_comments = $show_comments ?? false;
 
-// Kiểm tra user đã like chưa (mock data - fixed state)
-$user_liked = ($post_id % 2 == 0); // Chẵn = liked, lẻ = chưa like
+// Kiểm tra user đã like chưa (từ database)
+$user_liked = $post['user_liked'] ?? false;
 
 // Load real comments từ database
 $real_comments = [];

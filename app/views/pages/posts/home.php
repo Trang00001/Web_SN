@@ -16,9 +16,12 @@ ob_start();
 // Load Controller thay vì Model
 require_once __DIR__ . '/../../../controllers/PostController.php';
 
+// Lấy userId từ session
+$userId = $_SESSION['user_id'] ?? null;
+
 // Lấy posts qua Controller - tất cả logic đã được xử lý ở đây
 $postController = new PostController();
-$posts = $postController->getAllPosts();
+$posts = $postController->getAllPosts($userId);
 
 // Load all images for each post
 require_once __DIR__ . '/../../../models/Image.php';
