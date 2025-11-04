@@ -3,7 +3,7 @@
 define("HOST", "localhost");
 define("DB", "SocialNetworkDB");
 define("USER", "root");
-define("PASSWORD", "");
+define("PASSWORD", "binhvo2005");
 
 // Base URL - tự động detect
 // Khi serve từ public folder: BASE_URL = ""

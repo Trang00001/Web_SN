@@ -5,6 +5,7 @@ class Friendship {
     private $account1ID;
     private $account2ID;
     private $db;
+
     
 
   public function __construct($account1ID = null, $account2ID = null) {

@@ -290,12 +290,41 @@ BEGIN
 END //
 DELIMITER ;
 
+-- DELIMITER //
+-- CREATE PROCEDURE sp_AcceptFriendRequest(IN p_requestID INT)
+-- BEGIN
+--     UPDATE FriendRequest SET Status = 'Accepted' WHERE RequestID = p_requestID;
+-- END //
+-- DELIMITER ;
+DROP PROCEDURE IF EXISTS sp_AcceptFriendRequest;
 DELIMITER //
 CREATE PROCEDURE sp_AcceptFriendRequest(IN p_requestID INT)
 BEGIN
-    UPDATE FriendRequest SET Status = 'Accepted' WHERE RequestID = p_requestID;
-END //
+    DECLARE v_senderID INT;
+    DECLARE v_receiverID INT;
+
+    -- Lấy sender và receiver từ FriendRequest
+    SELECT SenderID, ReceiverID
+    INTO v_senderID, v_receiverID
+    FROM FriendRequest
+    WHERE RequestID = p_requestID;
+
+    -- Cập nhật trạng thái Accepted
+    UPDATE FriendRequest
+    SET Status = 'Accepted'
+    WHERE RequestID = p_requestID;
+
+    -- Thêm bạn bè 1 chiều vào Friendship
+    IF v_senderID IS NOT NULL AND v_receiverID IS NOT NULL THEN
+        INSERT IGNORE INTO Friendship (Account1ID, Account2ID)
+        VALUES (v_senderID, v_receiverID);
+    END IF;
+
+    -- Xóa request sau khi đã accept (nếu muốn)
+    DELETE FROM FriendRequest WHERE RequestID = p_requestID;
+END
 DELIMITER ;
+
 
 DELIMITER //
 CREATE PROCEDURE sp_RejectFriendRequest(IN p_requestID INT)
