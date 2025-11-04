@@ -141,7 +141,9 @@ $router->get('/messages/chat', function(){
     require __DIR__ . '/../app/views/pages/messages/chat.php'; 
 });
 $router->get('/profile', function(){ 
-    require __DIR__ . '/../app/views/pages/profile/profile.php'; 
+    require_once __DIR__ . '/../app/controllers/ProfileController.php';
+    $controller = new ProfileController();
+    $controller->index();
 });
 $router->get('/profile/edit', function(){ 
     require __DIR__ . '/../app/views/pages/profile/edit_profile.php'; 
