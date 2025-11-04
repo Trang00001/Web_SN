@@ -1,5 +1,14 @@
 USE SocialNetworkDB;
 
+-- Add CategoryID column to Post table if not exists
+ALTER TABLE Post 
+ADD COLUMN IF NOT EXISTS CategoryID INT DEFAULT 1;
+
+-- Add foreign key constraint
+ALTER TABLE Post
+ADD CONSTRAINT IF NOT EXISTS fk_post_category 
+FOREIGN KEY (CategoryID) REFERENCES PostCategory(CategoryID);
+
 -- Update sp_GetAllPosts to include category
 DROP PROCEDURE IF EXISTS sp_GetAllPosts;
 DELIMITER //
