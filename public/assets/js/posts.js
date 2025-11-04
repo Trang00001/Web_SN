@@ -645,12 +645,16 @@ class PostManager {
             }
             
             // Create post with images
+            const categorySelect = document.getElementById('post-category-select');
+            const categoryID = categorySelect ? categorySelect.value : 1;
+            
             const response = await fetch('/api/posts/create.php', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify({
                     content: content,
-                    image_urls: imageURLs
+                    image_urls: imageURLs,
+                    category_id: parseInt(categoryID)
                 })
             });
 

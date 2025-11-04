@@ -5,12 +5,12 @@
 
 /* CSS Variables */
 :root {
-    --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-    --accent-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-    --success-gradient: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+    --primary-color: #667eea;
+    --secondary-color: #f093fb;
+    --accent-color: #4facfe;
+    --success-color: #43e97b;
     
-    --bg-main: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    --bg-main: #f5f7fa;
     --bg-card: rgba(255, 255, 255, 0.9);
     --bg-card-hover: rgba(255, 255, 255, 0.95);
     
@@ -53,6 +53,13 @@ body {
     align-items: start;
 }
 
+.left-sidebar, .right-sidebar {
+    position: sticky;
+    top: 1rem;
+    max-height: calc(100vh - 2rem);
+    overflow-y: auto;
+}
+
 @media (max-width: 1200px) {
     .content-grid {
         grid-template-columns: 1fr;
@@ -75,10 +82,7 @@ body {
 }
 
 .navbar-brand {
-    background: var(--primary-gradient);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    color: var(--primary-color);
     font-weight: 800;
     font-size: 1.5rem;
     text-decoration: none;
@@ -95,7 +99,7 @@ body {
 }
 
 .search-modern:focus {
-    border-color: var(--primary-gradient);
+    border-color: var(--primary-color);
     box-shadow: 0 0 20px rgba(102, 126, 234, 0.1);
     outline: none;
 }
@@ -125,7 +129,7 @@ body {
     left: 0;
     right: 0;
     height: 4px;
-    background: var(--primary-gradient);
+    background: var(--primary-color);
     opacity: 0;
     transition: var(--transition);
 }
@@ -149,7 +153,7 @@ body {
     width: 50px;
     height: 50px;
     border-radius: var(--border-radius);
-    background: var(--primary-gradient);
+    background: var(--primary-color);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -197,14 +201,14 @@ body {
     top: 0;
     bottom: 0;
     width: 4px;
-    background: var(--primary-gradient);
+    background: var(--primary-color);
     transform: scaleY(0);
     transition: var(--transition);
 }
 
 .menu-item:hover,
 .sidebar-item:hover {
-    background: var(--primary-gradient);
+    background: var(--primary-color);
     color: white !important;
     transform: translateX(8px);
     text-decoration: none;
@@ -223,7 +227,7 @@ body {
     align-items: center;
     justify-content: center;
     margin-right: 1rem;
-    background: var(--accent-gradient);
+    background: var(--accent-color);
     color: white;
     transition: var(--transition);
 }
@@ -245,7 +249,7 @@ body {
 }
 
 .stat-card {
-    background: var(--success-gradient);
+    background: var(--success-color);
     color: white;
     padding: 1.5rem;
     border-radius: var(--border-radius);
@@ -270,22 +274,22 @@ body {
     padding: 1rem;
     border-radius: var(--border-radius);
     margin-bottom: 0.8rem;
-    background: linear-gradient(45deg, rgba(102, 126, 234, 0.08), rgba(240, 147, 251, 0.08));
+    background: rgba(102, 126, 234, 0.08);
     transition: var(--transition);
     border-left: 4px solid transparent;
 }
 
 .trending-item:hover {
     transform: translateX(8px);
-    background: linear-gradient(45deg, rgba(102, 126, 234, 0.15), rgba(240, 147, 251, 0.15));
-    border-left-color: var(--primary-gradient);
+    background: rgba(102, 126, 234, 0.15);
+    border-left-color: var(--primary-color);
 }
 
 .trending-icon {
     width: 35px;
     height: 35px;
     border-radius: 10px;
-    background: var(--secondary-gradient);
+    background: var(--secondary-color);
     color: white;
     display: flex;
     align-items: center;
@@ -344,26 +348,25 @@ body {
     overflow: hidden;
 }
 
-.btn-primary-gradient {
-    background: var(--primary-gradient);
+.btn-primary-solid {
+    background: var(--primary-color);
     color: white;
 }
 
-.btn-primary-gradient:hover {
+.btn-primary-solid:hover {
     transform: translateY(-2px);
     box-shadow: var(--shadow-medium);
     color: white;
 }
 
 .btn-outline-modern {
-    border: 2px solid transparent;
-    background: linear-gradient(white, white) padding-box,
-                var(--primary-gradient) border-box;
+    border: 2px solid var(--primary-color);
+    background: white;
     color: var(--text-primary);
 }
 
 .btn-outline-modern:hover {
-    background: var(--primary-gradient);
+    background: var(--primary-color);
     color: white;
     transform: translateY(-2px);
 }

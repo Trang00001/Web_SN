@@ -134,9 +134,9 @@ DELIMITER ;
 -- =============================
 
 DELIMITER //
-CREATE PROCEDURE sp_CreatePost(IN p_authorID INT, IN p_content TEXT, OUT p_postID INT)
+CREATE PROCEDURE sp_CreatePost(IN p_authorID INT, IN p_content TEXT, IN p_categoryID INT, OUT p_postID INT)
 BEGIN
-    INSERT INTO Post (AuthorID, Content) VALUES (p_authorID, p_content);
+    INSERT INTO Post (AuthorID, Content, CategoryID) VALUES (p_authorID, p_content, p_categoryID);
     SET p_postID = LAST_INSERT_ID();
 END //
 DELIMITER ;
@@ -162,6 +162,8 @@ BEGIN
         p.PostID,
         p.Content,
         p.PostTime AS CreatedAt,
+        p.CategoryID,
+        pc.CategoryName,
         (SELECT i.ImageURL FROM Image i WHERE i.PostID = p.PostID LIMIT 1) AS ImageUrl,
         a.Username,
         pr.AvatarURL,
@@ -170,6 +172,7 @@ BEGIN
     FROM Post p
     JOIN Account a ON p.AuthorID = a.AccountID
     LEFT JOIN Profile pr ON a.AccountID = pr.AccountID
+    LEFT JOIN PostCategory pc ON p.CategoryID = pc.CategoryID
     ORDER BY p.PostTime DESC;
 END //
 DELIMITER ;
@@ -177,10 +180,17 @@ DELIMITER ;
 DELIMITER //
 CREATE PROCEDURE sp_GetPostById(IN p_postID INT)
 BEGIN
-    SELECT p.*, a.Username, pr.AvatarURL
+    SELECT 
+        p.*, 
+        a.Username, 
+        pr.AvatarURL,
+        pc.CategoryName,
+        (SELECT COUNT(*) FROM PostLike pl WHERE pl.PostID = p.PostID) AS LikeCount,
+        (SELECT COUNT(*) FROM Comment c WHERE c.PostID = p.PostID) AS CommentCount
     FROM Post p
     JOIN Account a ON p.AuthorID = a.AccountID
     LEFT JOIN Profile pr ON a.AccountID = pr.AccountID
+    LEFT JOIN PostCategory pc ON p.CategoryID = pc.CategoryID
     WHERE p.PostID = p_postID;
 END //
 DELIMITER ;

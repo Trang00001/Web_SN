@@ -30,7 +30,7 @@ body.auth-page {
   align-items: center;
   justify-content: center;
   min-height: 100vh;
-  background: linear-gradient(135deg, #833AB4, #FD1D1D, #FCAF45);
+  background: #833AB4;
 }
 
 .auth-container {

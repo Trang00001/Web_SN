@@ -8,7 +8,7 @@
     background: var(--bg-card) !important;
     color: var(--text-primary) !important;
     border: 2px solid transparent;
-    background-image: linear-gradient(var(--bg-card), var(--bg-card)), var(--primary-gradient);
+    background-image: var(--bg-card);
     background-origin: border-box;
     background-clip: content-box, border-box;
     margin-bottom: 2rem;
@@ -35,7 +35,7 @@
 
 .create-post-input:focus {
     background: rgba(255, 255, 255, 0.95) !important;
-    border-color: var(--primary-gradient) !important;
+    border-color: var(--primary-color) !important;
     color: var(--text-primary) !important;
     box-shadow: 0 0 20px rgba(102, 126, 234, 0.2);
     outline: none;
@@ -57,7 +57,7 @@
 }
 
 .create-post-btn:hover {
-    background: var(--primary-gradient) !important;
+    background: var(--primary-color) !important;
     color: white !important;
     transform: translateY(-2px);
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
@@ -82,7 +82,7 @@
     left: 0;
     right: 0;
     height: 3px;
-    background: var(--primary-gradient);
+    background: var(--primary-color);
     opacity: 0;
     transition: var(--transition);
 }
@@ -198,7 +198,7 @@
 }
 
 .action-btn:hover {
-    background: var(--primary-gradient);
+    background: var(--primary-color);
     color: white;
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
@@ -313,7 +313,7 @@
 
 .comment-input:focus {
     outline: none;
-    border-color: var(--primary-gradient);
+    border-color: var(--primary-color);
     box-shadow: 0 0 10px rgba(102, 126, 234, 0.2);
 }
 

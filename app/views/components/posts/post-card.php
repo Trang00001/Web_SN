@@ -70,6 +70,18 @@ try {
     error_log("Error loading comments for post {$post_id}: " . $e->getMessage());
 }
 
+// Get category info
+$category_id = $post['category_id'] ?? 1;
+$category_name = $post['category_name'] ?? 'Cuộc sống';
+
+// Map category to color
+$category_colors = [
+    1 => 'primary',     // Life - Blue
+    2 => 'success',     // Study - Green  
+    3 => 'danger'       // Entertainment - Red/Purple
+];
+$category_color = $category_colors[$category_id] ?? 'secondary';
+
 // Get images for carousel
 $images = $post['images'] ?? [];
 $imageCount = count($images);
@@ -99,6 +111,13 @@ $hasMultipleImages = $imageCount > 1;
                     <li><a class="dropdown-item" href="#"><i class="fas fa-flag me-2"></i>Báo cáo</a></li>
                 </ul>
             </div>
+        </div>
+        
+        <!-- Category Badge -->
+        <div class="mt-2">
+            <span class="badge bg-<?= $category_color ?> text-white px-3 py-1" style="font-size: 0.75rem;">
+                <i class="fas fa-tag me-1"></i><?= htmlspecialchars($category_name) ?>
+            </span>
         </div>
     </div>
     

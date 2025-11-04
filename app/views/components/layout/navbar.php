@@ -15,11 +15,32 @@
 
       <!-- Menu trái -->
       <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-        <li class="nav-item mx-1">
-          <a class="nav-link active" href="/home">
+        <li class="nav-item dropdown mx-1">
+          <a class="nav-link active dropdown-toggle" href="/home" id="homeDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
             <i class="fa-solid fa-house"></i>
             <span class="d-none d-lg-inline">Home</span>
           </a>
+          <ul class="dropdown-menu" aria-labelledby="homeDropdown">
+            <li><a class="dropdown-item" href="/home"><i class="fas fa-th-large me-2"></i>Tất cả</a></li>
+            <li><hr class="dropdown-divider"></li>
+            <?php
+            try {
+              require_once __DIR__ . '/../../../models/PostCategory.php';
+              $categoryModel = new PostCategory();
+              $categories = $categoryModel->getAll();
+              if ($categories && is_array($categories)) {
+                foreach ($categories as $cat) {
+                  $icon = ['fa-heart', 'fa-book', 'fa-gamepad'][$cat['CategoryID'] - 1] ?? 'fa-tag';
+                  echo '<li><a class="dropdown-item" href="/home?category=' . $cat['CategoryID'] . '">';
+                  echo '<i class="fas ' . $icon . ' me-2"></i>' . htmlspecialchars($cat['CategoryName']);
+                  echo '</a></li>';
+                }
+              }
+            } catch (Exception $e) {
+              error_log("Navbar category error: " . $e->getMessage());
+            }
+            ?>
+          </ul>
         </li>
         <li class="nav-item mx-1">
           <a class="nav-link" href="/friends">

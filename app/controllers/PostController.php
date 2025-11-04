@@ -34,9 +34,10 @@ class PostController {
     /**
      * Lấy tất cả bài viết để hiển thị trên trang chủ
      * @param int $userId (optional) - ID của user đang xem để check liked status
+     * @param int $categoryId (optional) - Filter theo category
      * @return array Mảng các bài viết đã được format
      */
-    public function getAllPosts($userId = null) {
+    public function getAllPosts($userId = null, $categoryId = null) {
         try {
             $postModel = new Post(0);
             $postsFromDB = $postModel->getAll();
@@ -44,6 +45,12 @@ class PostController {
             $posts = [];
             if ($postsFromDB && is_array($postsFromDB)) {
                 foreach ($postsFromDB as $row) {
+                    // Filter by category if specified
+                    if ($categoryId !== null && isset($row['CategoryID'])) {
+                        if ($row['CategoryID'] != $categoryId) {
+                            continue; // Skip posts that don't match category
+                        }
+                    }
                     $posts[] = $this->formatPostData($row, $userId);
                 }
             }
@@ -426,7 +433,9 @@ class PostController {
             'like_count' => $row['LikeCount'] ?? 0,
             'comment_count' => $row['CommentCount'] ?? 0,
             'created_at' => $createdAt,
-            'user_liked' => $userLiked
+            'user_liked' => $userLiked,
+            'category_id' => $row['CategoryID'] ?? 1,
+            'category_name' => $row['CategoryName'] ?? 'Cuộc sống'
         ];
     }
     

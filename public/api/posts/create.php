@@ -41,6 +41,7 @@ if (!$input) {
 
 $content = trim($input['content'] ?? '');
 $imageURLs = $input['image_urls'] ?? []; // Array of uploaded image URLs
+$categoryID = (int)($input['category_id'] ?? 1); // Default category = 1
 
 // Validate content
 if (empty($content)) {
@@ -75,7 +76,7 @@ if (!$authorID) {
 
 // Create post object
 try {
-    $post = new Post($authorID, $content);
+    $post = new Post($authorID, $content, null, $categoryID);
     
     // Save to database via stored procedure
     $result = $post->create();

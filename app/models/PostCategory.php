@@ -21,11 +21,12 @@ class PostCategory {
     // Functions
     public function create() {
         $query = "INSERT INTO PostCategory (CategoryName) VALUES (?)";
-        return $this->db->executeQuery($query, [$this->categoryName]);
+        return $this->db->execute($query, [$this->categoryName]);
     }
 
     public function getAll() {
-        return $this->db->executeQuery("SELECT * FROM PostCategory");
+        $query = "SELECT CategoryID, CategoryName FROM PostCategory ORDER BY CategoryID";
+        return $this->db->select($query);
     }
 }
 ?>

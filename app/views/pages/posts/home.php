@@ -11,7 +11,6 @@ require_once __DIR__ . '/../../../../core/Helpers.php';
 require_auth();
 
 // session_start() already called in public/index.php
-ob_start();
 
 // Load Controller thay vì Model
 require_once __DIR__ . '/../../../controllers/PostController.php';
@@ -19,9 +18,12 @@ require_once __DIR__ . '/../../../controllers/PostController.php';
 // Lấy userId từ session
 $userId = $_SESSION['user_id'] ?? null;
 
-// Lấy posts qua Controller - tất cả logic đã được xử lý ở đây
+// Lấy category filter từ URL (nếu có)
+$categoryId = isset($_GET['category']) ? (int)$_GET['category'] : null;
+
+// Lấy posts qua Controller - với category filter
 $postController = new PostController();
-$posts = $postController->getAllPosts($userId);
+$posts = $postController->getAllPosts($userId, $categoryId);
 
 // Load all images for each post
 require_once __DIR__ . '/../../../models/Image.php';
@@ -30,6 +32,35 @@ foreach ($posts as &$post) {
     $post['images'] = $imageModel->getByPostId($post['post_id']);
 }
 unset($post); // Break reference
+
+// Get current user info for create post section
+$currentUser = 'User';
+$userInitial = 'U';
+$userAvatar = '';
+
+try {
+    require_once __DIR__ . '/../../../../core/Database.php';
+    $db = new Database();
+    $userResult = $db->select(
+        "SELECT a.Username, p.FullName, p.AvatarURL 
+         FROM Account a 
+         LEFT JOIN Profile p ON a.AccountID = p.AccountID 
+         WHERE a.AccountID = ?", 
+        [$userId]
+    );
+    
+    if ($userResult && isset($userResult[0])) {
+        $username = $userResult[0]['Username'] ?? 'User';
+        $fullName = $userResult[0]['FullName'] ?? '';
+        $userAvatar = $userResult[0]['AvatarURL'] ?? '';
+        
+        // Priority: FullName > Username
+        $currentUser = !empty($fullName) ? $fullName : $username;
+        $userInitial = strtoupper(substr($currentUser, 0, 1));
+    }
+} catch (Exception $e) {
+    error_log("Home page user info error: " . $e->getMessage());
+}
 ?>
 
 <!DOCTYPE html>
@@ -42,10 +73,15 @@ unset($post); // Break reference
     <!-- CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="/assets/css/variables.css" rel="stylesheet">
+    <link href="/assets/css/global.css" rel="stylesheet">
+    <link href="/assets/css/layout.css" rel="stylesheet">
     <link href="/assets/css/theme.css" rel="stylesheet">
     <link href="/assets/css/posts.css" rel="stylesheet">
 </head>
 <body>
+    <!-- Navbar -->
+    <?php include __DIR__ . '/../../components/layout/navbar.php'; ?>
 
     <!-- Main Content -->
     <div class="main-container">
@@ -87,11 +123,15 @@ unset($post); // Break reference
                     <form id="create-post-form">
                         <div class="d-flex align-items-center mb-3">
                             <div class="bg-primary rounded-circle d-flex align-items-center justify-content-center me-3" 
-                                 style="width: 40px; height: 40px;">
-                                <span class="text-white fw-bold"><?= strtoupper(substr($_SESSION['username'] ?? 'U', 0, 1)) ?></span>
+                                 style="width: 40px; height: 40px; overflow: hidden;">
+                                <?php if (!empty($userAvatar)): ?>
+                                    <img src="<?= htmlspecialchars($userAvatar) ?>" alt="Avatar" style="width: 100%; height: 100%; object-fit: cover;">
+                                <?php else: ?>
+                                    <span class="text-white fw-bold"><?= $userInitial ?></span>
+                                <?php endif; ?>
                             </div>
                             <div>
-                                <h6 class="mb-0"><?= htmlspecialchars($_SESSION['username'] ?? 'User') ?></h6>
+                                <h6 class="mb-0"><?= htmlspecialchars($currentUser) ?></h6>
                                 <small class="text-muted">Công khai</small>
                             </div>
                         </div>
@@ -100,6 +140,39 @@ unset($post); // Break reference
                                   id="post-content-textarea"
                                   name="content"
                                   style="resize: none; box-shadow: none;"></textarea>
+                        
+                        <!-- Category Selection -->
+                        <div class="mt-3">
+                            <label class="form-label small text-muted mb-2">
+                                <i class="fas fa-tag me-1"></i>Danh mục
+                            </label>
+                            <select class="form-select" name="category_id" id="post-category-select">
+                                <?php
+                                // Load categories from database
+                                try {
+                                    require_once __DIR__ . '/../../../models/PostCategory.php';
+                                    $categoryModel = new PostCategory();
+                                    $categories = $categoryModel->getAll();
+                                    if ($categories && is_array($categories) && count($categories) > 0) {
+                                        foreach ($categories as $cat) {
+                                            $categoryID = $cat['CategoryID'] ?? 0;
+                                            $categoryName = $cat['CategoryName'] ?? '';
+                                            if ($categoryID && $categoryName) {
+                                                echo '<option value="' . $categoryID . '">' . htmlspecialchars($categoryName) . '</option>';
+                                            }
+                                        }
+                                    } else {
+                                        // Fallback categories if database fails
+                                        echo '<option value="1">Chung</option>';
+                                    }
+                                } catch (Exception $e) {
+                                    // Fallback if there's an error
+                                    echo '<option value="1">Chung</option>';
+                                    error_log("Category load error: " . $e->getMessage());
+                                }
+                                ?>
+                            </select>
+                        </div>
                         
                         <!-- Image Preview Area -->
                         <div id="image-preview-container" class="mt-3" style="display: none;">
@@ -183,10 +256,3 @@ unset($post); // Break reference
     </script>
 </body>
 </html>
-
-<?php
-// Lấy nội dung buffer
-$content = ob_get_clean();
-
-// Áp dụng layout
-require_once __DIR__ . '/../../layouts/main.php';

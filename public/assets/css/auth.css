@@ -3,7 +3,7 @@
   --card-radius: 1rem;
 }
 .auth-page{
-  background: linear-gradient(180deg, #f8fafc, #eef2f7);
+  background: #f8fafc;
   min-height: 100vh;
 }
 .card{
