@@ -6,9 +6,19 @@
 
 $uri = urldecode(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH));
 
-// Serve static files directly (CSS, JS, images)
-if ($uri !== '/' && file_exists(__DIR__ . $uri)) {
-    return false; // Let PHP built-in server handle static files
+// Serve static files directly (CSS, JS, images, uploads)
+// Check in both root and public directory
+if ($uri !== '/') {
+    $possiblePaths = [
+        __DIR__ . $uri,                    // Root directory
+        __DIR__ . '/public' . $uri,        // Public directory
+    ];
+    
+    foreach ($possiblePaths as $path) {
+        if (file_exists($path) && is_file($path)) {
+            return false; // Let PHP built-in server handle static files
+        }
+    }
 }
 
 // Load Router class

@@ -67,8 +67,9 @@ $filepath = $uploadDir . $filename;
 
 // Move uploaded file
 if (move_uploaded_file($file['tmp_name'], $filepath)) {
-    // Return relative URL
-    $imageURL = '/WEB-SN/public/uploads/posts/' . $filename;
+    // Return relative URL that works with any setup
+    // Path from web root: /uploads/posts/filename.jpg
+    $imageURL = '/uploads/posts/' . $filename;
     
     echo json_encode([
         'success' => true,
