@@ -84,13 +84,35 @@ body {
     z-index: 10 !important;
 }
 
+/* Tablet - Ẩn sidebar phải */
 @media (max-width: 1200px) {
     .content-grid {
-        grid-template-columns: 1fr;
-        gap: 1.5rem;
+        grid-template-columns: 240px 1fr !important;
+        gap: 1rem !important;
+    }
+    .right-sidebar {
+        display: none !important;
+    }
+    .left-sidebar {
+        width: 240px !important;
+        min-width: 240px !important;
+    }
+}
+
+/* Mobile - Ẩn tất cả sidebar */
+@media (max-width: 992px) {
+    .content-grid {
+        grid-template-columns: 1fr !important;
+        gap: 0 !important;
     }
     .left-sidebar, .right-sidebar {
-        display: none;
+        display: none !important;
+    }
+    .main-container {
+        padding: 1rem 0 !important;
+    }
+    .center-feed {
+        padding: 0 !important;
     }
 }
 
@@ -477,20 +499,51 @@ body {
 }
 
 /* ==============================================
-   RESPONSIVE DESIGN
+   RESPONSIVE DESIGN - Mobile Small
    ============================================== */
 @media (max-width: 768px) {
     .main-container {
-        padding: 1rem 0.5rem;
+        padding: 0.5rem 0 !important;
     }
     
     .tech-card,
     .sidebar-card {
-        padding: 1rem;
-        border-radius: var(--border-radius);
+        padding: 0.875rem;
+        border-radius: 0;
+        margin-bottom: 0.5rem;
     }
     
     .stats-grid {
         grid-template-columns: 1fr;
+    }
+    
+    /* Navbar trên mobile */
+    .navbar {
+        padding: 0.5rem 1rem !important;
+    }
+    
+    .navbar-brand {
+        font-size: 1.25rem !important;
+    }
+    
+    .navbar-brand i {
+        font-size: 1.5rem !important;
+    }
+    
+    .navbar .nav-link {
+        padding: 0.75rem 1rem !important;
+        min-height: 44px; /* Touch-friendly */
+    }
+    
+    /* Dropdown menu mobile */
+    .dropdown-menu {
+        width: 100vw !important;
+        max-width: 300px !important;
+        margin: 0 !important;
+    }
+    
+    .dropdown-item {
+        padding: 0.875rem 1rem !important;
+        font-size: 1rem !important;
     }
 }

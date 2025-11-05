@@ -311,25 +311,48 @@
 /* RESPONSIVE POSTS */
 @media (max-width: 768px) {
     .post-card {
-        border-radius: var(--border-radius);
-        margin-bottom: 1rem;
+        border-radius: 0;
+        margin-bottom: 0.5rem;
+        border-left: none;
+        border-right: none;
     }
     
     .post-header,
     .post-content,
     .post-actions,
     .comments-section {
-        padding: 1rem;
+        padding: 0.875rem;
     }
     
     .create-post-card {
-        padding: 1rem;
-        border-radius: var(--border-radius);
+        padding: 0.875rem;
+        border-radius: 0;
+        border-left: none;
+        border-right: none;
+        margin-bottom: 0.5rem;
+    }
+    
+    /* Post images trên mobile */
+    .post-images {
+        margin: 0 -0.875rem;
+    }
+    
+    .post-image {
+        border-radius: 0;
     }
     
     .action-btn {
-        padding: 0.5rem;
+        padding: 0.75rem 0.5rem;
         font-size: 0.9rem;
+        min-height: 44px; /* Touch-friendly size */
+    }
+    
+    .action-btn i {
+        font-size: 1.2rem;
+    }
+    
+    .action-btn span {
+        font-size: 0.85rem;
     }
 }
 
@@ -459,20 +482,34 @@
 /* Responsive Carousel */
 @media (max-width: 768px) {
     .post-carousel {
-        min-height: 300px;
+        min-height: 250px;
+        margin: 0 -0.875rem;
     }
     
     .carousel-slide img {
-        max-height: 400px;
+        max-height: 350px;
+        border-radius: 0;
     }
     
     .carousel-nav {
-        width: 28px;
-        height: 28px;
+        width: 35px;
+        height: 35px;
+        font-size: 1rem;
     }
     
-    .carousel-nav i {
-        font-size: 14px;
+    .carousel-indicators {
+        bottom: 8px;
+    }
+    
+    .carousel-indicators .dot {
+        width: 5px;
+        height: 5px;
+    }
+    
+    .carousel-nav {
+        width: 35px;
+        height: 35px;
+        font-size: 1rem;
     }
     
     .carousel-nav-prev {
