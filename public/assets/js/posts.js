@@ -740,4 +740,34 @@ window.app = window.socialApp;
 window.SocialApp = SocialApp;
 window.PostManager = PostManager;
 
+// Xử lý lưu bài viết
+document.addEventListener('click', function(e) {
+    if (e.target.closest('.save-post-btn')) {
+        e.preventDefault();
+        const btn = e.target.closest('.save-post-btn');
+        const postId = btn.dataset.postId;
+        
+        fetch('/api/posts/save.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ post_id: postId })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                const icon = btn.querySelector('i');
+                if (data.saved) {
+                    icon.classList.remove('far');
+                    icon.classList.add('fas');
+                } else {
+                    icon.classList.remove('fas');
+                    icon.classList.add('far');
+                }
+                alert(data.message);
+            }
+        })
+        .catch(err => console.error('Save error:', err));
+    }
+});
+
 })(); // End IIFE

@@ -21,7 +21,10 @@
             <span class="d-none d-lg-inline">Home</span>
           </a>
           <ul class="dropdown-menu" aria-labelledby="homeDropdown">
-            <li><a class="dropdown-item" href="/home"><i class="fas fa-th-large me-2"></i>Tất cả</a></li>
+            <li><a class="dropdown-item" href="#" id="createCategoryBtn"><i class="fas fa-plus me-2"></i>Tạo danh mục</a></li>
+            <li><hr class="dropdown-divider"></li>
+            <li><a class="dropdown-item" href="/home"><i class="fas fa-home me-2"></i>Tất cả</a></li>
+            <li><a class="dropdown-item" href="/home?saved=1"><i class="fas fa-bookmark me-2"></i>Đã lưu</a></li>
             <li><hr class="dropdown-divider"></li>
             <?php
             try {
@@ -30,9 +33,8 @@
               $categories = $categoryModel->getAll();
               if ($categories && is_array($categories)) {
                 foreach ($categories as $cat) {
-                  $icon = ['fa-heart', 'fa-book', 'fa-gamepad'][$cat['CategoryID'] - 1] ?? 'fa-tag';
                   echo '<li><a class="dropdown-item" href="/home?category=' . $cat['CategoryID'] . '">';
-                  echo '<i class="fas ' . $icon . ' me-2"></i>' . htmlspecialchars($cat['CategoryName']);
+                  echo htmlspecialchars($cat['CategoryName']);
                   echo '</a></li>';
                 }
               }
@@ -74,12 +76,6 @@
           </a>
         </li>
         <li class="nav-item mx-1">
-          <a class="nav-link" href="/settings">
-            <i class="fa-solid fa-gear"></i>
-            <span class="d-none d-lg-inline">Cài đặt</span>
-          </a>
-        </li>
-        <li class="nav-item mx-1">
           <a class="nav-link" href="/auth/logout" onclick="return confirm('Bạn có chắc muốn đăng xuất?')">
             <i class="fa-solid fa-sign-out-alt"></i>
             <span class="d-none d-lg-inline">Đăng xuất</span>
@@ -90,3 +86,68 @@
     </div>
   </div>
 </nav>
+
+<!-- Modal Tạo Danh Mục -->
+<div class="modal fade" id="createCategoryModal" tabindex="-1">
+  <div class="modal-dialog modal-sm">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Tạo danh mục mới</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <input type="text" id="categoryNameInput" class="form-control" placeholder="Tên danh mục" maxlength="50">
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Hủy</button>
+        <button type="button" class="btn btn-primary btn-sm" id="saveCategoryBtn">Tạo</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// Xử lý tạo danh mục
+document.addEventListener('DOMContentLoaded', function() {
+  const createBtn = document.getElementById('createCategoryBtn');
+  const modal = new bootstrap.Modal(document.getElementById('createCategoryModal'));
+  const saveBtn = document.getElementById('saveCategoryBtn');
+  const input = document.getElementById('categoryNameInput');
+
+  if (createBtn) {
+    createBtn.addEventListener('click', function(e) {
+      e.preventDefault();
+      input.value = '';
+      modal.show();
+    });
+  }
+
+  if (saveBtn) {
+    saveBtn.addEventListener('click', async function() {
+      const name = input.value.trim();
+      if (!name) {
+        alert('Vui lòng nhập tên danh mục');
+        return;
+      }
+
+      try {
+        const response = await fetch('/api/categories/create.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name: name })
+        });
+
+        const data = await response.json();
+        if (data.success) {
+          modal.hide();
+          location.reload();
+        } else {
+          alert(data.message || 'Lỗi khi tạo danh mục');
+        }
+      } catch (error) {
+        alert('Lỗi kết nối: ' + error.message);
+      }
+    });
+  }
+});
+</script>

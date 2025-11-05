@@ -107,16 +107,19 @@ $hasMultipleImages = $imageCount > 1;
                     <i class="fas fa-ellipsis-h"></i>
                 </button>
                 <ul class="dropdown-menu dropdown-menu-end">
-                    <li><a class="dropdown-item" href="#"><i class="fas fa-bookmark me-2"></i>Lưu bài viết</a></li>
-                    <li><a class="dropdown-item" href="#"><i class="fas fa-flag me-2"></i>Báo cáo</a></li>
+                    <li>
+                        <a class="dropdown-item save-post-btn" href="#" data-post-id="<?= $post_id ?>">
+                            <i class="far fa-bookmark me-2"></i>Lưu bài viết
+                        </a>
+                    </li>
                 </ul>
             </div>
         </div>
         
         <!-- Category Badge -->
         <div class="mt-2">
-            <span class="badge bg-<?= $category_color ?> text-white px-3 py-1" style="font-size: 0.75rem;">
-                <i class="fas fa-tag me-1"></i><?= htmlspecialchars($category_name) ?>
+            <span class="badge bg-<?= $category_color ?> text-white px-2 py-1" style="font-size: 0.7rem;">
+                <?= htmlspecialchars($category_name) ?>
             </span>
         </div>
     </div>

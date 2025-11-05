@@ -18,12 +18,58 @@ require_once __DIR__ . '/../../../controllers/PostController.php';
 // Lấy userId từ session
 $userId = $_SESSION['user_id'] ?? null;
 
+// Kiểm tra filter "Đã lưu"
+$showSaved = isset($_GET['saved']) && $_GET['saved'] == 1;
+
+// Lấy search keyword
+$searchKeyword = isset($_GET['search']) ? trim($_GET['search']) : null;
+
 // Lấy category filter từ URL (nếu có)
 $categoryId = isset($_GET['category']) ? (int)$_GET['category'] : null;
 
-// Lấy posts qua Controller - với category filter
-$postController = new PostController();
-$posts = $postController->getAllPosts($userId, $categoryId);
+// Lấy posts
+require_once __DIR__ . '/../../../../core/Database.php';
+$db = new Database();
+
+if ($showSaved) {
+    // Lấy bài viết đã lưu
+    $posts = $db->select(
+        "SELECT p.PostID as post_id, p.Content as content, p.PostTime as created_at,
+                a.Username as username, a.AccountID as author_id,
+                (SELECT COUNT(*) FROM PostLike WHERE PostID = p.PostID) as like_count,
+                (SELECT COUNT(*) FROM Comment WHERE PostID = p.PostID) as comment_count,
+                EXISTS(SELECT 1 FROM PostLike WHERE PostID = p.PostID AND AccountID = ?) as user_liked,
+                pc.CategoryID as category_id, pc.CategoryName as category_name
+         FROM SavedPost sp
+         JOIN Post p ON sp.PostID = p.PostID
+         JOIN Account a ON p.AuthorID = a.AccountID
+         LEFT JOIN PostCategory pc ON p.CategoryID = pc.CategoryID
+         WHERE sp.AccountID = ?
+         ORDER BY sp.SavedTime DESC",
+        [$userId, $userId]
+    );
+} elseif ($searchKeyword) {
+    // Tìm kiếm theo từ khóa
+    $searchPattern = "%{$searchKeyword}%";
+    $posts = $db->select(
+        "SELECT p.PostID as post_id, p.Content as content, p.PostTime as created_at,
+                a.Username as username, a.AccountID as author_id,
+                (SELECT COUNT(*) FROM PostLike WHERE PostID = p.PostID) as like_count,
+                (SELECT COUNT(*) FROM Comment WHERE PostID = p.PostID) as comment_count,
+                EXISTS(SELECT 1 FROM PostLike WHERE PostID = p.PostID AND AccountID = ?) as user_liked,
+                pc.CategoryID as category_id, pc.CategoryName as category_name
+         FROM Post p
+         JOIN Account a ON p.AuthorID = a.AccountID
+         LEFT JOIN PostCategory pc ON p.CategoryID = pc.CategoryID
+         WHERE p.Content LIKE ? OR a.Username LIKE ?
+         ORDER BY p.PostTime DESC",
+        [$userId, $searchPattern, $searchPattern]
+    );
+} else {
+    // Lấy posts thông thường
+    $postController = new PostController();
+    $posts = $postController->getAllPosts($userId, $categoryId);
+}
 
 // Load all images for each post
 require_once __DIR__ . '/../../../models/Image.php';
@@ -93,14 +139,39 @@ try {
 
             <!-- Center Feed -->
             <main class="center-feed">
+                <!-- Search Result Header -->
+                <?php if ($searchKeyword): ?>
+                <div class="tech-card mb-3">
+                    <h5 class="mb-1">
+                        <i class="fas fa-search me-2"></i>
+                        Kết quả tìm kiếm: "<?= htmlspecialchars($searchKeyword) ?>"
+                    </h5>
+                    <p class="text-muted mb-0"><?= count($posts) ?> bài viết</p>
+                    <a href="/home" class="btn btn-sm btn-outline-secondary mt-2">
+                        <i class="fas fa-times me-1"></i>Xóa bộ lọc
+                    </a>
+                </div>
+                <?php endif; ?>
+                
                 <!-- Create Post -->
-                <?php include __DIR__ . '/create-post.php'; ?>
+                <?php if (!$searchKeyword): ?>
+                    <?php include __DIR__ . '/create-post.php'; ?>
+                <?php endif; ?>
 
                 <!-- Posts Feed -->
                 <section class="posts-feed">
-                    <?php foreach ($posts as $post): ?>
-                        <?php include __DIR__ . '/../../components/posts/post-card.php'; ?>
-                    <?php endforeach; ?>
+                    <?php if (count($posts) > 0): ?>
+                        <?php foreach ($posts as $post): ?>
+                            <?php include __DIR__ . '/../../components/posts/post-card.php'; ?>
+                        <?php endforeach; ?>
+                    <?php elseif ($searchKeyword): ?>
+                        <!-- Chỉ hiện "không tìm thấy" khi đang search -->
+                        <div class="tech-card text-center py-5">
+                            <i class="fas fa-search fa-3x text-muted mb-3"></i>
+                            <h5>Không tìm thấy kết quả</h5>
+                            <p class="text-muted">Thử tìm kiếm với từ khóa khác</p>
+                        </div>
+                    <?php endif; ?>
                 </section>
             </main>
 
@@ -143,30 +214,18 @@ try {
                         
                         <!-- Category Selection -->
                         <div class="mt-3">
-                            <label class="form-label small text-muted mb-2">
-                                <i class="fas fa-tag me-1"></i>Danh mục
-                            </label>
-                            <select class="form-select" name="category_id" id="post-category-select">
+                            <select class="form-select form-select-sm" name="category_id" id="post-category-select">
                                 <?php
-                                // Load categories from database
                                 try {
                                     require_once __DIR__ . '/../../../models/PostCategory.php';
                                     $categoryModel = new PostCategory();
                                     $categories = $categoryModel->getAll();
-                                    if ($categories && is_array($categories) && count($categories) > 0) {
+                                    if ($categories && is_array($categories)) {
                                         foreach ($categories as $cat) {
-                                            $categoryID = $cat['CategoryID'] ?? 0;
-                                            $categoryName = $cat['CategoryName'] ?? '';
-                                            if ($categoryID && $categoryName) {
-                                                echo '<option value="' . $categoryID . '">' . htmlspecialchars($categoryName) . '</option>';
-                                            }
+                                            echo '<option value="' . $cat['CategoryID'] . '">' . htmlspecialchars($cat['CategoryName']) . '</option>';
                                         }
-                                    } else {
-                                        // Fallback categories if database fails
-                                        echo '<option value="1">Chung</option>';
                                     }
                                 } catch (Exception $e) {
-                                    // Fallback if there's an error
                                     echo '<option value="1">Chung</option>';
                                     error_log("Category load error: " . $e->getMessage());
                                 }

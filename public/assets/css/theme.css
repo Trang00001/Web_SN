@@ -1,63 +1,87 @@
 /* ==============================================
-   MAIN THEME STYLES - TechConnect
-   Layout, Navigation, Sidebar, Global Components
+   ĐỒ ÁN MẠNG XÃ HỘI - STUDENT PROJECT
+   Simple & Clean Design for Academic Project
    ============================================== */
 
-/* CSS Variables */
+/* CSS Variables - Màu đơn giản, trẻ trung */
 :root {
-    --primary-color: #667eea;
-    --secondary-color: #f093fb;
-    --accent-color: #4facfe;
-    --success-color: #43e97b;
+    --primary-color: #833AB4;        /* Tím MySocial */
+    --secondary-color: #6B2F8F;      /* Tím đậm hơn */
+    --accent-color: #9D50BB;         /* Tím nhạt */
+    --success-color: #4CAF50;
+    --danger-color: #f44336;
     
-    --bg-main: #f5f7fa;
-    --bg-card: rgba(255, 255, 255, 0.9);
-    --bg-card-hover: rgba(255, 255, 255, 0.95);
+    --bg-main: #f0f2f5;              /* Xám nhạt như Facebook */
+    --bg-card: #ffffff;
+    --bg-card-hover: #f8f9fa;
     
-    --shadow-light: 0 4px 20px rgba(102, 126, 234, 0.08);
-    --shadow-medium: 0 8px 32px rgba(102, 126, 234, 0.12);
-    --shadow-heavy: 0 12px 40px rgba(102, 126, 234, 0.16);
+    --shadow-light: 0 1px 3px rgba(0,0,0,0.1);
+    --shadow-medium: 0 2px 8px rgba(0,0,0,0.15);
+    --shadow-heavy: 0 4px 12px rgba(0,0,0,0.2);
     
-    --text-primary: #2d3436;
-    --text-secondary: #636e72;
-    --text-muted: #b2bec3;
+    --text-primary: #1c1e21;
+    --text-secondary: #65676b;
+    --text-muted: #8a8d91;
     
-    --border-radius: 16px;
-    --border-radius-lg: 24px;
-    --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --border-radius: 8px;            /* Bo góc đơn giản */
+    --border-radius-lg: 12px;
+    --transition: all 0.2s ease;     /* Transition đơn giản */
 }
 
 /* ==============================================
-   GLOBAL STYLES
+   GLOBAL STYLES - Đơn giản, dễ đọc
    ============================================== */
 body {
     background: var(--bg-main) !important;
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif !important;
     color: var(--text-primary) !important;
-    line-height: 1.6;
+    line-height: 1.5;
 }
 
 /* ==============================================
    LAYOUT CONTAINER
    ============================================== */
 .main-container {
-    max-width: 1400px;
-    margin: 0 auto;
-    padding: 2rem 1rem;
+    max-width: 1400px !important;
+    margin: 0 auto !important;
+    padding: 2rem 1rem !important;
 }
 
 .content-grid {
-    display: grid;
-    grid-template-columns: 280px 1fr 320px;
-    gap: 2rem;
-    align-items: start;
+    display: grid !important;
+    grid-template-columns: 280px 1fr 320px !important;
+    gap: 2rem !important;
+    min-height: 100vh !important;
 }
 
-.left-sidebar, .right-sidebar {
-    position: sticky;
-    top: 1rem;
-    max-height: calc(100vh - 2rem);
-    overflow-y: auto;
+.left-sidebar {
+    width: 280px !important;
+    min-width: 280px !important;
+    position: -webkit-sticky !important;
+    position: sticky !important;
+    top: 70px !important;
+    height: fit-content !important;
+    max-height: calc(100vh - 90px) !important;
+    overflow-y: auto !important;
+    z-index: 10 !important;
+}
+
+.center-feed {
+    width: 100% !important;
+    min-width: 0 !important;
+    flex: 1 !important;
+}
+
+.right-sidebar {
+    width: 320px !important;
+    min-width: 320px !important;
+    position: -webkit-sticky !important;
+    position: sticky !important;
+    top: 70px !important;
+    height: fit-content !important;
+    max-height: calc(100vh - 90px) !important;
+    overflow-y: auto !important;
+    z-index: 10 !important;
 }
 
 @media (max-width: 1200px) {
@@ -71,79 +95,54 @@ body {
 }
 
 /* ==============================================
-   NAVIGATION BAR
+   NAVIGATION BAR - Đơn giản như Facebook
    ============================================== */
 .modern-navbar {
-    background: rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(20px);
-    border-bottom: 1px solid rgba(102, 126, 234, 0.1);
-    box-shadow: var(--shadow-light);
+    background: #ffffff;
+    border-bottom: 1px solid #e4e6eb;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.1);
     transition: var(--transition);
 }
 
 .navbar-brand {
     color: var(--primary-color);
-    font-weight: 800;
+    font-weight: 700;
     font-size: 1.5rem;
     text-decoration: none;
 }
 
-/* Search Bar */
+/* Search Bar - Đơn giản */
 .search-modern {
-    background: var(--bg-card);
-    border: 1px solid rgba(102, 126, 234, 0.1);
-    border-radius: 50px;
-    padding: 0.75rem 1.5rem;
+    background: #f0f2f5;
+    border: none;
+    border-radius: 20px;
+    padding: 0.6rem 1rem;
     transition: var(--transition);
-    backdrop-filter: blur(10px);
 }
 
 .search-modern:focus {
-    border-color: var(--primary-color);
-    box-shadow: 0 0 20px rgba(102, 126, 234, 0.1);
+    background: #ffffff;
+    box-shadow: 0 0 0 2px var(--primary-color);
     outline: none;
 }
 
 /* ==============================================
-   CARD COMPONENTS
+   CARD COMPONENTS - Đơn giản, sạch sẽ
    ============================================== */
 .tech-card,
 .sidebar-card {
     background: var(--bg-card);
-    backdrop-filter: blur(20px);
-    border-radius: var(--border-radius-lg);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: var(--border-radius);
+    border: 1px solid #e4e6eb;
     box-shadow: var(--shadow-light);
-    padding: 1.5rem;
-    margin-bottom: 1.5rem;
-    transition: var(--transition);
-    position: relative;
-    overflow: hidden;
-}
-
-.tech-card::before,
-.sidebar-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 4px;
-    background: var(--primary-color);
-    opacity: 0;
+    padding: 1rem;
+    margin-bottom: 1rem;
     transition: var(--transition);
 }
 
 .tech-card:hover,
 .sidebar-card:hover {
-    transform: translateY(-8px);
-    box-shadow: var(--shadow-heavy);
-    background: var(--bg-card-hover);
-}
-
-.tech-card:hover::before,
-.sidebar-card:hover::before {
-    opacity: 1;
+    box-shadow: var(--shadow-medium);
 }
 
 /* ==============================================
@@ -208,9 +207,8 @@ body {
 
 .menu-item:hover,
 .sidebar-item:hover {
-    background: var(--primary-color);
-    color: white !important;
-    transform: translateX(8px);
+    background: #f0f2f5;
+    color: var(--primary-color) !important;
     text-decoration: none;
 }
 
@@ -220,22 +218,22 @@ body {
 }
 
 .menu-item i {
-    width: 40px;
-    height: 40px;
-    border-radius: 12px;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-right: 1rem;
-    background: var(--accent-color);
-    color: white;
+    margin-right: 0.75rem;
+    background: #e4e6eb;
+    color: var(--text-primary);
     transition: var(--transition);
 }
 
 .menu-item:hover i,
 .sidebar-item:hover i {
-    background: rgba(255, 255, 255, 0.2);
-    transform: scale(1.1);
+    background: var(--primary-color);
+    color: white;
 }
 
 /* ==============================================
@@ -249,9 +247,22 @@ body {
 }
 
 .stat-card {
-    background: var(--success-color);
+    background: var(--primary-color);
     color: white;
-    padding: 1.5rem;
+    padding: 1rem;
+    border-radius: var(--border-radius);
+    text-align: center;
+    transition: var(--transition);
+}
+
+.stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-medium);
+}
+
+.stat-number {
+    font-size: 1.5rem;
+    font-weight: 700;
     border-radius: var(--border-radius);
     text-align: center;
     transition: var(--transition);

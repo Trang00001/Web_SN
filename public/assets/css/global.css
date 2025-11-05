@@ -1,4 +1,4 @@
-/* global.css */
+/* global.css - Đồ án đơn giản */
 
 /* Reset cơ bản */
 * {
@@ -8,36 +8,38 @@
 }
 
 body {
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background-color: #f5f6f7;
-  color: #333;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+  background-color: var(--bg-main);
+  color: var(--text-primary);
   line-height: 1.5;
 }
 
 /* Link mặc định */
 a {
   text-decoration: none;
-  color: #007bff;
+  color: var(--primary-color);
 }
 
 a:hover {
-  text-decoration: underline;
+  text-decoration: none;
+  color: var(--secondary-color);
 }
 
-/* Auth page */
+/* Auth page - Đơn giản */
 body.auth-page {
   display: flex;
   align-items: center;
   justify-content: center;
   min-height: 100vh;
-  background: #833AB4;
+  background: var(--primary-color);
 }
 
 .auth-container {
   background: #fff;
-  border-radius: 12px;
+  border-radius: var(--border-radius);
   padding: 2rem;
   width: 100%;
   max-width: 400px;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+  box-shadow: var(--shadow-heavy);
+  border: 1px solid #e4e6eb;
 }
