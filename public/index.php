@@ -68,6 +68,12 @@ $router->get('/login', function(){
 $router->get('/register', function(){ 
     require __DIR__ . '/../app/views/pages/auth/register.php'; 
 });
+$router->get('/forgot', function(){ 
+    require __DIR__ . '/../app/views/pages/auth/forgot_password.php'; 
+});
+$router->get('/auth/forgot', function(){ 
+    require __DIR__ . '/../app/views/pages/auth/forgot_password.php'; 
+});
 
 // Auth API endpoints - POST requests
 $router->post('/auth/login', function() {

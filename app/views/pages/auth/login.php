@@ -18,7 +18,7 @@ $csrf = $_SESSION['csrf_token'];
         <div class="card shadow-sm rounded-4">
           <div class="card-body p-4">
             <h1 class="h4 mb-4 text-center">Đăng nhập</h1>
-            <form id="formLogin" method="POST" action="<?php echo htmlspecialchars(defined('BASE_URL') ? BASE_URL : ''); ?>/auth/login" novalidate>
+            <form id="formLogin" method="POST" action="/auth/login" novalidate>
               <input type="hidden" name="csrf" value="<?php echo htmlspecialchars($csrf); ?>">
               <div class="mb-3">
                 <label for="email" class="form-label">Email</label>
@@ -30,8 +30,8 @@ $csrf = $_SESSION['csrf_token'];
               </div>
               <div class="d-grid gap-2">
                 <button class="btn btn-primary" type="submit">Đăng nhập</button>
-                <a class="btn btn-outline-secondary" href="<?php echo htmlspecialchars(defined('BASE_URL') ? BASE_URL : ''); ?>/auth/register">Tạo tài khoản</a>
-                <a class="btn btn-link" href="<?php echo htmlspecialchars(defined('BASE_URL') ? BASE_URL : ''); ?>/auth/forgot">Quên mật khẩu?</a>
+                <a class="btn btn-outline-secondary" href="/register">Tạo tài khoản</a>
+                <a class="btn btn-link" href="/forgot">Quên mật khẩu?</a>
               </div>
             </form>
           </div>

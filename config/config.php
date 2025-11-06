@@ -15,5 +15,8 @@ if (strpos($scriptPath, '/public') !== false) {
     define("BASE_URL", $basePath);
 }
 
+// Assets URL
+define("ASSETS_URL", (defined('BASE_URL') ? BASE_URL : '') . '/assets');
+
 // Thiết lập charset mặc định
 define("DB_CHARSET", "utf8mb4");

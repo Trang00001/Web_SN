@@ -18,7 +18,7 @@ $csrf = $_SESSION['csrf_token'];
         <div class="card shadow-sm rounded-4">
           <div class="card-body p-4">
             <h1 class="h4 mb-4 text-center">Đặt lại mật khẩu</h1>
-            <form id="formForgot" method="POST" action="<?php echo htmlspecialchars(defined('BASE_URL') ? BASE_URL : ''); ?>/auth/forgot" novalidate>
+            <form id="formForgot" method="POST" action="/auth/forgot" novalidate>
               <input type="hidden" name="csrf" value="<?php echo htmlspecialchars($csrf); ?>">
               <div class="mb-3">
                 <label for="fg_email" class="form-label">Email đã đăng ký</label>
@@ -36,7 +36,7 @@ $csrf = $_SESSION['csrf_token'];
               </div>
               <div class="d-grid gap-2 mt-3">
                 <button class="btn btn-primary" type="submit">Cập nhật mật khẩu</button>
-                <a class="btn btn-outline-secondary" href="<?php echo htmlspecialchars(defined('BASE_URL') ? BASE_URL : ''); ?>/auth/login">Quay lại đăng nhập</a>
+                <a class="btn btn-outline-secondary" href="/login">Quay lại đăng nhập</a>
               </div>
             </form>
           </div>
@@ -45,5 +45,50 @@ $csrf = $_SESSION['csrf_token'];
     </div>
   </div>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <?php include __DIR__ . '/../../components/layout/toast.php'; ?>
+  <script src="/assets/js/validation.js"></script>
+  <script>
+    window.attachBasicValidation('#formForgot', { confirm: true });
+
+    document.getElementById('formForgot').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const form = e.target;
+    
+      const formData = new FormData(form);
+      fetch(form.action, {
+        method: 'POST',
+        body: formData
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          if (typeof showSuccessToast === 'function') {
+            showSuccessToast(data.message);
+          } else {
+            alert(data.message);
+          }
+          if (data.redirect) {
+            setTimeout(() => {
+              window.location.href = data.redirect;
+            }, 1500);
+          }
+        } else {
+          if (typeof showErrorToast === 'function') {
+            showErrorToast(data.message);
+          } else {
+            alert('Lỗi: ' + data.message);
+          }
+        }
+      })
+      .catch(error => {
+        console.error('Forgot password error:', error);
+        if (typeof showErrorToast === 'function') {
+          showErrorToast('Có lỗi xảy ra, vui lòng thử lại');
+        } else {
+          alert('Có lỗi xảy ra: ' + error.message);
+        }
+      });
+    });
+  </script>
 </body>
 </html>

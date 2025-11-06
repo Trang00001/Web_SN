@@ -31,11 +31,38 @@ class Account {
 
     // -------- Core actions --------
 
-    // Đăng ký bằng stored procedure
+    // Đăng ký bằng stored procedure hoặc fallback INSERT trực tiếp
     public function register() {
-        return $this->db->callProcedureExecute("sp_RegisterUser", [
-            $this->email, $this->passwordHash, $this->username
-        ]);
+        try {
+            // Thử dùng stored procedure trước
+            return $this->db->callProcedureExecute("sp_RegisterUser", [
+                $this->email, $this->passwordHash, $this->username
+            ]);
+        } catch (Exception $e) {
+            // Nếu stored procedure fail, kiểm tra lại và dùng INSERT trực tiếp
+            $existingEmail = $this->findByEmail($this->email);
+            $existingUsername = $this->findByUsername($this->username);
+            
+            if (!empty($existingEmail) && count($existingEmail) > 0) {
+                throw new Exception('Email or username already exists');
+            }
+            
+            if (!empty($existingUsername) && count($existingUsername) > 0) {
+                throw new Exception('Email or username already exists');
+            }
+            
+            // INSERT trực tiếp nếu không có duplicate
+            $result = $this->db->execute(
+                "INSERT INTO Account (Email, PasswordHash, Username) VALUES (?, ?, ?)",
+                [$this->email, $this->passwordHash, $this->username]
+            );
+            
+            if ($result > 0) {
+                return true;
+            } else {
+                throw new Exception('Failed to register user');
+            }
+        }
     }
 
     // Đăng nhập: trả về bản ghi người dùng nếu đúng
@@ -54,9 +81,18 @@ class Account {
         }
     }
 
-    // Lấy user theo email
+    // Lấy user theo email (case-insensitive)
     public function findByEmail($email) {
-        return $this->db->select("SELECT * FROM Account WHERE Email = ?", [$email]);
+        // Normalize email to lowercase for comparison
+        $email = strtolower(trim($email));
+        return $this->db->select("SELECT * FROM Account WHERE LOWER(Email) = ?", [$email]);
+    }
+
+    // Lấy user theo username (case-insensitive)
+    public function findByUsername($username) {
+        // Normalize username - check both exact match and case-insensitive
+        $username = trim($username);
+        return $this->db->select("SELECT * FROM Account WHERE LOWER(Username) = ?", [strtolower($username)]);
     }
 
     // Lấy user theo ID
