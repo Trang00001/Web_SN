@@ -116,98 +116,103 @@ class AuthController {
                 $email = strtolower(trim($email));
                 $username = trim($username);
                 
-                // Kiểm tra email/username đã tồn tại trước khi đăng ký
-                $acc = new Account();
+                // Đăng ký tài khoản mới - để stored procedure xử lý duplicate check
+                // (Tránh race condition khi kiểm tra trước rồi mới insert)
+                $hash = password_hash($password, PASSWORD_DEFAULT);
+                $acc = new Account($email, $hash, $username);
                 
-                // Kiểm tra email - sử dụng LOWER() trong SQL để case-insensitive
-                $existingEmail = $acc->findByEmail($email);
-                
-                // Debug: Log để kiểm tra
-                if (!empty($existingEmail) && is_array($existingEmail)) {
-                    error_log("Email exists check - Found: " . json_encode($existingEmail[0] ?? []));
-                }
-                
-                if (!empty($existingEmail) && is_array($existingEmail) && count($existingEmail) > 0) {
-                    $response['message'] = "Email này đã được sử dụng.";
-                } else {
-                    // Kiểm tra username (case-insensitive)
-                    $existingUsername = $acc->findByUsername($username);
+                try {
+                    error_log("DEBUG register - Bắt đầu gọi acc->register() cho email: $email, username: $username");
+                    $result = $acc->register();
+                    error_log("DEBUG register - acc->register() trả về: " . ($result ? 'true' : 'false'));
                     
-                    if (!empty($existingUsername) && is_array($existingUsername) && count($existingUsername) > 0) {
-                        $response['message'] = "Tên người dùng này đã được sử dụng.";
+                    if ($result === true) {
+                        // Đăng ký thành công - không auto login, chuyển về trang đăng nhập
+                        $response['success'] = true;
+                        $response['message'] = "Đăng ký thành công! Vui lòng đăng nhập.";
+                        $response['redirect'] = '/login';
+                        error_log("DEBUG register - ✅ ĐĂNG KÝ THÀNH CÔNG cho email: $email, username: $username");
+                        error_log("DEBUG register - Response sau khi set success: " . json_encode($response));
                     } else {
-                        // Double check: Query trực tiếp để chắc chắn
-                        require_once __DIR__ . '/../../core/Database.php';
-                        $db = new Database();
-                        $doubleCheckEmail = $db->select("SELECT AccountID FROM Account WHERE LOWER(Email) = ?", [$email]);
-                        $doubleCheckUsername = $db->select("SELECT AccountID FROM Account WHERE LOWER(Username) = ?", [strtolower($username)]);
-                        
-                        if (!empty($doubleCheckEmail) && count($doubleCheckEmail) > 0) {
-                            $response['message'] = "Email này đã được sử dụng.";
-                        } elseif (!empty($doubleCheckUsername) && count($doubleCheckUsername) > 0) {
-                            $response['message'] = "Tên người dùng này đã được sử dụng.";
+                        $response['message'] = "Không thể đăng ký. Vui lòng thử lại.";
+                        error_log("DEBUG register - ❌ register() trả về false cho email: $email");
+                    }
+                } catch (Exception $regException) {
+                    // If stored procedure throws exception, it means email/username exists
+                    $regMsg = $regException->getMessage();
+                    error_log("DEBUG register - ⚠️ Exception trong register(): " . $regMsg);
+                    error_log("DEBUG register - Response trước khi xử lý exception: " . json_encode($response));
+                    
+                    // Chỉ set message nếu chưa đăng ký thành công
+                    if (!$response['success']) {
+                        if (stripos($regMsg, 'Email or username already exists') !== false || 
+                            stripos($regMsg, 'Duplicate entry') !== false ||
+                            stripos($regMsg, 'already exists') !== false ||
+                            stripos($regMsg, 'Duplicate') !== false) {
+                            $response['message'] = "Email hoặc tên người dùng đã tồn tại.";
+                            error_log("DEBUG register - Set message: Email hoặc tên người dùng đã tồn tại.");
                         } else {
-                            // Đăng ký tài khoản mới
-                            $hash = password_hash($password, PASSWORD_DEFAULT);
-                            $acc = new Account($email, $hash, $username);
-                            
-                            try {
-                                $acc->register();
-                                
-                                // Auto login after register
-                                $_SESSION['user_email'] = $email;
-                                $_SESSION['user_name']  = $username;
-                                
-                                $response['success'] = true;
-                                $response['message'] = "Đăng ký thành công!";
-                                $response['redirect'] = (defined('BASE_URL') ? rtrim(BASE_URL, '/') : '') . '/login';
-                            } catch (Exception $regException) {
-                                // If stored procedure throws exception, it means email/username exists
-                                $regMsg = $regException->getMessage();
-                                
-                                if (stripos($regMsg, 'Email or username already exists') !== false || 
-                                    stripos($regMsg, 'Duplicate entry') !== false) {
-                                    $response['message'] = "Email hoặc tên người dùng đã tồn tại.";
-                                } else {
-                                    throw $regException; // Re-throw if it's a different error
-                                }
-                            }
+                            // Re-throw nếu là lỗi khác và chưa đăng ký thành công
+                            error_log("DEBUG register - Re-throw exception: " . $regMsg);
+                            throw $regException;
                         }
+                    } else {
+                        // Nếu đã đăng ký thành công, chỉ log exception nhưng không override response
+                        error_log("DEBUG register - ⚠️ Exception sau khi đăng ký thành công (BỎ QUA): " . $regMsg);
+                        error_log("DEBUG register - Response vẫn giữ nguyên: " . json_encode($response));
                     }
                 }
             } catch (Exception $e) {
+                // Chỉ xử lý exception nếu chưa đăng ký thành công
                 $msg = $e->getMessage();
-                if (stripos($msg, 'Email or username already exists') !== false || 
-                    stripos($msg, 'Duplicate entry') !== false ||
-                    stripos($msg, 'already exists') !== false) {
-                    $response['message'] = "Email hoặc tên người dùng đã tồn tại.";
+                error_log("DEBUG register - ⚠️ Exception ở outer catch: " . $msg);
+                error_log("DEBUG register - Response trước khi xử lý outer exception: " . json_encode($response));
+                
+                if (!$response['success']) {
+                    if (stripos($msg, 'Email or username already exists') !== false || 
+                        stripos($msg, 'Duplicate entry') !== false ||
+                        stripos($msg, 'already exists') !== false) {
+                        $response['message'] = "Email hoặc tên người dùng đã tồn tại.";
+                        error_log("DEBUG register - Set message ở outer catch: Email hoặc tên người dùng đã tồn tại.");
+                    } else {
+                        $response['message'] = "Không thể đăng ký: " . htmlspecialchars($msg);
+                        error_log("DEBUG register - Set message ở outer catch: " . $response['message']);
+                    }
                 } else {
-                    $response['message'] = "Không thể đăng ký: " . htmlspecialchars($msg);
+                    // Nếu đã đăng ký thành công, chỉ log exception nhưng không override response
+                    error_log("DEBUG register - ⚠️ Exception ở outer catch sau khi đăng ký thành công (BỎ QUA): " . $msg);
+                    error_log("DEBUG register - Response vẫn giữ nguyên: " . json_encode($response));
                 }
             }
         }
+        
+        // Log response cuối cùng trước khi trả về
+        error_log("DEBUG register - 📤 Response cuối cùng: " . json_encode($response));
         
         // Check if this is an AJAX request
         $isAjax = !empty($_SERVER['HTTP_X_REQUESTED_WITH']) && 
                   strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest';
         
         if ($isAjax) {
+            // AJAX request - trả về JSON, frontend sẽ xử lý redirect
             header('Content-Type: application/json');
             echo json_encode($response);
             exit;
         } else {
-            // If not AJAX, redirect back to register page with error message
-            if (!$response['success']) {
-                $_SESSION['register_error'] = $response['message'];
-            } else {
+            // Non-AJAX request - redirect trực tiếp
+            if ($response['success'] && isset($response['redirect'])) {
+                // Đăng ký thành công - chuyển về trang đăng nhập
                 $_SESSION['register_success'] = $response['message'];
-                if (isset($response['redirect'])) {
-                    header('Location: ' . $response['redirect']);
-                    exit;
-                }
+                error_log("DEBUG register - ✅ Redirect về: " . $response['redirect']);
+                header('Location: ' . $response['redirect']);
+                exit;
+            } else {
+                // Đăng ký thất bại - quay lại trang đăng ký với thông báo lỗi
+                $_SESSION['register_error'] = $response['message'];
+                error_log("DEBUG register - ❌ Redirect về /register với error: " . $response['message']);
+                header('Location: /register');
+                exit;
             }
-            header('Location: /register');
-            exit;
         }
     }
 
