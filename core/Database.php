@@ -49,6 +49,12 @@ class Database {
         $sql = "CALL $procedureName($placeholders)";
         $stmt = $this->conn->prepare($sql);
 
+        if (!$stmt) {
+            $error = $this->conn->error;
+            error_log("❌ Prepare failed for $procedureName: $error");
+            throw new Exception($error);
+        }
+
         if ($params) {
             $types = str_repeat('s', count($params));
             $stmt->bind_param($types, ...$params);
@@ -56,7 +62,10 @@ class Database {
 
         $success = $stmt->execute();
         if (!$success) {
-            error_log("❌ Lỗi khi gọi $procedureName: " . $stmt->error);
+            $error = $stmt->error;
+            error_log("❌ Lỗi khi gọi $procedureName: $error");
+            $stmt->close();
+            throw new Exception($error);
         }
         $stmt->close();
         return $success;

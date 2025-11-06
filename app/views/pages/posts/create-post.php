@@ -4,13 +4,18 @@
  * Component tạo bài viết mới
  */
 
-$currentUser = $_SESSION['username'] ?? 'User';
+// Use user info from parent file (home.php)
+// Variables: $currentUser, $userInitial, $userAvatar are already set
 ?>
 
 <div class="create-post-card">
     <div class="d-flex align-items-center mb-4">
-        <div class="user-avatar me-3">
-            <?= strtoupper(substr($currentUser, 0, 1)) ?>
+        <div class="user-avatar me-3" style="overflow: hidden;">
+            <?php if (!empty($userAvatar)): ?>
+                <img src="<?= htmlspecialchars($userAvatar) ?>" alt="Avatar" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">
+            <?php else: ?>
+                <?= $userInitial ?>
+            <?php endif; ?>
         </div>
         <div class="flex-grow-1">
             <input type="text" 
@@ -20,27 +25,6 @@ $currentUser = $_SESSION['username'] ?? 'User';
                    data-bs-target="#createPostModal"
                    readonly>
         </div>
-    </div>
-    
-    <div class="d-flex justify-content-around">
-        <button class="create-post-btn" 
-                data-bs-toggle="modal" 
-                data-bs-target="#createPostModal">
-            <i class="fas fa-image me-2"></i>
-            Ảnh/Video
-        </button>
-        <button class="create-post-btn" 
-                data-bs-toggle="modal" 
-                data-bs-target="#createPostModal">
-            <i class="fas fa-smile me-2"></i>
-            Cảm xúc
-        </button>
-        <button class="create-post-btn" 
-                data-bs-toggle="modal" 
-                data-bs-target="#createPostModal">
-            <i class="fas fa-video me-2"></i>
-            Live Stream
-        </button>
     </div>
 </div>
 

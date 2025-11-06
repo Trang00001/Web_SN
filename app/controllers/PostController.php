@@ -12,10 +12,32 @@ require_once __DIR__ . '/../models/PostLike.php';
 class PostController {
     
     /**
+     * Kiểm tra user đã like post chưa
+     * @param int $userId
+     * @param int $postId
+     * @return bool
+     */
+    private function checkUserLiked($userId, $postId) {
+        if (!$userId || !$postId) {
+            return false;
+        }
+        
+        try {
+            $postLike = new PostLike($userId, $postId);
+            return $postLike->isLiked();
+        } catch (Exception $e) {
+            error_log("PostController::checkUserLiked() - Error: " . $e->getMessage());
+            return false;
+        }
+    }
+    
+    /**
      * Lấy tất cả bài viết để hiển thị trên trang chủ
+     * @param int $userId (optional) - ID của user đang xem để check liked status
+     * @param int $categoryId (optional) - Filter theo category
      * @return array Mảng các bài viết đã được format
      */
-    public function getAllPosts() {
+    public function getAllPosts($userId = null, $categoryId = null) {
         try {
             $postModel = new Post(0);
             $postsFromDB = $postModel->getAll();
@@ -23,7 +45,13 @@ class PostController {
             $posts = [];
             if ($postsFromDB && is_array($postsFromDB)) {
                 foreach ($postsFromDB as $row) {
-                    $posts[] = $this->formatPostData($row);
+                    // Filter by category if specified
+                    if ($categoryId !== null && isset($row['CategoryID'])) {
+                        if ($row['CategoryID'] != $categoryId) {
+                            continue; // Skip posts that don't match category
+                        }
+                    }
+                    $posts[] = $this->formatPostData($row, $userId);
                 }
             }
             
@@ -59,16 +87,17 @@ class PostController {
     /**
      * Lấy bài viết theo ID
      * @param int $postId
+     * @param int $userId (optional) - ID của user đang xem để check liked status
      * @return array|null
      */
-    public function getPostById($postId) {
+    public function getPostById($postId, $userId = null) {
         try {
             $postModel = new Post(0);
             $postModel->setPostID($postId);
             $result = $postModel->getById();
             
             if ($result) {
-                return $this->formatPostData($result);
+                return $this->formatPostData($result, $userId);
             }
             
             return null;
@@ -371,9 +400,10 @@ class PostController {
     /**
      * Format dữ liệu post từ database
      * @param array $row
+     * @param int $userId (optional) - ID của user đang xem để check liked status
      * @return array
      */
-    private function formatPostData($row) {
+    private function formatPostData($row, $userId = null) {
         // Fix image URL
         $imageUrl = $row['ImageUrl'] ?? null;
         if ($imageUrl) {
@@ -389,6 +419,12 @@ class PostController {
         // Format time ago
         $createdAt = $this->formatTimeAgo($row['CreatedAt'] ?? $row['PostTime'] ?? null);
         
+        // Check if user liked this post
+        $userLiked = false;
+        if ($userId) {
+            $userLiked = $this->checkUserLiked($userId, $row['PostID']);
+        }
+        
         return [
             'post_id' => $row['PostID'],
             'username' => $row['Username'] ?? 'Unknown User',
@@ -396,7 +432,10 @@ class PostController {
             'media_url' => $imageUrl,
             'like_count' => $row['LikeCount'] ?? 0,
             'comment_count' => $row['CommentCount'] ?? 0,
-            'created_at' => $createdAt
+            'created_at' => $createdAt,
+            'user_liked' => $userLiked,
+            'category_id' => $row['CategoryID'] ?? 1,
+            'category_name' => $row['CategoryName'] ?? 'Cuộc sống'
         ];
     }
     

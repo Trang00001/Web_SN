@@ -1,4 +1,4 @@
-/* global.css */
+/* global.css - Đồ án đơn giản */
 
 /* Reset cơ bản */
 * {
@@ -8,36 +8,62 @@
 }
 
 body {
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background-color: #f5f6f7;
-  color: #333;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+  background-color: var(--bg-main);
+  color: var(--text-primary);
   line-height: 1.5;
 }
 
 /* Link mặc định */
 a {
   text-decoration: none;
-  color: #007bff;
+  color: var(--primary-color);
 }
 
 a:hover {
-  text-decoration: underline;
+  text-decoration: none;
+  color: var(--secondary-color);
 }
 
-/* Auth page */
+/* Auth page - Đơn giản */
 body.auth-page {
   display: flex;
   align-items: center;
   justify-content: center;
   min-height: 100vh;
-  background: linear-gradient(135deg, #833AB4, #FD1D1D, #FCAF45);
+  background: var(--primary-color);
 }
 
 .auth-container {
   background: #fff;
-  border-radius: 12px;
+  border-radius: var(--border-radius);
   padding: 2rem;
   width: 100%;
   max-width: 400px;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+  box-shadow: var(--shadow-heavy);
+  border: 1px solid #e4e6eb;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  body {
+    font-size: 14px;
+  }
+  
+  .auth-container {
+    margin: 1rem;
+    padding: 1.5rem;
+    border-radius: var(--border-radius);
+  }
+  
+  /* Better touch targets */
+  button, .btn {
+    min-height: 44px;
+    padding: 0.75rem 1rem;
+  }
+  
+  /* Prevent zoom on input focus */
+  input, textarea, select {
+    font-size: 16px !important;
+  }
 }

@@ -18,7 +18,19 @@ $csrf = $_SESSION['csrf_token'];
         <div class="card shadow-sm rounded-4">
           <div class="card-body p-4">
             <h1 class="h4 mb-4 text-center">Tạo tài khoản</h1>
-            <form id="formRegister" method="POST" action="<?php echo htmlspecialchars(defined('BASE_URL') ? BASE_URL : ''); ?>/auth/register" novalidate>
+            <?php if (isset($_SESSION['register_error'])): ?>
+              <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <?php echo htmlspecialchars($_SESSION['register_error']); unset($_SESSION['register_error']); ?>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+              </div>
+            <?php endif; ?>
+            <?php if (isset($_SESSION['register_success'])): ?>
+              <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <?php echo htmlspecialchars($_SESSION['register_success']); unset($_SESSION['register_success']); ?>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+              </div>
+            <?php endif; ?>
+            <form id="formRegister" method="POST" action="/auth/register" novalidate>
               <input type="hidden" name="csrf" value="<?php echo htmlspecialchars($csrf); ?>">
               <div class="mb-3">
                 <label for="reg_email" class="form-label">Email</label>
@@ -40,7 +52,7 @@ $csrf = $_SESSION['csrf_token'];
               </div>
               <div class="d-grid gap-2 mt-3">
                 <button class="btn btn-primary" type="submit">Đăng ký</button>
-                <a class="btn btn-outline-secondary" href="<?php echo htmlspecialchars(defined('BASE_URL') ? BASE_URL : ''); ?>/auth/login">Đã có tài khoản</a>
+                <a class="btn btn-outline-secondary" href="/login">Đã có tài khoản</a>
               </div>
                 <div id="registerMsg" class="mt-3"></div>
             </form>
@@ -51,35 +63,81 @@ $csrf = $_SESSION['csrf_token'];
   </div>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <?php include __DIR__ . '/../../components/layout/toast.php'; ?>
-    <script src="<?php echo htmlspecialchars(defined('ASSETS_URL') ? ASSETS_URL : '/assets'); ?>/js/validation.js"></script>
+    <script src="/assets/js/validation.js"></script>
     <script>
       window.attachBasicValidation('#formRegister', { confirm: true });
 
-      document.getElementById('formRegister').addEventListener('submit', function(e) {
+      document.getElementById('formRegister').addEventListener('submit', async function(e) {
         e.preventDefault();
+        e.stopPropagation();
         const form = e.target;
+        const submitBtn = form.querySelector('button[type="submit"]');
+        
+        // Disable submit button to prevent double submission
+        if (submitBtn) {
+          submitBtn.disabled = true;
+          submitBtn.textContent = 'Đang xử lý...';
+        }
       
-        const formData = new FormData(form);
-        fetch(form.action, {
-          method: 'POST',
-          body: formData
-        })
-        .then(res => res.json())
-        .then(data => {
+        try {
+          const formData = new FormData(form);
+          const response = await fetch(form.action, {
+            method: 'POST',
+            body: formData,
+            headers: {
+              'X-Requested-With': 'XMLHttpRequest'
+            }
+          });
+          
+          // Check if response is JSON
+          const contentType = response.headers.get('content-type');
+          if (!contentType || !contentType.includes('application/json')) {
+            const text = await response.text();
+            console.error('Non-JSON response:', text);
+            showErrorToast('Có lỗi xảy ra, vui lòng thử lại');
+            if (submitBtn) {
+              submitBtn.disabled = false;
+              submitBtn.textContent = 'Đăng ký';
+            }
+            return;
+          }
+          
+          const data = await response.json();
+          
           if (data.success) {
-            showSuccessToast(data.message);
+            if (typeof showSuccessToast === 'function') {
+              showSuccessToast(data.message);
+            } else {
+              alert(data.message);
+            }
             if (data.redirect) {
               setTimeout(() => {
                 window.location.href = data.redirect;
               }, 1500);
             }
           } else {
-            showErrorToast(data.message);
+            if (typeof showErrorToast === 'function') {
+              showErrorToast(data.message || 'Đăng ký thất bại');
+            } else {
+              alert('Lỗi: ' + (data.message || 'Đăng ký thất bại'));
+            }
+            if (submitBtn) {
+              submitBtn.disabled = false;
+              submitBtn.textContent = 'Đăng ký';
+            }
           }
-        })
-        .catch(error => {
-          showErrorToast('Có lỗi xảy ra, vui lòng thử lại');
-        });
+        } catch (error) {
+          console.error('Registration error:', error);
+          if (typeof showErrorToast === 'function') {
+            showErrorToast('Có lỗi xảy ra, vui lòng thử lại');
+          } else {
+            alert('Có lỗi xảy ra: ' + error.message);
+          }
+          if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Đăng ký';
+          }
+        }
       });
     </script>
   </body>
