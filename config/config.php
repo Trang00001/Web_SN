@@ -3,7 +3,7 @@
 define("HOST", "localhost");
 define("DB", "SocialNetworkDB");
 define("USER", "root");
-define("PASSWORD", "binhvo2005");
+define("PASSWORD", "");
 
 // Base URL - tự động detect, hỗ trợ chạy dưới thư mục con (vd: /Web_SN/public)
 $scriptDir = dirname($_SERVER['SCRIPT_NAME'] ?? '/');

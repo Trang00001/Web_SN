@@ -31,7 +31,7 @@ class Friendship {
     }
 
 public function getSuggestedFriends($accountID) {
-    return $this->db->callProcedureSelect("sp_GetSuggestedFriends", [$accountID]);
+    return $this->db->callProcedureSelect("sp_SuggestFriends", [$accountID]);
 }
 
 

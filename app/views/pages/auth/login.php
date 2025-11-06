@@ -42,6 +42,21 @@ $csrf = $_SESSION['csrf_token'];
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <?php include __DIR__ . '/../../components/layout/toast.php'; ?>
   <script>
+    // Show success/error messages from session
+    <?php if (isset($_SESSION['success_message'])): ?>
+      if (typeof showSuccessToast === 'function') {
+        showSuccessToast(<?php echo json_encode($_SESSION['success_message']); ?>);
+      }
+      <?php unset($_SESSION['success_message']); ?>
+    <?php endif; ?>
+    
+    <?php if (isset($_SESSION['error_message'])): ?>
+      if (typeof showErrorToast === 'function') {
+        showErrorToast(<?php echo json_encode($_SESSION['error_message']); ?>);
+      }
+      <?php unset($_SESSION['error_message']); ?>
+    <?php endif; ?>
+
     document.getElementById('formLogin').addEventListener('submit', async function(e) {
       e.preventDefault();
       const form = e.target;

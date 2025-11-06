@@ -36,6 +36,7 @@ if ($showSaved) {
     $posts = $db->select(
         "SELECT p.PostID as post_id, p.Content as content, p.PostTime as created_at,
                 a.Username as username, a.AccountID as author_id,
+                pr.AvatarURL as avatar_url,
                 (SELECT COUNT(*) FROM PostLike WHERE PostID = p.PostID) as like_count,
                 (SELECT COUNT(*) FROM Comment WHERE PostID = p.PostID) as comment_count,
                 EXISTS(SELECT 1 FROM PostLike WHERE PostID = p.PostID AND AccountID = ?) as user_liked,
@@ -43,6 +44,7 @@ if ($showSaved) {
          FROM SavedPost sp
          JOIN Post p ON sp.PostID = p.PostID
          JOIN Account a ON p.AuthorID = a.AccountID
+         LEFT JOIN Profile pr ON a.AccountID = pr.AccountID
          LEFT JOIN PostCategory pc ON p.CategoryID = pc.CategoryID
          WHERE sp.AccountID = ?
          ORDER BY sp.SavedTime DESC",
@@ -54,12 +56,14 @@ if ($showSaved) {
     $posts = $db->select(
         "SELECT p.PostID as post_id, p.Content as content, p.PostTime as created_at,
                 a.Username as username, a.AccountID as author_id,
+                pr.AvatarURL as avatar_url,
                 (SELECT COUNT(*) FROM PostLike WHERE PostID = p.PostID) as like_count,
                 (SELECT COUNT(*) FROM Comment WHERE PostID = p.PostID) as comment_count,
                 EXISTS(SELECT 1 FROM PostLike WHERE PostID = p.PostID AND AccountID = ?) as user_liked,
                 pc.CategoryID as category_id, pc.CategoryName as category_name
          FROM Post p
          JOIN Account a ON p.AuthorID = a.AccountID
+         LEFT JOIN Profile pr ON a.AccountID = pr.AccountID
          LEFT JOIN PostCategory pc ON p.CategoryID = pc.CategoryID
          WHERE p.Content LIKE ? OR a.Username LIKE ?
          ORDER BY p.PostTime DESC",
