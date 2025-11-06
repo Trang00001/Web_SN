@@ -113,6 +113,11 @@ $router->post('/api/friends/send_request', function() {
     $controller = new FriendController();
     $controller->sendRequest();
 });
+// Suggested friends
+$router->get('/api/friends/suggested', function() {
+    $controller = new FriendController();
+    $controller->getSuggestedFriends();
+});
 
 // Message API endpoints
 $router->get('/api/messages/fetch', function() {

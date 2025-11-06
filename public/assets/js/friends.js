@@ -4,18 +4,24 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // ------------------ Load tab bằng AJAX ------------------
   function loadTab(action) {
-    if (action === "suggested") {
-      content.innerHTML = `
-        <div class="text-center py-5 text-muted">
-          Chưa có gợi ý.
-        </div>`;
-      return;
-    }
-
+    // Gọi API cho tất cả các tab (bao gồm cả "suggested")
     fetch(`/api/friends/${action}`)
       .then((res) => res.text())
-      .then((html) => (content.innerHTML = html))
-      .catch((err) => console.error(err));
+      .then((html) => {
+        content.innerHTML =
+          html ||
+          `
+          <div class="text-center py-5 text-muted">
+            Không có dữ liệu hiển thị.
+          </div>`;
+      })
+      .catch((err) => {
+        console.error(err);
+        content.innerHTML = `
+          <div class="text-center py-5 text-danger">
+            Lỗi tải dữ liệu.
+          </div>`;
+      });
   }
 
   // ------------------ Chuyển tab ------------------
@@ -52,11 +58,11 @@ document.addEventListener("DOMContentLoaded", function () {
           return;
         }
 
-        // ------------------ Xóa card hiện tại ------------------
+        // Xóa card hiện tại
         const card = target.closest(".friend-item");
         if (card) card.remove();
 
-        // ------------------ Append bạn mới vào tab All Friends ------------------
+        // Nếu vừa kết bạn thành công → thêm vào tab All Friends
         if (
           (action === "accept" || action === "send_request") &&
           data.newFriend

@@ -25,19 +25,20 @@ $defaultAvatar = '/Web_SN/assets/images/default-avatar.png';
 <?php endif; ?>
 
 
-<!-- <php elseif ($tab === 'suggested' && $friendData): ?>
-    <div class="card p-3 friend-item">
+<?php if ($tab === 'suggested' && $friendData): ?>
+    <div class="card p-3 friend-item d-flex justify-content-between align-items-center">
         <div class="d-flex align-items-center">
-            <img src="<= htmlspecialchars($friendData['AvatarURL'] ?? $defaultAvatar) ?>" 
+            <img src="<?= htmlspecialchars($friendData['AvatarURL'] ?? $defaultAvatar) ?>" 
                  alt="Avatar" class="rounded-circle me-3" width="50" height="50">
-            <span class="fw-bold"><= htmlspecialchars($friendData['Username'] ?? '') ?></span>
+            <span class="fw-bold"><?= htmlspecialchars($friendData['Username'] ?? '') ?></span>
         </div>
-        <div class="mt-2">
-            <button class="btn btn-sm btn-primary btn-send-request" data-id="<= $friendData['AccountID'] ?? 0 ?>">
-                Kết bạn
-            </button>
-        </div>
-    </div> -->
+        <button class="btn btn-sm btn-primary btn-send-request" 
+                data-id="<?= $friendData['AccountID'] ?? 0 ?>">
+            Kết bạn
+        </button>
+    </div>
+<?php endif; ?>
+
 
 <?php if ($tab === 'requests' && $req): ?>
     <div class="card p-3 friend-item">

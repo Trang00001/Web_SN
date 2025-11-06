@@ -87,6 +87,32 @@ class FriendController {
             echo json_encode(['success' => true, 'newFriend' => null]);
         }
     }
+
+// Gợi ý kết bạn
+// Get suggested friends
+public function getSuggestedFriends() {
+    require_once __DIR__ . '/../models/Friendship.php';
+    
+    $currentUserID = $this->requireAuth();
+    $fs = new Friendship();
+    $suggested = $fs->getSuggestedFriends($currentUserID);
+
+    ob_start();
+    foreach ($suggested as $f) {
+        $friendData = [
+            'AccountID' => $f['AccountID'],
+            'Username'  => $f['Username'],
+            'AvatarURL' => $f['AvatarURL'] ?? null
+        ];
+        $tab = 'suggested';
+        include __DIR__ . '/../views/components/item/friend-item.php';
+    }
+    echo ob_get_clean();
+}
+
+
+
+
     
     // Reject friend request
     public function rejectRequest() {
