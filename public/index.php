@@ -152,7 +152,14 @@ $router->get('/profile', function(){
     $controller->index();
 });
 $router->get('/profile/edit', function(){ 
-    require __DIR__ . '/../app/views/pages/profile/edit_profile.php'; 
+    require_once __DIR__ . '/../app/controllers/ProfileController.php';
+    $controller = new ProfileController();
+    $controller->edit();
+});
+$router->post('/profile/edit', function(){ 
+    require_once __DIR__ . '/../app/controllers/ProfileController.php';
+    $controller = new ProfileController();
+    $controller->update();
 });
 $router->get('/notifications', function(){ 
     require __DIR__ . '/../app/views/pages/notifications/index.php'; 

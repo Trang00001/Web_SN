@@ -5,14 +5,18 @@ define("DB", "SocialNetworkDB");
 define("USER", "root");
 define("PASSWORD", "");
 
-// Base URL - tự động detect
-$scriptPath = dirname($_SERVER['SCRIPT_NAME']);
-if (strpos($scriptPath, '/public') !== false) {
+// Base URL - tự động detect, hỗ trợ chạy dưới thư mục con (vd: /Web_SN/public)
+$scriptDir = dirname($_SERVER['SCRIPT_NAME'] ?? '/');
+$scriptDir = str_replace('\\', '/', $scriptDir);
+$scriptDir = rtrim($scriptDir, '/');
+
+// Khi chạy bằng PHP built-in server với document root là public, $scriptDir sẽ là '/'
+// -> BASE_URL rỗng để tạo đường dẫn như '/profile'
+if ($scriptDir === '' || $scriptDir === '/') {
     define("BASE_URL", "");
 } else {
-    $basePath = str_replace('/public', '', $scriptPath);
-    $basePath = rtrim($basePath, '/');
-    define("BASE_URL", $basePath);
+    // Ví dụ: '/Web_SN/public' => dùng nguyên vẹn để tạo URL tuyệt đối đúng
+    define("BASE_URL", $scriptDir);
 }
 
 // Assets URL

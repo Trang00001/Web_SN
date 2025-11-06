@@ -59,6 +59,114 @@ class ProfileController {
         
         include __DIR__ . '/../views/pages/profile/profile.php';
     }
+
+    /**
+     * Hiển thị form chỉnh sửa hồ sơ
+     */
+    public function edit() {
+        ensure_session_started();
+        require_auth();
+
+        $accountID = $_SESSION['user_id'] ?? null;
+        if (!$accountID) { redirect('/login'); }
+
+        $profile = $this->getProfile($accountID);
+        if (!$profile) {
+            // Nếu chưa có profile, dựng dữ liệu trống tối thiểu từ Account
+            $account = (new Account())->getAccountById($accountID);
+            $profile = [
+                'account_id' => $accountID,
+                'email' => $account['Email'] ?? '',
+                'username' => $account['Username'] ?? 'User',
+                'full_name' => '',
+                'gender' => '',
+                'birth_date' => '',
+                'hometown' => '',
+                'avatar' => ''
+            ];
+        }
+
+        include __DIR__ . '/../views/pages/profile/edit_profile.php';
+    }
+
+    /**
+     * Cập nhật hồ sơ người dùng
+     */
+    public function update() {
+        ensure_session_started();
+        require_auth();
+
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            redirect('/profile/edit');
+        }
+
+        if (!check_csrf($_POST['csrf_token'] ?? '')) {
+            $_SESSION['flash_error'] = 'Phiên làm việc không hợp lệ. Vui lòng thử lại!';
+            redirect('/profile/edit');
+        }
+
+        $accountID = $_SESSION['user_id'];
+
+        // Lấy dữ liệu form
+        $fullName = trim($_POST['full_name'] ?? '');
+        $gender = trim($_POST['gender'] ?? '');
+        $birthDate = trim($_POST['birth_date'] ?? '');
+        $hometown = trim($_POST['hometown'] ?? '');
+
+        // Chuẩn hóa birth date
+        if ($birthDate === '') { $birthDate = null; }
+
+        // Xử lý upload avatar (nếu có)
+        $avatarUrl = null;
+        if (!empty($_FILES['avatar']['name']) && $_FILES['avatar']['error'] === UPLOAD_ERR_OK) {
+            $allowed = ['image/jpeg','image/png','image/webp','image/jpg'];
+            $mime = mime_content_type($_FILES['avatar']['tmp_name']);
+            $size = (int)$_FILES['avatar']['size'];
+            if (!in_array($mime, $allowed)) {
+                $_SESSION['flash_error'] = 'Ảnh đại diện không hợp lệ.';
+                redirect('/profile/edit');
+            }
+            if ($size > 2 * 1024 * 1024) { // 2MB
+                $_SESSION['flash_error'] = 'Kích thước ảnh tối đa 2MB.';
+                redirect('/profile/edit');
+            }
+
+            $uploadDir = __DIR__ . '/../../public/uploads/avatars';
+            if (!is_dir($uploadDir)) {
+                @mkdir($uploadDir, 0777, true);
+            }
+
+            $ext = pathinfo($_FILES['avatar']['name'], PATHINFO_EXTENSION);
+            $fileName = 'avatar_' . $accountID . '_' . time() . '.' . strtolower($ext);
+            $targetPath = $uploadDir . '/' . $fileName;
+
+            if (!move_uploaded_file($_FILES['avatar']['tmp_name'], $targetPath)) {
+                $_SESSION['flash_error'] = 'Không thể lưu ảnh đại diện.';
+                redirect('/profile/edit');
+            }
+
+            // URL tương đối để hiển thị từ web
+            $avatarUrl = '/uploads/avatars/' . $fileName;
+        }
+
+        // Lấy URL avatar hiện tại nếu không upload mới
+        if ($avatarUrl === null) {
+            $current = $this->getProfile($accountID);
+            $avatarUrl = $current['avatar'] ?? '';
+        }
+
+        // Gọi model cập nhật
+        $profileModel = new Profile($accountID, $fullName, $gender, $birthDate, $hometown, $avatarUrl);
+        try {
+            $profileModel->updateProfile();
+            $_SESSION['flash_success'] = 'Cập nhật hồ sơ thành công!';
+            redirect('/profile');
+        } catch (Exception $e) {
+            error_log('Update profile failed: ' . $e->getMessage());
+            $_SESSION['flash_error'] = 'Cập nhật thất bại, vui lòng thử lại!';
+            redirect('/profile/edit');
+        }
+    }
     
     /**
      * Lấy thông tin profile của user

@@ -43,6 +43,18 @@ if ($displayBirthDate && $displayBirthDate !== 'Chưa cập nhật') {
 </head>
 <body class="profile-page">
   <div class="container py-4">
+    <?php if (!empty($_SESSION['flash_success'])): ?>
+      <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <?= htmlspecialchars($_SESSION['flash_success']) ?>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      </div>
+      <?php unset($_SESSION['flash_success']); endif; ?>
+    <?php if (!empty($_SESSION['flash_error'])): ?>
+      <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <?= htmlspecialchars($_SESSION['flash_error']) ?>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      </div>
+      <?php unset($_SESSION['flash_error']); endif; ?>
     <div class="row g-4">
       <!-- Left Sidebar: Profile Card -->
       <div class="col-lg-4">
