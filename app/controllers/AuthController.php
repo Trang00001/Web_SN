@@ -281,53 +281,64 @@ class AuthController {
         echo json_encode($response);
     }
 
-    public function resetPassword() {
-        ensure_session_started();
-        $email = trim($_POST['email'] ?? '');
-        $new = $_POST['new_password'] ?? '';
-        $confirm = $_POST['confirm_password'] ?? '';
-        $csrf = $_POST['csrf'] ?? $_POST['csrf_token'] ?? '';
+public function resetPassword() {
+    ensure_session_started();
 
-        $response = ['success' => false, 'message' => ''];
+    $email = trim($_POST['email'] ?? '');
+    $new = $_POST['new_password'] ?? '';
+    $confirm = $_POST['confirm_password'] ?? '';
+    $csrf = $_POST['csrf'] ?? $_POST['csrf_token'] ?? '';
 
-        if (!check_csrf($csrf)) {
-            http_response_code(400);
-            $response['message'] = "CSRF token không hợp lệ.";
-        }
-        else if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            $response['message'] = "Email không hợp lệ";
-        }
-        else if (strlen($new) < 6) {
-            $response['message'] = "Mật khẩu tối thiểu 6 ký tự";
-        }
-        else if ($new !== $confirm) {
-            $response['message'] = "Mật khẩu nhập lại không khớp";
-        }
-        else {
-            try {
-                $acc = new Account();
-                $found = $acc->findByEmail($email);
-                if (!$found) {
-                    $response['message'] = "Không tìm thấy tài khoản với email này.";
+    $msg = "";
+    $redirect = null;
+    $isSuccess = false;
+
+    if (!check_csrf($csrf)) {
+        $msg = "⚠️ CSRF token không hợp lệ.";
+    } 
+    else if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        $msg = "⚠️ Email không hợp lệ.";
+    } 
+    else if (strlen($new) < 6) {
+        $msg = "⚠️ Mật khẩu tối thiểu 6 ký tự.";
+    } 
+    else if ($new !== $confirm) {
+        $msg = "⚠️ Mật khẩu nhập lại không khớp.";
+    } 
+    else {
+        try {
+            $acc = new Account();
+            $found = $acc->findByEmail($email);
+
+            if (!$found) {
+                $msg = "❌ Không tìm thấy tài khoản với email này.";
+            } else {
+                $hash = password_hash($new, PASSWORD_DEFAULT);
+                $updated = $acc->updatePasswordByEmail($email, $hash);
+
+                if ($updated <= 0) {
+                    $msg = "❌ Đặt lại mật khẩu thất bại. Vui lòng thử lại.";
                 } else {
-                    $hash = password_hash($new, PASSWORD_DEFAULT);
-                    $updated = $acc->updatePasswordByEmail($email, $hash);
-                    if ($updated <= 0) {
-                        $response['message'] = "Đặt lại mật khẩu thất bại.";
-                    } else {
-                        $response['success'] = true;
-                        $response['message'] = "Đặt lại mật khẩu thành công!";
-                        $response['redirect'] = (defined('BASE_URL') ? rtrim(BASE_URL, '/') : '') . '/login';
-                    }
+                    $msg = "✅ Đặt lại mật khẩu thành công! Bạn sẽ được chuyển đến trang đăng nhập trong 5 giây...";
+                    $redirect = '/login';
+                    $isSuccess = true;
                 }
-            } catch (Exception $e) {
-                $response['message'] = "Lỗi: " . htmlspecialchars($e->getMessage());
             }
+        } catch (Exception $e) {
+            $msg = "❌ Lỗi: " . htmlspecialchars($e->getMessage());
         }
-
-        header('Content-Type: application/json');
-        echo json_encode($response);
     }
+include __DIR__ . '/../views/components/auth/notification.php';
+
+}
+
+
+
+
+
+
+
+
 
     public function logout() {
         ensure_session_started();

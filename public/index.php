@@ -75,6 +75,7 @@ $router->get('/auth/forgot', function(){
     require __DIR__ . '/../app/views/pages/auth/forgot_password.php'; 
 });
 
+
 // Auth API endpoints - POST requests
 $router->post('/auth/login', function() {
     $auth = new AuthController();
@@ -92,6 +93,7 @@ $router->post('/auth/forgot', function() {
     $auth = new AuthController();
     $auth->resetPassword();
 });
+
 
 // Friend API endpoints
 require_once __DIR__ . '/../app/controllers/FriendController.php';
