@@ -282,63 +282,75 @@ class AuthController {
     }
 
 public function resetPassword() {
-    ensure_session_started();
+        ensure_session_started();
 
-    $email = trim($_POST['email'] ?? '');
-    $new = $_POST['new_password'] ?? '';
-    $confirm = $_POST['confirm_password'] ?? '';
-    $csrf = $_POST['csrf'] ?? $_POST['csrf_token'] ?? '';
+        $email   = trim($_POST['email'] ?? '');
+        $new     = $_POST['new_password'] ?? '';
+        $confirm = $_POST['confirm_password'] ?? '';
+        $csrf    = $_POST['csrf'] ?? ($_POST['csrf_token'] ?? '');
 
-    $msg = "";
-    $redirect = null;
-    $isSuccess = false;
+        $msg = "";
+        $type = "error";
+        $redirect = null;
 
-    if (!check_csrf($csrf)) {
-        $msg = "⚠️ CSRF token không hợp lệ.";
-    } 
-    else if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-        $msg = "⚠️ Email không hợp lệ.";
-    } 
-    else if (strlen($new) < 6) {
-        $msg = "⚠️ Mật khẩu tối thiểu 6 ký tự.";
-    } 
-    else if ($new !== $confirm) {
-        $msg = "⚠️ Mật khẩu nhập lại không khớp.";
-    } 
-    else {
-        try {
-            $acc = new Account();
-            $found = $acc->findByEmail($email);
+        // --- Kiểm tra dữ liệu ---
+        if (!check_csrf($csrf)) {
+            $msg = "⚠️ CSRF token không hợp lệ.";
+            $type = "warning";
+        } 
+        elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            $msg = "⚠️ Email không hợp lệ.";
+            $type = "warning";
+        } 
+        elseif (strlen($new) < 6) {
+            $msg = "⚠️ Mật khẩu phải có ít nhất 6 ký tự.";
+            $type = "warning";
+        } 
+        elseif ($new !== $confirm) {
+            $msg = "⚠️ Mật khẩu nhập lại không khớp.";
+            $type = "warning";
+        } 
+        else {
+            try {
+                $acc = new Account();
+                $found = $acc->findByEmail($email);
 
-            if (!$found) {
-                $msg = "❌ Không tìm thấy tài khoản với email này.";
-            } else {
-                $hash = password_hash($new, PASSWORD_DEFAULT);
-                $updated = $acc->updatePasswordByEmail($email, $hash);
-
-                if ($updated <= 0) {
-                    $msg = "❌ Đặt lại mật khẩu thất bại. Vui lòng thử lại.";
+                if (!$found) {
+                    $msg = "❌ Không tìm thấy tài khoản với email này.";
+                    $type = "error";
                 } else {
-                    $msg = "✅ Đặt lại mật khẩu thành công! Bạn sẽ được chuyển đến trang đăng nhập trong 5 giây...";
-                    $redirect = '/login';
-                    $isSuccess = true;
+                    $hash = password_hash($new, PASSWORD_DEFAULT);
+                    $updated = $acc->updatePasswordByEmail($email, $hash);
+
+                    if ($updated > 0) {
+                        $msg = "✅ Đặt lại mật khẩu thành công!";
+                        $type = "success";
+                        $redirect = '/login';
+                    } else {
+                        $msg = "❌ Đặt lại mật khẩu thất bại. Vui lòng thử lại.";
+                        $type = "error";
+                    }
                 }
+            } catch (Exception $e) {
+                $msg = "❌ Lỗi hệ thống: " . htmlspecialchars($e->getMessage());
+                $type = "error";
             }
-        } catch (Exception $e) {
-            $msg = "❌ Lỗi: " . htmlspecialchars($e->getMessage());
-        }
-    }
-include __DIR__ . '/../views/components/auth/notification.php';
+     }
 
+        // --- Hiển thị giao diện reset lại (đảm bảo toast có trong HTML) ---
+        include __DIR__ . '/../views/pages/auth/forgot_password.php';
+        include __DIR__ . '/../views/components/layout/toast.php';
+
+        // --- Gọi toast bằng JS ---
+        echo "<script>
+            document.addEventListener('DOMContentLoaded', function() {
+                showToast(" . json_encode($msg) . ", " . json_encode($type) . ", 3000);
+                " . ($redirect && $type === 'success' ? 
+                    "setTimeout(() => { window.location.href = '{$redirect}'; }, 3000);" 
+                    : "") . "
+            });
+        </script>";
 }
-
-
-
-
-
-
-
-
 
     public function logout() {
         ensure_session_started();
