@@ -160,9 +160,6 @@ $comments = $commentModel->getByPost();
                             <button class="btn btn-link text-decoration-none">
                                 <i class="far fa-comment"></i> Bình luận
                             </button>
-                            <button class="btn btn-link text-decoration-none">
-                                <i class="far fa-share-square"></i> Chia sẻ
-                            </button>
                         </div>
                     </div>
 

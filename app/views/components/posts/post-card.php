@@ -11,6 +11,7 @@ if (!isset($post)) return;
 
 $post_id = $post['post_id'];
 $username = $post['username'] ?? 'Unknown';
+$avatar_url = $post['avatar_url'] ?? null;
 $content = $post['content'] ?? '';
 $media_url = $post['media_url'] ?? null;
 $like_count = $post['like_count'] ?? 0;
@@ -93,10 +94,17 @@ $hasMultipleImages = $imageCount > 1;
     <div class="post-header">
         <div class="d-flex align-items-center justify-content-between">
             <div class="d-flex align-items-center">
-                <div class="bg-primary rounded-circle d-flex align-items-center justify-content-center me-3" 
-                     style="width: 40px; height: 40px;">
-                    <span class="text-white fw-bold"><?= strtoupper(substr($username, 0, 1)) ?></span>
-                </div>
+                <?php if ($avatar_url): ?>
+                    <img src="<?= htmlspecialchars($avatar_url) ?>" 
+                         alt="<?= htmlspecialchars($username) ?>" 
+                         class="rounded-circle me-3"
+                         style="width: 40px; height: 40px; object-fit: cover;">
+                <?php else: ?>
+                    <div class="bg-primary rounded-circle d-flex align-items-center justify-content-center me-3" 
+                         style="width: 40px; height: 40px;">
+                        <span class="text-white fw-bold"><?= strtoupper(substr($username, 0, 1)) ?></span>
+                    </div>
+                <?php endif; ?>
                 <div>
                     <h6 class="mb-0"><?= htmlspecialchars($username) ?></h6>
                     <small class="text-muted"><?= htmlspecialchars($created_at) ?></small>
@@ -187,10 +195,6 @@ $hasMultipleImages = $imageCount > 1;
         <button class="action-btn comment-btn" data-post-id="<?= $post_id ?>" onclick="openPostDetail(<?= $post_id ?>)">
             <i class="fas fa-comment"></i>
             <span>Bình luận</span>
-        </button>
-        <button class="action-btn share-btn" data-post-id="<?= $post_id ?>">
-            <i class="fas fa-share"></i>
-            <span>Chia sẻ</span>
         </button>
     </div>
 </div>

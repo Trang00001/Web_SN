@@ -48,47 +48,15 @@ $csrf = $_SESSION['csrf_token'];
   <?php include __DIR__ . '/../../components/layout/toast.php'; ?>
   <script src="/assets/js/validation.js"></script>
   <script>
-    window.attachBasicValidation('#formForgot', { confirm: true });
+    // Show error messages from session
+    <?php if (isset($_SESSION['error_message'])): ?>
+      if (typeof showErrorToast === 'function') {
+        showErrorToast(<?php echo json_encode($_SESSION['error_message']); ?>);
+      }
+      <?php unset($_SESSION['error_message']); ?>
+    <?php endif; ?>
 
-    document.getElementById('formForgot').addEventListener('submit', function(e) {
-      e.preventDefault();
-      const form = e.target;
-    
-      const formData = new FormData(form);
-      fetch(form.action, {
-        method: 'POST',
-        body: formData
-      })
-      .then(res => res.json())
-      .then(data => {
-        if (data.success) {
-          if (typeof showSuccessToast === 'function') {
-            showSuccessToast(data.message);
-          } else {
-            alert(data.message);
-          }
-          if (data.redirect) {
-            setTimeout(() => {
-              window.location.href = data.redirect;
-            }, 1500);
-          }
-        } else {
-          if (typeof showErrorToast === 'function') {
-            showErrorToast(data.message);
-          } else {
-            alert('Lỗi: ' + data.message);
-          }
-        }
-      })
-      .catch(error => {
-        console.error('Forgot password error:', error);
-        if (typeof showErrorToast === 'function') {
-          showErrorToast('Có lỗi xảy ra, vui lòng thử lại');
-        } else {
-          alert('Có lỗi xảy ra: ' + error.message);
-        }
-      });
-    });
+    window.attachBasicValidation('#formForgot', { confirm: true });
   </script>
 </body>
 </html>

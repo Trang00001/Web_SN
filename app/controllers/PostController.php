@@ -428,6 +428,7 @@ class PostController {
         return [
             'post_id' => $row['PostID'],
             'username' => $row['Username'] ?? 'Unknown User',
+            'avatar_url' => $row['AvatarURL'] ?? null,
             'content' => $row['Content'] ?? '',
             'media_url' => $imageUrl,
             'like_count' => $row['LikeCount'] ?? 0,

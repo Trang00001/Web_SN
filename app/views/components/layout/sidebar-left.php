@@ -24,11 +24,6 @@
         <span>Tin nhắn</span>
     </a>
     
-    <a href="/notifications" class="menu-item">
-        <i class="fas fa-bell"></i>
-        <span>Thông báo</span>
-    </a>
-    
     <a href="/profile" class="menu-item">
         <i class="fas fa-user"></i>
         <span>Trang cá nhân</span>

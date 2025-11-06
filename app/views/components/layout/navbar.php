@@ -70,12 +70,6 @@
       <!-- Menu phải -->
       <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
         <li class="nav-item mx-1">
-          <a class="nav-link" href="/notifications">
-            <i class="fa-solid fa-bell"></i>
-            <span class="d-none d-lg-inline">Thông báo</span>
-          </a>
-        </li>
-        <li class="nav-item mx-1">
           <a class="nav-link" href="/auth/logout" onclick="return confirm('Bạn có chắc muốn đăng xuất?')">
             <i class="fa-solid fa-sign-out-alt"></i>
             <span class="d-none d-lg-inline">Đăng xuất</span>
