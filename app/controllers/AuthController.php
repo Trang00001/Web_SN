@@ -112,20 +112,74 @@ class AuthController {
         }
         else {
             try {
-                $hash = password_hash($password, PASSWORD_DEFAULT);
-                $acc = new Account($email, $hash, $username);
-                $acc->register();
+                // Normalize email (lowercase, trim)
+                $email = strtolower(trim($email));
+                $username = trim($username);
                 
-                // Auto login after register
-                $_SESSION['user_email'] = $email;
-                $_SESSION['user_name']  = $username;
+                // Kiểm tra email/username đã tồn tại trước khi đăng ký
+                $acc = new Account();
                 
-                $response['success'] = true;
-                $response['message'] = "Đăng ký thành công!";
-                $response['redirect'] = (defined('BASE_URL') ? rtrim(BASE_URL, '/') : '') . '/auth/login';
+                // Kiểm tra email - sử dụng LOWER() trong SQL để case-insensitive
+                $existingEmail = $acc->findByEmail($email);
+                
+                // Debug: Log để kiểm tra
+                if (!empty($existingEmail) && is_array($existingEmail)) {
+                    error_log("Email exists check - Found: " . json_encode($existingEmail[0] ?? []));
+                }
+                
+                if (!empty($existingEmail) && is_array($existingEmail) && count($existingEmail) > 0) {
+                    $response['message'] = "Email này đã được sử dụng.";
+                } else {
+                    // Kiểm tra username (case-insensitive)
+                    $existingUsername = $acc->findByUsername($username);
+                    
+                    if (!empty($existingUsername) && is_array($existingUsername) && count($existingUsername) > 0) {
+                        $response['message'] = "Tên người dùng này đã được sử dụng.";
+                    } else {
+                        // Double check: Query trực tiếp để chắc chắn
+                        require_once __DIR__ . '/../../core/Database.php';
+                        $db = new Database();
+                        $doubleCheckEmail = $db->select("SELECT AccountID FROM Account WHERE LOWER(Email) = ?", [$email]);
+                        $doubleCheckUsername = $db->select("SELECT AccountID FROM Account WHERE LOWER(Username) = ?", [strtolower($username)]);
+                        
+                        if (!empty($doubleCheckEmail) && count($doubleCheckEmail) > 0) {
+                            $response['message'] = "Email này đã được sử dụng.";
+                        } elseif (!empty($doubleCheckUsername) && count($doubleCheckUsername) > 0) {
+                            $response['message'] = "Tên người dùng này đã được sử dụng.";
+                        } else {
+                            // Đăng ký tài khoản mới
+                            $hash = password_hash($password, PASSWORD_DEFAULT);
+                            $acc = new Account($email, $hash, $username);
+                            
+                            try {
+                                $acc->register();
+                                
+                                // Auto login after register
+                                $_SESSION['user_email'] = $email;
+                                $_SESSION['user_name']  = $username;
+                                
+                                $response['success'] = true;
+                                $response['message'] = "Đăng ký thành công!";
+                                $response['redirect'] = (defined('BASE_URL') ? rtrim(BASE_URL, '/') : '') . '/login';
+                            } catch (Exception $regException) {
+                                // If stored procedure throws exception, it means email/username exists
+                                $regMsg = $regException->getMessage();
+                                
+                                if (stripos($regMsg, 'Email or username already exists') !== false || 
+                                    stripos($regMsg, 'Duplicate entry') !== false) {
+                                    $response['message'] = "Email hoặc tên người dùng đã tồn tại.";
+                                } else {
+                                    throw $regException; // Re-throw if it's a different error
+                                }
+                            }
+                        }
+                    }
+                }
             } catch (Exception $e) {
                 $msg = $e->getMessage();
-                if (strpos($msg, 'Email or username already exists') !== false) {
+                if (stripos($msg, 'Email or username already exists') !== false || 
+                    stripos($msg, 'Duplicate entry') !== false ||
+                    stripos($msg, 'already exists') !== false) {
                     $response['message'] = "Email hoặc tên người dùng đã tồn tại.";
                 } else {
                     $response['message'] = "Không thể đăng ký: " . htmlspecialchars($msg);
@@ -133,8 +187,28 @@ class AuthController {
             }
         }
         
-        header('Content-Type: application/json');
-        echo json_encode($response);
+        // Check if this is an AJAX request
+        $isAjax = !empty($_SERVER['HTTP_X_REQUESTED_WITH']) && 
+                  strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest';
+        
+        if ($isAjax) {
+            header('Content-Type: application/json');
+            echo json_encode($response);
+            exit;
+        } else {
+            // If not AJAX, redirect back to register page with error message
+            if (!$response['success']) {
+                $_SESSION['register_error'] = $response['message'];
+            } else {
+                $_SESSION['register_success'] = $response['message'];
+                if (isset($response['redirect'])) {
+                    header('Location: ' . $response['redirect']);
+                    exit;
+                }
+            }
+            header('Location: /register');
+            exit;
+        }
     }
 
     public function login() {

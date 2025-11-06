@@ -1,43 +1,52 @@
 /* ==============================================
-   POSTS SPECIFIC STYLES - TechConnect  
+   POSTS STYLES - Đơn giản cho Đồ Án
    Post Cards, Create Post, Post Interactions
    ============================================== */
 
-/* CREATE POST SECTION */
+/* Category Badge - Đơn giản */
+.badge {
+    font-weight: 500;
+    border-radius: 4px;
+    font-size: 0.75rem !important;
+}
+
+.bg-primary {
+    background-color: var(--primary-color) !important;
+}
+
+.bg-success {
+    background-color: var(--success-color) !important;
+}
+
+.bg-danger {
+    background-color: var(--danger-color) !important;
+}
+
+/* CREATE POST SECTION - Đơn giản */
 .create-post-card {
     background: var(--bg-card) !important;
     color: var(--text-primary) !important;
-    border: 2px solid transparent;
-    background-image: linear-gradient(var(--bg-card), var(--bg-card)), var(--primary-gradient);
-    background-origin: border-box;
-    background-clip: content-box, border-box;
-    margin-bottom: 2rem;
-    box-shadow: var(--shadow-medium);
-    border-radius: var(--border-radius-lg);
-    padding: 1.5rem;
+    border: 1px solid #e4e6eb;
+    margin-bottom: 1rem;
+    box-shadow: var(--shadow-light);
+    border-radius: var(--border-radius);
+    padding: 1rem;
     transition: var(--transition);
 }
 
-.create-post-card:hover {
-    transform: translateY(-4px);
-    box-shadow: var(--shadow-heavy);
-}
-
 .create-post-input {
-    background: rgba(248, 249, 250, 0.9) !important;
-    border: 1px solid rgba(0, 0, 0, 0.1) !important;
-    border-radius: 25px;
+    background: #f0f2f5 !important;
+    border: none !important;
+    border-radius: 20px;
     color: var(--text-primary) !important;
-    padding: 1rem 1.5rem;
+    padding: 0.75rem 1rem;
     transition: var(--transition);
     width: 100%;
 }
 
 .create-post-input:focus {
-    background: rgba(255, 255, 255, 0.95) !important;
-    border-color: var(--primary-gradient) !important;
+    background: #e4e6eb !important;
     color: var(--text-primary) !important;
-    box-shadow: 0 0 20px rgba(102, 126, 234, 0.2);
     outline: none;
 }
 
@@ -46,58 +55,40 @@
 }
 
 .create-post-btn {
-    background: rgba(102, 126, 234, 0.1) !important;
-    color: var(--text-primary) !important;
-    border: 1px solid rgba(102, 126, 234, 0.3);
+    background: #e4e6eb !important;
+    color: var(--text-secondary) !important;
+    border: none;
     border-radius: var(--border-radius);
-    padding: 0.8rem 1.5rem;
+    padding: 0.6rem 1rem;
     transition: var(--transition);
-    backdrop-filter: blur(10px);
     font-weight: 500;
 }
 
 .create-post-btn:hover {
-    background: var(--primary-gradient) !important;
-    color: white !important;
-    transform: translateY(-2px);
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+    background: #d8dadf !important;
 }
 
-/* POST CARDS */
+.create-post-btn i {
+    color: var(--primary-color);
+}
+
+/* POST CARDS - Giống Facebook đơn giản */
 .post-card {
     background: var(--bg-card);
-    border-radius: var(--border-radius-lg);
+    border-radius: var(--border-radius);
     box-shadow: var(--shadow-light);
-    margin-bottom: 1.5rem;
+    margin-bottom: 1rem;
     overflow: hidden;
     transition: var(--transition);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    position: relative;
-}
-
-.post-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 3px;
-    background: var(--primary-gradient);
-    opacity: 0;
-    transition: var(--transition);
+    border: 1px solid #e4e6eb;
 }
 
 .post-card:hover {
-    transform: translateY(-6px);
     box-shadow: var(--shadow-medium);
 }
 
-.post-card:hover::before {
-    opacity: 1;
-}
-
 .post-header {
-    padding: 1.5rem;
+    padding: 1rem;
     border-bottom: 1px solid rgba(0, 0, 0, 0.05);
     background: rgba(255, 255, 255, 0.5);
 }
@@ -119,46 +110,40 @@
 }
 
 .post-content {
-    padding: 1.5rem;
+    padding: 1rem;
     color: var(--text-primary);
-    line-height: 1.6;
+    line-height: 1.5;
 }
 
 .post-content p {
-    margin-bottom: 1rem;
-    font-size: 1rem;
+    margin-bottom: 0.75rem;
+    font-size: 0.95rem;
 }
 
 .post-text {
     color: var(--text-primary);
-    margin-bottom: 1rem;
+    margin-bottom: 0.75rem;
 }
 
 .post-media {
-    margin: 1rem 0;
+    margin: 0.75rem 0;
 }
 
 .post-media img {
     width: 100%;
-    border-radius: var(--border-radius);
+    border-radius: 0;
     transition: var(--transition);
     cursor: pointer;
 }
 
-.post-media img:hover {
-    transform: scale(1.02);
-    box-shadow: var(--shadow-medium);
-}
-
 .post-stats {
-    padding: 0 1.5rem;
+    padding: 0.5rem 1rem;
     display: flex;
     justify-content: space-between;
     align-items: center;
     color: var(--text-secondary);
     font-size: 0.9rem;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-    padding-bottom: 0.5rem;
+    border-bottom: 1px solid #e4e6eb;
 }
 
 .like-reactions {
@@ -171,20 +156,19 @@
     color: var(--text-secondary);
 }
 
-/* POST ACTIONS */
+/* POST ACTIONS - Đơn giản */
 .post-actions {
-    padding: 1rem 1.5rem;
-    border-top: 1px solid rgba(0, 0, 0, 0.05);
-    background: rgba(248, 249, 250, 0.5);
+    padding: 0.5rem;
+    border-top: 1px solid #e4e6eb;
     display: flex;
     justify-content: space-around;
-    gap: 0.5rem;
+    gap: 0.25rem;
 }
 
 .action-btn {
     background: none;
     border: none;
-    padding: 0.75rem 1rem;
+    padding: 0.6rem 1rem;
     border-radius: var(--border-radius);
     transition: var(--transition);
     color: var(--text-secondary);
@@ -198,40 +182,19 @@
 }
 
 .action-btn:hover {
-    background: var(--primary-gradient);
-    color: white;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+    background: #f0f2f5;
 }
 
 .action-btn.liked {
-    color: #e74c3c;
-    background: rgba(231, 76, 60, 0.1);
+    color: var(--danger-color);
 }
 
-.action-btn.liked:hover {
-    background: #e74c3c;
-    color: white;
+.action-btn.liked i {
+    color: var(--danger-color);
 }
 
 .action-btn i {
-    font-size: 1rem;
-    transition: var(--transition);
-}
-
-.action-btn:hover i {
-    transform: scale(1.1);
-}
-
-.like-btn.liked i {
-    animation: heartbeat 0.6s ease-in-out;
-}
-
-@keyframes heartbeat {
-    0% { transform: scale(1); }
-    25% { transform: scale(1.3); }
-    50% { transform: scale(1.1); }
-    100% { transform: scale(1); }
+    font-size: 1.1rem;
 }
 
 /* COMMENTS SECTION */
@@ -313,7 +276,7 @@
 
 .comment-input:focus {
     outline: none;
-    border-color: var(--primary-gradient);
+    border-color: var(--primary-color);
     box-shadow: 0 0 10px rgba(102, 126, 234, 0.2);
 }
 
@@ -348,25 +311,48 @@
 /* RESPONSIVE POSTS */
 @media (max-width: 768px) {
     .post-card {
-        border-radius: var(--border-radius);
-        margin-bottom: 1rem;
+        border-radius: 0;
+        margin-bottom: 0.5rem;
+        border-left: none;
+        border-right: none;
     }
     
     .post-header,
     .post-content,
     .post-actions,
     .comments-section {
-        padding: 1rem;
+        padding: 0.875rem;
     }
     
     .create-post-card {
-        padding: 1rem;
-        border-radius: var(--border-radius);
+        padding: 0.875rem;
+        border-radius: 0;
+        border-left: none;
+        border-right: none;
+        margin-bottom: 0.5rem;
+    }
+    
+    /* Post images trên mobile */
+    .post-images {
+        margin: 0 -0.875rem;
+    }
+    
+    .post-image {
+        border-radius: 0;
     }
     
     .action-btn {
-        padding: 0.5rem;
+        padding: 0.75rem 0.5rem;
         font-size: 0.9rem;
+        min-height: 44px; /* Touch-friendly size */
+    }
+    
+    .action-btn i {
+        font-size: 1.2rem;
+    }
+    
+    .action-btn span {
+        font-size: 0.85rem;
     }
 }
 
@@ -496,20 +482,34 @@
 /* Responsive Carousel */
 @media (max-width: 768px) {
     .post-carousel {
-        min-height: 300px;
+        min-height: 250px;
+        margin: 0 -0.875rem;
     }
     
     .carousel-slide img {
-        max-height: 400px;
+        max-height: 350px;
+        border-radius: 0;
     }
     
     .carousel-nav {
-        width: 28px;
-        height: 28px;
+        width: 35px;
+        height: 35px;
+        font-size: 1rem;
     }
     
-    .carousel-nav i {
-        font-size: 14px;
+    .carousel-indicators {
+        bottom: 8px;
+    }
+    
+    .carousel-indicators .dot {
+        width: 5px;
+        height: 5px;
+    }
+    
+    .carousel-nav {
+        width: 35px;
+        height: 35px;
+        font-size: 1rem;
     }
     
     .carousel-nav-prev {

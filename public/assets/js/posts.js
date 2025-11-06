@@ -86,8 +86,19 @@ class SocialApp {
         
         console.log('Toggle like called');
         const isLiked = button.classList.contains('liked');
+        
+        // Tìm container - có thể là post-card hoặc modal
         const postCard = button.closest('.post-card');
-        const postID = postCard.dataset.postId;
+        const modalContent = button.closest('.modal-content');
+        const container = postCard || modalContent;
+        
+        if (!container) {
+            this.showToast('Không tìm thấy container', 'error');
+            return;
+        }
+        
+        // Lấy postID từ button hoặc container
+        const postID = button.dataset.postId || container.dataset.postId;
         
         if (!postID) {
             this.showToast('Không tìm thấy ID bài viết', 'error');
@@ -95,8 +106,8 @@ class SocialApp {
         }
         
         const icon = button.querySelector('i');
-        const text = button.querySelector('span');
-        const likeCount = postCard.querySelector('.like-count');
+        const text = button.querySelector('span, .like-text');
+        const likeCount = container.querySelector('.like-count');
         
         // Disable button during API call
         button.disabled = true;
@@ -176,18 +187,48 @@ class SocialApp {
 
     sharePost(button) {
         console.log('Share post called');
+        
+        // Tìm container - có thể là post-card hoặc modal
         const postCard = button.closest('.post-card');
-        const postContent = postCard.querySelector('.post-content').textContent.substring(0, 100) + '...';
+        const modalContent = button.closest('.modal-content');
+        const container = postCard || modalContent;
+        
+        if (!container) {
+            this.showToast('Không tìm thấy bài viết để chia sẻ', 'error');
+            return;
+        }
+        
+        // Lấy postID từ button hoặc container
+        const postID = button.dataset.postId || container.dataset.postId;
+        
+        // Lấy nội dung bài viết
+        const postContent = container.querySelector('.post-content, .post-detail-content');
+        const contentText = postContent ? postContent.textContent.substring(0, 100) + '...' : 'Bài viết trên TechConnect';
+        
+        // Tạo URL chia sẻ
+        const shareUrl = postID ? `${window.location.origin}${window.location.pathname}?post=${postID}` : window.location.href;
         
         if (navigator.share) {
             navigator.share({
                 title: 'TechConnect - Chia sẻ bài viết',
-                text: postContent,
-                url: window.location.href
+                text: contentText,
+                url: shareUrl
+            }).then(() => {
+                this.showToast('Đã chia sẻ bài viết', 'success');
+            }).catch((error) => {
+                if (error.name !== 'AbortError') {
+                    console.error('Error sharing:', error);
+                }
             });
         } else {
-            navigator.clipboard.writeText(window.location.href);
-            this.showToast('Đã sao chép link bài viết', 'success');
+            // Fallback: copy link
+            navigator.clipboard.writeText(shareUrl)
+                .then(() => {
+                    this.showToast('Đã copy link bài viết', 'success');
+                })
+                .catch(() => {
+                    this.showToast('Không thể copy link', 'error');
+                });
         }
         
         this.animateButton(button, 'share');
@@ -329,10 +370,11 @@ class SocialApp {
             
             // Update comment count (tìm trong post-card hoặc modal)
             const postCard = input.closest('.post-card');
-            const modal = input.closest('.modal');
+            const modalContent = input.closest('.modal-content');
+            const container = postCard || modalContent;
             
-            if (postCard) {
-                const commentCount = postCard.querySelector('.comment-count');
+            if (container) {
+                const commentCount = container.querySelector('.comment-count');
                 if (commentCount) {
                     let count = parseInt(commentCount.textContent.match(/\d+/)[0]) || 0;
                     commentCount.textContent = (count + 1) + ' bình luận';
@@ -603,12 +645,16 @@ class PostManager {
             }
             
             // Create post with images
+            const categorySelect = document.getElementById('post-category-select');
+            const categoryID = categorySelect ? categorySelect.value : 1;
+            
             const response = await fetch('/api/posts/create.php', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify({
                     content: content,
-                    image_urls: imageURLs
+                    image_urls: imageURLs,
+                    category_id: parseInt(categoryID)
                 })
             });
 
@@ -693,5 +739,35 @@ window.app = window.socialApp;
 // Export classes globally
 window.SocialApp = SocialApp;
 window.PostManager = PostManager;
+
+// Xử lý lưu bài viết
+document.addEventListener('click', function(e) {
+    if (e.target.closest('.save-post-btn')) {
+        e.preventDefault();
+        const btn = e.target.closest('.save-post-btn');
+        const postId = btn.dataset.postId;
+        
+        fetch('/api/posts/save.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ post_id: postId })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                const icon = btn.querySelector('i');
+                if (data.saved) {
+                    icon.classList.remove('far');
+                    icon.classList.add('fas');
+                } else {
+                    icon.classList.remove('fas');
+                    icon.classList.add('far');
+                }
+                alert(data.message);
+            }
+        })
+        .catch(err => console.error('Save error:', err));
+    }
+});
 
 })(); // End IIFE

@@ -68,6 +68,12 @@ $router->get('/login', function(){
 $router->get('/register', function(){ 
     require __DIR__ . '/../app/views/pages/auth/register.php'; 
 });
+$router->get('/forgot', function(){ 
+    require __DIR__ . '/../app/views/pages/auth/forgot_password.php'; 
+});
+$router->get('/auth/forgot', function(){ 
+    require __DIR__ . '/../app/views/pages/auth/forgot_password.php'; 
+});
 
 // Auth API endpoints - POST requests
 $router->post('/auth/login', function() {
@@ -146,10 +152,19 @@ $router->get('/messages/chat', function(){
     require __DIR__ . '/../app/views/pages/messages/chat.php'; 
 });
 $router->get('/profile', function(){ 
-    require __DIR__ . '/../app/views/pages/profile/profile.php'; 
+    require_once __DIR__ . '/../app/controllers/ProfileController.php';
+    $controller = new ProfileController();
+    $controller->index();
 });
 $router->get('/profile/edit', function(){ 
-    require __DIR__ . '/../app/views/pages/profile/edit_profile.php'; 
+    require_once __DIR__ . '/../app/controllers/ProfileController.php';
+    $controller = new ProfileController();
+    $controller->edit();
+});
+$router->post('/profile/edit', function(){ 
+    require_once __DIR__ . '/../app/controllers/ProfileController.php';
+    $controller = new ProfileController();
+    $controller->update();
 });
 $router->get('/notifications', function(){ 
     require __DIR__ . '/../app/views/pages/notifications/index.php'; 

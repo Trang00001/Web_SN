@@ -57,11 +57,23 @@ class Image {
                 if ($imageUrl && !str_starts_with($imageUrl, 'http')) {
                     // Remove leading slash if exists
                     $imageUrl = ltrim($imageUrl, '/');
-                    // Add full URL
-                    if (str_starts_with($imageUrl, 'WEB-SN/')) {
-                        $imageUrl = 'http://localhost/' . $imageUrl;
-                    } else {
-                        $imageUrl = 'http://localhost/WEB-SN/' . $imageUrl;
+                    
+                    // Get base URL from current server
+                    $protocol = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http';
+                    $host = $_SERVER['HTTP_HOST'] ?? 'localhost:8000';
+                    $baseUrl = $protocol . '://' . $host;
+                    
+                    // If path contains 'public/uploads', use it directly
+                    if (str_contains($imageUrl, 'public/uploads')) {
+                        $imageUrl = $baseUrl . '/' . $imageUrl;
+                    }
+                    // If path starts with 'uploads', prepend with base
+                    else if (str_starts_with($imageUrl, 'uploads')) {
+                        $imageUrl = $baseUrl . '/' . $imageUrl;
+                    }
+                    // Otherwise assume it's a full path from project root
+                    else {
+                        $imageUrl = $baseUrl . '/' . $imageUrl;
                     }
                 }
                 

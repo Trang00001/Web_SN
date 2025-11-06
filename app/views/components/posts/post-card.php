@@ -18,8 +18,8 @@ $comment_count = $post['comment_count'] ?? 0;
 $created_at = $post['created_at'] ?? 'Vừa xong';
 $show_comments = $show_comments ?? false;
 
-// Kiểm tra user đã like chưa (mock data - fixed state)
-$user_liked = ($post_id % 2 == 0); // Chẵn = liked, lẻ = chưa like
+// Kiểm tra user đã like chưa (từ database)
+$user_liked = $post['user_liked'] ?? false;
 
 // Load real comments từ database
 $real_comments = [];
@@ -70,6 +70,18 @@ try {
     error_log("Error loading comments for post {$post_id}: " . $e->getMessage());
 }
 
+// Get category info
+$category_id = $post['category_id'] ?? 1;
+$category_name = $post['category_name'] ?? 'Cuộc sống';
+
+// Map category to color
+$category_colors = [
+    1 => 'primary',     // Life - Blue
+    2 => 'success',     // Study - Green  
+    3 => 'danger'       // Entertainment - Red/Purple
+];
+$category_color = $category_colors[$category_id] ?? 'secondary';
+
 // Get images for carousel
 $images = $post['images'] ?? [];
 $imageCount = count($images);
@@ -95,10 +107,20 @@ $hasMultipleImages = $imageCount > 1;
                     <i class="fas fa-ellipsis-h"></i>
                 </button>
                 <ul class="dropdown-menu dropdown-menu-end">
-                    <li><a class="dropdown-item" href="#"><i class="fas fa-bookmark me-2"></i>Lưu bài viết</a></li>
-                    <li><a class="dropdown-item" href="#"><i class="fas fa-flag me-2"></i>Báo cáo</a></li>
+                    <li>
+                        <a class="dropdown-item save-post-btn" href="#" data-post-id="<?= $post_id ?>">
+                            <i class="far fa-bookmark me-2"></i>Lưu bài viết
+                        </a>
+                    </li>
                 </ul>
             </div>
+        </div>
+        
+        <!-- Category Badge -->
+        <div class="mt-2">
+            <span class="badge bg-<?= $category_color ?> text-white px-2 py-1" style="font-size: 0.7rem;">
+                <?= htmlspecialchars($category_name) ?>
+            </span>
         </div>
     </div>
     
