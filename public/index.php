@@ -181,5 +181,24 @@ $router->get('/posts/:id', function($id){
     require __DIR__ . '/../app/views/pages/posts/detail.php'; 
 });
 
-// Dispatch the request
+
+require_once __DIR__ . '/../app/controllers/NotificationController.php';
+
+$router->get('/api/notifications', function() {
+    $controller = new NotificationController();
+    $controller->fetch();
+});
+
+$router->post('/api/notifications/read', function() {
+    $controller = new NotificationController();
+    $controller->markAsRead();
+});
+
+$router->post('/api/notifications/delete', function() {
+    $controller = new NotificationController();
+    $controller->delete();
+});
+
+// Cuối cùng mới dispatch
 $router->dispatch($uri, $method);
+

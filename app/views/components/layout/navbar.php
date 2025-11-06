@@ -1,7 +1,10 @@
+<head>
+  <link rel="stylesheet" href="/assets/css/notification.css">
+</head>
 <nav class="navbar navbar-expand-lg">
   <div class="container-fluid">
 
-    <!-- Logo -->
+    <!-- Logo --> 
     <a class="navbar-brand" href="/">
       <i class="fa-brands fa-instagram"></i> MySocial
     </a>
@@ -66,6 +69,19 @@
 
       <!-- Thanh tìm kiếm -->
       <?php include __DIR__ . '/search-bar.php'; ?>
+      
+      <!-- Thông báo -->
+      <div class="dropdown position-relative ms-3">
+        <button id="notifBtn" class="btn btn-outline-primary position-relative">
+          <i class="fa-solid fa-bell"></i>
+          <span id="notifCount" class="badge bg-danger position-absolute top-0 start-100 translate-middle"></span>
+        </button>
+
+        <div id="notifList" class="notif-list dropdown-menu p-2 shadow">
+        <!-- JS sẽ render thông báo vào đây -->
+        </div>
+      </div>
+
 
       <!-- Menu phải -->
       <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
@@ -145,3 +161,4 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 });
 </script>
+<script src="/assets/js/notifications.js"></script>

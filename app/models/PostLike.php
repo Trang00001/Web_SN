@@ -49,5 +49,23 @@ class PostLike {
             return false;
         }
     }
+
+    /**
+     * Lấy số lượng like của một post
+     * @return int
+     */
+    public function getCountByPost() {
+        try {
+            $result = $this->db->select(
+                "SELECT COUNT(*) as count FROM PostLike WHERE PostID = ?",
+                [$this->postID]
+            );
+            
+            return $result && isset($result[0]['count']) ? (int)$result[0]['count'] : 0;
+        } catch (Exception $e) {
+            error_log("PostLike::getCountByPost() - Error: " . $e->getMessage());
+            return 0;
+        }
+    }
 }
 ?>

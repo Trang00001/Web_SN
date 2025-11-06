@@ -10,8 +10,9 @@
  */
 
 session_start();
-require_once '../../../app/models/Comment.php';
+require_once '../../../app/controllers/PostController.php';
 require_once '../../../app/models/Account.php';
+require_once '../../../core/Helpers.php';
 
 // CORS headers - Allow cross-origin requests
 header('Access-Control-Allow-Origin: *');
@@ -81,23 +82,24 @@ if (strlen($content) > 1000) {
     exit;
 }
 
-// Check authentication (AUTO-LOGIN FOR TESTING)
+// Check authentication
 $userID = $_SESSION['user_id'] ?? null;
 
 if (!$userID) {
-    // Auto-login for testing
-    $_SESSION['user_id'] = 1;
-    $_SESSION['username'] = 'Alice';
-    $_SESSION['email'] = 'alice@test.com';
-    $userID = 1;
+    http_response_code(401);
+    echo json_encode([
+        'success' => false,
+        'error' => 'Chưa đăng nhập'
+    ]);
+    exit;
 }
 
-// Add comment
+// Add comment using PostController (includes notification creation)
 try {
-    $comment = new Comment($postID, $userID, $content);
-    $result = $comment->add();
+    $postController = new PostController();
+    $result = $postController->addComment($postID, $userID, $content);
     
-    if ($result) {
+    if ($result['success']) {
         // Get user info from database for accurate data
         $account = new Account();
         $userData = $account->getAccountById($userID);
@@ -119,13 +121,13 @@ try {
                 'content' => $content,
                 'created_at' => 'Vừa xong'
             ],
-            'message' => 'Đã thêm bình luận'
+            'message' => $result['message'] ?? 'Đã thêm bình luận'
         ]);
     } else {
         http_response_code(500);
         echo json_encode([
             'success' => false,
-            'error' => 'Không thể lưu bình luận vào database'
+            'error' => $result['error'] ?? 'Không thể thêm bình luận'
         ]);
     }
 } catch (Exception $e) {

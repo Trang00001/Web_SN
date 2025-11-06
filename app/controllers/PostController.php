@@ -8,6 +8,7 @@ require_once __DIR__ . '/../models/Post.php';
 require_once __DIR__ . '/../models/Image.php';
 require_once __DIR__ . '/../models/Comment.php';
 require_once __DIR__ . '/../models/PostLike.php';
+require_once __DIR__ . '/../models/Notification.php';
 
 class PostController {
     
@@ -258,6 +259,55 @@ class PostController {
             $result = $commentModel->add();
             
             if ($result) {
+                // Tạo notification cho tác giả bài viết (nếu không phải tự comment)
+                try {
+                    $postModel = new Post(0);
+                    $postModel->setPostID($postId);
+                    $postData = $postModel->getById();
+                    
+                    // Kiểm tra xem có dữ liệu không
+                    if (!empty($postData) && is_array($postData)) {
+                        $post = $postData[0] ?? null;
+                        
+                        if ($post) {
+                            // Lấy AuthorID từ dữ liệu trả về
+                            $authorId = $post['AuthorID'] ?? null;
+                            
+                            error_log("DEBUG addComment - authorId: $authorId, userId: $userId");
+                            
+                            if ($authorId && $authorId != $userId) { // tránh tự thông báo cho chính mình
+                                require_once __DIR__ . '/../../core/Helpers.php';
+                                $commenterName = getUsername($userId);
+                                
+                                // Rút ngắn nội dung comment nếu quá dài
+                                $commentPreview = mb_strlen($content) > 50 
+                                    ? mb_substr($content, 0, 50) . '...' 
+                                    : $content;
+                                
+                                $notificationContent = "$commenterName đã bình luận: \"$commentPreview\"";
+                                
+                                $notification = new Notification($authorId, 'comment', $notificationContent);
+                                $createResult = $notification->create();
+                                
+                                if ($createResult) {
+                                    error_log("DEBUG addComment - Notification tạo thành công cho authorId: $authorId");
+                                } else {
+                                    error_log("DEBUG addComment - Notification không lưu được (create() trả về false)");
+                                }
+                            } else {
+                                error_log("DEBUG addComment - Không tạo notification (authorId null hoặc tự comment)");
+                            }
+                        } else {
+                            error_log("DEBUG addComment - Post data rỗng sau khi lấy từ getById()");
+                        }
+                    } else {
+                        error_log("DEBUG addComment - Không tìm thấy post với ID: $postId");
+                    }
+                } catch (Exception $e) {
+                    error_log("DEBUG addComment - Exception khi tạo notification: " . $e->getMessage());
+                    // Không throw exception, chỉ log vì comment đã được thêm thành công
+                }
+                
                 return [
                     'success' => true,
                     'comment' => [
@@ -290,43 +340,88 @@ class PostController {
      * @param string $action 'like' hoặc 'unlike'
      * @return array Response
      */
+    
     public function toggleLike($postId, $userId, $action) {
-        try {
-            $postLikeModel = new PostLike($userId, $postId);
-            
-            if ($action === 'like') {
-                $result = $postLikeModel->add();
-                $message = 'Đã thích bài viết';
-            } else {
-                $result = $postLikeModel->remove();
-                $message = 'Đã bỏ thích';
-            }
-            
-            if ($result) {
-                // Get new like count
-                $likeCount = $postLikeModel->getCountByPost();
-                
-                return [
-                    'success' => true,
-                    'action' => $action,
-                    'new_count' => $likeCount,
-                    'message' => $message
-                ];
-            }
-            
-            return [
-                'success' => false,
-                'error' => 'Không thể thực hiện'
-            ];
-            
-        } catch (Exception $e) {
-            error_log("PostController::toggleLike() - Error: " . $e->getMessage());
-            return [
-                'success' => false,
-                'error' => $e->getMessage()
-            ];
+    try {
+        require_once __DIR__ . '/../models/Post.php';
+        require_once __DIR__ . '/../models/PostLike.php';
+        require_once __DIR__ . '/../models/Notification.php';
+
+        // 1️⃣ Thao tác like/unlike
+        $postLikeModel = new PostLike($userId, $postId);
+        $result = false;
+        $message = '';
+
+        if ($action === 'like') {
+            $result = $postLikeModel->like();
+            $message = 'Đã thích bài viết';
+        } else {
+            $result = $postLikeModel->unlike();
+            $message = 'Đã bỏ thích';
         }
+
+        // 2️⃣ Lấy số like mới
+        $likeCount = $postLikeModel->getCountByPost();
+
+        // 3️⃣ Nếu là like và thao tác thành công, tạo notification
+        if ($action === 'like' && $result) {
+            try {
+                $postModel = new Post(0);
+                $postModel->setPostID($postId);
+                $postData = $postModel->getById();
+                
+                // Kiểm tra xem có dữ liệu không
+                if (empty($postData) || !is_array($postData)) {
+                    error_log("DEBUG toggleLike - Không tìm thấy post với ID: $postId");
+                } else {
+                    $post = $postData[0] ?? null; // Lấy dòng đầu tiên
+                    
+                    if ($post) {
+                        // Lấy AuthorID từ dữ liệu trả về
+                        $authorId = $post['AuthorID'] ?? null;
+                        
+                        error_log("DEBUG toggleLike - authorId: $authorId, userId: $userId");
+                        
+                        if ($authorId && $authorId != $userId) { // tránh tự thông báo cho chính mình
+                            require_once __DIR__ . '/../../core/Helpers.php';
+                            $likerName = getUsername($userId);
+                            $content = "$likerName đã thích bài viết của bạn";
+                            
+                            $notification = new Notification($authorId, 'like', $content);
+                            $createResult = $notification->create();
+                            
+                            if ($createResult) {
+                                error_log("DEBUG toggleLike - Notification tạo thành công cho authorId: $authorId");
+                            } else {
+                                error_log("DEBUG toggleLike - Notification không lưu được (create() trả về false)");
+                            }
+                        } else {
+                            error_log("DEBUG toggleLike - Không tạo notification (authorId null hoặc tự like)");
+                        }
+                    } else {
+                        error_log("DEBUG toggleLike - Post data rỗng sau khi lấy từ getById()");
+                    }
+                }
+            } catch (Exception $e) {
+                error_log("DEBUG toggleLike - Exception khi tạo notification: " . $e->getMessage());
+            }
+        }
+
+        return [
+            'success' => $result,
+            'action' => $action,
+            'new_count' => $likeCount,
+            'message' => $message
+        ];
+
+    } catch (Exception $e) {
+        error_log("PostController::toggleLike() - Error: " . $e->getMessage());
+        return ['success' => false, 'error' => $e->getMessage()];
     }
+}
+
+
+
     
     /**
      * Upload ảnh cho bài viết
@@ -374,7 +469,7 @@ class PostController {
             // Move uploaded file
             if (move_uploaded_file($file['tmp_name'], $uploadPath)) {
                 // Return absolute URL
-                $imageUrl = 'http://localhost/WEB-SN/public/uploads/posts/' . $filename;
+                $imageUrl = 'http://localhost/WEB_SN/public/uploads/posts/' . $filename;
                 
                 return [
                     'success' => true,
@@ -411,7 +506,7 @@ class PostController {
                 if (str_starts_with($imageUrl, '/')) {
                     $imageUrl = 'http://localhost' . $imageUrl;
                 } else {
-                    $imageUrl = 'http://localhost/WEB-SN/public/' . ltrim($imageUrl, '/');
+                    $imageUrl = 'http://localhost/WEB_SN/public/' . ltrim($imageUrl, '/');
                 }
             }
         }
