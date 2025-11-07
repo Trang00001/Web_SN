@@ -300,39 +300,34 @@ BEGIN
 END //
 DELIMITER ;
 
--- DELIMITER //
--- CREATE PROCEDURE sp_AcceptFriendRequest(IN p_requestID INT)
--- BEGIN
---     UPDATE FriendRequest SET Status = 'Accepted' WHERE RequestID = p_requestID;
--- END //
--- DELIMITER ;
-DROP PROCEDURE IF EXISTS sp_AcceptFriendRequest;
+-- DROP PROCEDURE IF EXISTS sp_AcceptFriendRequest;
 DELIMITER //
 CREATE PROCEDURE sp_AcceptFriendRequest(IN p_requestID INT)
 BEGIN
     DECLARE v_senderID INT;
     DECLARE v_receiverID INT;
 
-    -- Lấy sender và receiver từ FriendRequest
+    -- Lấy sender và receiver
     SELECT SenderID, ReceiverID
     INTO v_senderID, v_receiverID
     FROM FriendRequest
     WHERE RequestID = p_requestID;
 
-    -- Cập nhật trạng thái Accepted
-    UPDATE FriendRequest
-    SET Status = 'Accepted'
-    WHERE RequestID = p_requestID;
-
-    -- Thêm bạn bè 1 chiều vào Friendship
     IF v_senderID IS NOT NULL AND v_receiverID IS NOT NULL THEN
+        -- Cập nhật trạng thái
+        UPDATE FriendRequest 
+        SET Status = 'Accepted' 
+        WHERE RequestID = p_requestID;
+
+        -- Thêm bạn bè 1 chiều (ví dụ: người gửi là bạn của người nhận)
         INSERT IGNORE INTO Friendship (Account1ID, Account2ID)
         VALUES (v_senderID, v_receiverID);
-    END IF;
 
-    -- Xóa request sau khi đã accept (nếu muốn)
-    DELETE FROM FriendRequest WHERE RequestID = p_requestID;
-END
+        -- Xóa lời mời kết bạn sau khi đã xử lý (tùy chọn)
+        DELETE FROM FriendRequest 
+        WHERE RequestID = p_requestID;
+    END IF;
+END //
 DELIMITER ;
 
 
@@ -374,47 +369,34 @@ BEGIN
 END //
 DELIMITER ;
 
-USE SocialNetworkDB;
-DELIMITER //
+-- Suggest Procedure
+
+DELIMITER $$
 
 CREATE PROCEDURE sp_SuggestFriends(IN currentUserID INT)
 BEGIN
     SELECT DISTINCT 
         a.AccountID, 
-        a.Username, 
-        a.AvatarURL
+        a.Username
     FROM Account a
     WHERE 
         a.AccountID <> currentUserID
-        -- Không phải bạn hiện tại
         AND a.AccountID NOT IN (
             SELECT 
                 CASE 
                     WHEN f.Account1ID = currentUserID THEN f.Account2ID 
                     ELSE f.Account1ID 
-                END AS FriendID
+                END
             FROM Friendship f
             WHERE currentUserID IN (f.Account1ID, f.Account2ID)
         )
-        -- Không có lời mời đang chờ
         AND a.AccountID NOT IN (
             SELECT ReceiverID FROM FriendRequest WHERE SenderID = currentUserID
             UNION
             SELECT SenderID FROM FriendRequest WHERE ReceiverID = currentUserID
-        -- )
-        -- -- Có bạn chung
-        -- AND EXISTS (
-        --     SELECT 1
-        --     FROM Friendship f1
-        --     JOIN Friendship f2 
-        --         ON (f1.Account2ID = f2.Account2ID OR f1.Account1ID = f2.Account1ID)
-        --     WHERE 
-        --         currentUserID IN (f1.Account1ID, f1.Account2ID)
-        --         AND a.AccountID IN (f2.Account1ID, f2.Account2ID)
-        --         AND f1.Account1ID <> f1.Account2ID
-        -- )
+        )
     LIMIT 10;
-END //
+END$$
 
 DELIMITER ;
 
