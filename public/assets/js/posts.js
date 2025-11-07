@@ -54,6 +54,22 @@ class SocialApp {
                 this.sharePost(e.target.closest('.share-btn'));
                 return;
             }
+
+            // Edit button
+            if (e.target.closest('.edit-post-btn')) {
+                e.preventDefault();
+                console.log('Edit post button clicked!');
+                this.openEditModal(e.target.closest('.edit-post-btn'));
+                return;
+            }
+
+            // Delete button
+            if (e.target.closest('.delete-post-btn')) {
+                e.preventDefault();
+                console.log('Delete post button clicked!');
+                this.deletePost(e.target.closest('.delete-post-btn'));
+                return;
+            }
         });
 
         // Comment submission với Enter (hỗ trợ cả 2 class)
@@ -68,6 +84,13 @@ class SocialApp {
 
         // Comment form submission (hỗ trợ cả 2 class)
         document.addEventListener('submit', (e) => {
+            if (e.target.id === 'edit-post-form') {
+                e.preventDefault();
+                console.log('Edit post form submitted');
+                this.submitPostUpdate(e.target);
+                return;
+            }
+
             if (e.target.classList.contains('comment-form') || e.target.classList.contains('comment-form-submit')) {
                 e.preventDefault();
                 console.log('Comment form submitted');
@@ -157,6 +180,180 @@ class SocialApp {
             this.showToast(error.message || 'Không thể thích bài viết', 'error');
         } finally {
             button.disabled = false;
+        }
+    }
+
+    openEditModal(button) {
+        if (!button) return;
+
+        const postCard = button.closest('.post-card');
+        if (!postCard) {
+            this.showToast('Không tìm thấy bài viết', 'error');
+            return;
+        }
+
+        const postId = button.dataset.postId || postCard.dataset.postId;
+        if (!postId) {
+            this.showToast('Không tìm thấy ID bài viết', 'error');
+            return;
+        }
+
+        const modalEl = document.getElementById('editPostModal');
+        const textarea = document.getElementById('edit-post-content');
+        const idInput = document.getElementById('edit-post-id');
+
+        if (!modalEl || !textarea || !idInput) {
+            this.showToast('Không thể mở form chỉnh sửa', 'error');
+            return;
+        }
+
+        const contentEl = postCard.querySelector('.post-text');
+        const textValue = contentEl ? contentEl.innerText : '';
+
+        textarea.value = textValue;
+        idInput.value = postId;
+
+        const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+        modal.show();
+
+        setTimeout(() => textarea.focus(), 150);
+    }
+
+    async submitPostUpdate(form) {
+        const postIdInput = form.querySelector('#edit-post-id');
+        const textarea = form.querySelector('#edit-post-content');
+        const submitBtn = form.querySelector('#edit-post-submit');
+
+        if (!postIdInput || !textarea) {
+            this.showToast('Form chỉnh sửa không hợp lệ', 'error');
+            return;
+        }
+
+        const postId = parseInt(postIdInput.value, 10);
+        const content = textarea.value.trim();
+
+        if (!postId) {
+            this.showToast('Không tìm thấy ID bài viết', 'error');
+            return;
+        }
+
+        if (!content) {
+            this.showToast('Vui lòng nhập nội dung bài viết', 'warning');
+            return;
+        }
+
+        if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.dataset.originalText = submitBtn.dataset.originalText || submitBtn.textContent;
+            submitBtn.textContent = 'Đang lưu...';
+        }
+
+        try {
+            const response = await fetch('/api/posts/update.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    post_id: postId,
+                    content
+                })
+            });
+
+            const data = await response.json();
+
+            if (!response.ok || !data.success) {
+                throw new Error(data.error || 'Không thể cập nhật bài viết');
+            }
+
+            const postCard = document.querySelector(`.post-card[data-post-id="${postId}"]`);
+            if (postCard) {
+                const postContent = postCard.querySelector('.post-content');
+                let postText = postCard.querySelector('.post-text');
+                const sanitized = content.replace(/\n/g, '<br>');
+
+                if (postText) {
+                    postText.innerHTML = sanitized;
+                } else if (postContent) {
+                    postText = document.createElement('p');
+                    postText.className = 'post-text';
+                    postText.innerHTML = sanitized;
+                    postContent.prepend(postText);
+                }
+            }
+
+            const modalEl = document.getElementById('editPostModal');
+            const modalInstance = bootstrap.Modal.getInstance(modalEl);
+            if (modalInstance) {
+                modalInstance.hide();
+            }
+
+            form.reset();
+            this.showToast(data.message || 'Đã cập nhật bài viết', 'success');
+
+        } catch (error) {
+            console.error('Error updating post:', error);
+            this.showToast(error.message || 'Không thể cập nhật bài viết', 'error');
+        } finally {
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                if (submitBtn.dataset.originalText) {
+                    submitBtn.textContent = submitBtn.dataset.originalText;
+                }
+            }
+        }
+    }
+
+    async deletePost(button) {
+        if (!button) return;
+
+        const postCard = button.closest('.post-card');
+        const postId = button.dataset.postId || (postCard ? postCard.dataset.postId : null);
+
+        if (!postId) {
+            this.showToast('Không tìm thấy ID bài viết', 'error');
+            return;
+        }
+
+        const confirmed = window.confirm('Bạn có chắc chắn muốn xóa bài viết này?');
+        if (!confirmed) {
+            return;
+        }
+
+        button.classList.add('disabled');
+
+        try {
+            const response = await fetch('/api/posts/delete.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    post_id: parseInt(postId, 10)
+                })
+            });
+
+            const data = await response.json();
+
+            if (!response.ok || !data.success) {
+                throw new Error(data.error || 'Không thể xóa bài viết');
+            }
+
+            if (postCard) {
+                postCard.style.transition = 'opacity 0.3s ease';
+                postCard.style.opacity = '0';
+                setTimeout(() => {
+                    postCard.remove();
+                }, 300);
+            }
+
+            this.showToast(data.message || 'Đã xóa bài viết', 'success');
+
+        } catch (error) {
+            console.error('Error deleting post:', error);
+            this.showToast(error.message || 'Không thể xóa bài viết', 'error');
+        } finally {
+            button.classList.remove('disabled');
         }
     }
 
