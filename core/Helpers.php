@@ -69,6 +69,36 @@ if (!function_exists('is_logged_in')) {
     }
 }
 
+if (!function_exists('getUsername')) {
+    /**
+     * Lấy username từ AccountID
+     * @param int $accountID
+     * @return string
+     */
+    function getUsername($accountID) {
+        if (!$accountID) {
+            return 'Người dùng';
+        }
+        
+        try {
+            require_once __DIR__ . '/Database.php';
+            $db = new Database();
+            $result = $db->select(
+                "SELECT Username FROM Account WHERE AccountID = ?",
+                [$accountID]
+            );
+            
+            if ($result && isset($result[0]['Username'])) {
+                return $result[0]['Username'];
+            }
+        } catch (Exception $e) {
+            error_log("getUsername() error: " . $e->getMessage());
+        }
+        
+        return 'Người dùng';
+    }
+}
+
 // Add JS-friendly URL helpers to all views
 if (!function_exists('inject_js_urls')) {
     function inject_js_urls() {

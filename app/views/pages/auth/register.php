@@ -105,15 +105,22 @@ $csrf = $_SESSION['csrf_token'];
           const data = await response.json();
           
           if (data.success) {
+            // Hiển thị thông báo thành công
             if (typeof showSuccessToast === 'function') {
               showSuccessToast(data.message);
             } else {
               alert(data.message);
             }
+            // Redirect về trang đăng nhập ngay sau khi đăng ký thành công
             if (data.redirect) {
               setTimeout(() => {
                 window.location.href = data.redirect;
-              }, 1500);
+              }, 800); // Giảm timeout để redirect nhanh hơn
+            } else {
+              // Nếu không có redirect trong response, redirect về /login
+              setTimeout(() => {
+                window.location.href = '/login';
+              }, 800);
             }
           } else {
             if (typeof showErrorToast === 'function') {

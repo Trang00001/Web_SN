@@ -10,7 +10,8 @@
  */
 
 session_start();
-require_once '../../../app/models/PostLike.php';
+require_once '../../../app/controllers/PostController.php';
+require_once '../../../core/Helpers.php';
 
 // CORS headers - Allow cross-origin requests
 header('Access-Control-Allow-Origin: *');
@@ -70,55 +71,37 @@ if (!in_array($action, ['like', 'unlike'])) {
     exit;
 }
 
-// Check authentication (AUTO-LOGIN FOR TESTING)
+// Check authentication
 $userID = $_SESSION['user_id'] ?? null;
 
 if (!$userID) {
-    // Auto-login for testing
-    $_SESSION['user_id'] = 1;
-    $_SESSION['username'] = 'Alice';
-    $_SESSION['email'] = 'alice@test.com';
-    $userID = 1;
+    http_response_code(401);
+    echo json_encode([
+        'success' => false,
+        'error' => 'Chưa đăng nhập'
+    ]);
+    exit;
 }
 
-// Process like/unlike
+// Process like/unlike using PostController (includes notification creation)
 try {
-    $postLike = new PostLike($userID, $postID);
+    $postController = new PostController();
+    $result = $postController->toggleLike($postID, $userID, $action);
     
-    if ($action === 'like') {
-        // Add like
-        $result = $postLike->like();
-        
-        if ($result) {
-            echo json_encode([
-                'success' => true,
-                'action' => 'liked',
-                'message' => 'Đã thích bài viết'
-            ]);
-        } else {
-            http_response_code(500);
-            echo json_encode([
-                'success' => false,
-                'error' => 'Không thể thêm like vào database'
-            ]);
-        }
+    // Return response
+    if ($result['success']) {
+        echo json_encode([
+            'success' => true,
+            'action' => $result['action'],
+            'new_count' => $result['new_count'],
+            'message' => $result['message']
+        ]);
     } else {
-        // Remove like
-        $result = $postLike->unlike();
-        
-        if ($result) {
-            echo json_encode([
-                'success' => true,
-                'action' => 'unliked',
-                'message' => 'Đã bỏ thích'
-            ]);
-        } else {
-            http_response_code(500);
-            echo json_encode([
-                'success' => false,
-                'error' => 'Không thể xóa like khỏi database'
-            ]);
-        }
+        http_response_code(500);
+        echo json_encode([
+            'success' => false,
+            'error' => $result['error'] ?? 'Không thể thực hiện thao tác like/unlike'
+        ]);
     }
 } catch (Exception $e) {
     http_response_code(500);

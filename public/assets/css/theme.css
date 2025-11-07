@@ -547,3 +547,47 @@ body {
         font-size: 1rem !important;
     }
 }
+
+/* ==============================================
+   THEME SYSTEM - Dark Mode & Color Schemes
+   ============================================== */
+
+/* Dark Theme - Tối nhạt, dịu mắt */
+.theme-dark {
+    --bg-main: #2E2E33;        /* Nền tổng thể xám đậm dịu mắt */
+    --bg-card: #393940;        /* Card nền nhạt hơn nền chính */
+    --bg-card-hover: #45454D;  /* Hover card hơi nổi nhẹ */
+
+    --text-primary: #E0E0E0;   /* Văn bản chính sáng vừa đủ */
+    --text-secondary: #B0B0B8; /* Văn bản phụ dịu mắt */
+    --text-muted: #8A8A90;     /* Văn bản mờ */
+
+    --shadow-light: 0 1px 3px rgba(0,0,0,0.15);
+    --shadow-medium: 0 2px 8px rgba(0,0,0,0.25);
+    --shadow-heavy: 0 4px 12px rgba(0,0,0,0.35);
+}
+
+/* Color Schemes - vẫn tươi sáng, hài hòa */
+.color-blue {
+    --primary-color: #1877F2;
+    --secondary-color: #3B69D6;
+    --accent-color: #4A90E2;
+}
+
+.color-green {
+    --primary-color: #43A047;
+    --secondary-color: #388E3C;
+    --accent-color: #66BB6A;
+}
+
+.color-red {
+    --primary-color: #E53935;
+    --secondary-color: #D32F2F;
+    --accent-color: #EF5350;
+}
+
+.color-orange {
+    --primary-color: #FB8C00;
+    --secondary-color: #F57C00;
+    --accent-color: #FFA726;
+}

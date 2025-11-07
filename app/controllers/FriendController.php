@@ -1,4 +1,7 @@
 <?php
+require_once __DIR__ . '/../models/Notification.php';
+require_once __DIR__ . '/../../core/Helpers.php';
+
 class FriendController {
     
     private function getCurrentUserId() {
@@ -63,16 +66,51 @@ class FriendController {
             return;
         }
         
+        // Lấy thông tin sender trước khi accept (vì request sẽ bị xóa sau khi accept)
         $fr = new FriendRequest($requestID);
-        $friendID = $fr->accept($currentUserID);
+        $incomingRequests = $fr->getIncomingRequests($currentUserID);
+        $senderID = null;
+        $senderName = null;
+        
+        foreach ($incomingRequests as $req) {
+            if ($req['RequestID'] == $requestID) {
+                $senderID = $req['SenderID'] ?? null;
+                $senderName = $req['SenderName'] ?? null;
+                break;
+            }
+        }
+        
+        // Accept request
+        $fr->accept($currentUserID);
+        
+        // Tạo notification cho người đã gửi request (sender)
+        if ($senderID && $senderID != $currentUserID) {
+            try {
+                $accepterName = getUsername($currentUserID);
+                $notificationContent = "$accepterName đã chấp nhận lời mời kết bạn của bạn";
+                
+                $notification = new Notification($senderID, 'friend_request_accepted', $notificationContent);
+                $createResult = $notification->create();
+                
+                if ($createResult) {
+                    error_log("DEBUG acceptRequest - Notification tạo thành công cho senderID: $senderID");
+                } else {
+                    error_log("DEBUG acceptRequest - Notification không lưu được (create() trả về false)");
+                }
+            } catch (Exception $e) {
+                error_log("DEBUG acceptRequest - Exception khi tạo notification: " . $e->getMessage());
+                // Không throw exception, chỉ log vì accept đã thành công
+            }
+        }
+        
+        // Lấy thông tin friend từ friend list (vì accept() có thể trả về null sau khi request bị xóa)
+        $fs = new Friendship();
+        $friends = $fs->getFriendList($currentUserID);
 
-        if ($friendID) {
-            $fs = new Friendship();
-            $friends = $fs->getFriendList($currentUserID);
-
-            $newFriend = null;
+        $newFriend = null;
+        if ($senderID) {
             foreach ($friends as $f) {
-                if ($f['AccountID'] == $friendID) {
+                if ($f['AccountID'] == $senderID) {
                     $newFriend = [
                         'AccountID' => $f['AccountID'],
                         'Username'  => $f['Username'],
@@ -81,11 +119,9 @@ class FriendController {
                     break;
                 }
             }
-
-            echo json_encode(['success' => true, 'newFriend' => $newFriend]);
-        } else {
-            echo json_encode(['success' => true, 'newFriend' => null]);
         }
+
+        echo json_encode(['success' => true, 'newFriend' => $newFriend]);
     }
 
 // Gợi ý kết bạn
@@ -166,9 +202,33 @@ public function getSuggestedFriends() {
             return;
         }
         
+        // Gửi friend request
         $fr = new FriendRequest();
-        $fr->sendRequest($currentUserID, $receiverID);
-        echo json_encode(['success' => true]);
+        $result = $fr->sendRequest($currentUserID, $receiverID);
+        
+        if ($result) {
+            // Tạo notification cho người nhận request (receiver)
+            if ($receiverID != $currentUserID) {
+                try {
+                    $senderName = getUsername($currentUserID);
+                    $notificationContent = "$senderName đã gửi lời mời kết bạn";
+                    
+                    $notification = new Notification($receiverID, 'friend_request', $notificationContent);
+                    $createResult = $notification->create();
+                    
+                    if ($createResult) {
+                        error_log("DEBUG sendRequest - Notification tạo thành công cho receiverID: $receiverID");
+                    } else {
+                        error_log("DEBUG sendRequest - Notification không lưu được (create() trả về false)");
+                    }
+                } catch (Exception $e) {
+                    error_log("DEBUG sendRequest - Exception khi tạo notification: " . $e->getMessage());
+                    // Không throw exception, chỉ log vì request đã được gửi thành công
+                }
+            }
+        }
+        
+        echo json_encode(['success' => $result]);
     }
 }
 ?>

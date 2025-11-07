@@ -1,0 +1,74 @@
+/* Danh sách thông báo */
+.notif-list {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  width: 300px;
+  max-height: 350px;
+  overflow-y: auto;
+  background: #fff;
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  z-index: 1050;
+  display: none; /* JS sẽ toggle */
+  padding: 0.5rem 0;
+}
+
+/* Mỗi thông báo */
+.notif-list .notif-item {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid #e0e0e0;
+  transition: background 0.3s, color 0.3s;
+  position: relative;
+
+  /* Nội dung tự xuống dòng */
+  white-space: normal;
+  word-wrap: break-word;
+  overflow-wrap: anywhere;
+
+  /* Tạo khoảng trống bên phải cho nút */
+  padding-right: 60px;
+
+  /* Chưa đọc: nổi bật */
+  background-color: #ffffff;
+  color: #212529;
+  font-weight: 500; /* chữ hơi đậm hơn */
+}
+
+/* Nút "Đã đọc" */
+.notif-list .notif-item .mark-read {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 0.85rem;
+  color: #0d6efd;
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: color 0.3s;
+}
+
+/* Hover */
+.notif-list .notif-item:hover {
+  background-color: #f8f9fa;
+}
+
+/* Thông báo đã đọc */
+.notif-list .notif-item.read {
+  background-color: #e9f5ff;  /* nền xanh nhạt */
+  color: #495057;             /* chữ mờ hơn để phân biệt */
+  font-weight: 400;           /* chữ nhẹ hơn */
+}
+
+/* Nút "Đã đọc" khi thông báo đã đọc */
+.notif-list .notif-item.read .mark-read {
+  color: #adb5bd;          /* mờ rõ ràng */
+  cursor: default;
+  pointer-events: none;    /* không thể click */
+}
+
+/* Hover vẫn có hiệu ứng nhưng thông báo read rõ ràng */
+.notif-list .notif-item.read:hover {
+  background-color: #d0e7ff;
+}
