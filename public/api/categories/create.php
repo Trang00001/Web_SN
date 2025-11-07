@@ -42,25 +42,33 @@ try {
     $dbInstance = new Database();
     $db = $dbInstance->getConnection();
 
-    // Kiểm tra trùng tên
+    // Kiểm tra trùng tên (mysqli syntax)
     $checkStmt = $db->prepare("SELECT CategoryID FROM PostCategory WHERE CategoryName = ?");
-    $checkStmt->execute([$categoryName]);
-    if ($checkStmt->fetch()) {
+    $checkStmt->bind_param('s', $categoryName);
+    $checkStmt->execute();
+    $checkStmt->store_result();
+    
+    if ($checkStmt->num_rows > 0) {
+        $checkStmt->close();
         ob_clean();
         header('Content-Type: application/json');
         die(json_encode(['success' => false, 'message' => 'Danh mục đã tồn tại']));
     }
+    $checkStmt->close();
 
-    // Thêm danh mục mới
+    // Thêm danh mục mới (mysqli syntax)
     $stmt = $db->prepare("INSERT INTO PostCategory (CategoryName) VALUES (?)");
-    $stmt->execute([$categoryName]);
+    $stmt->bind_param('s', $categoryName);
+    $stmt->execute();
+    $newCategoryId = $db->insert_id;
+    $stmt->close();
 
     ob_clean();
     header('Content-Type: application/json');
     echo json_encode([
         'success' => true,
         'message' => 'Tạo thành công',
-        'category_id' => $db->lastInsertId()
+        'category_id' => $newCategoryId
     ]);
 
 } catch (Exception $e) {
