@@ -22,23 +22,25 @@ CREATE TABLE Profile (
     AvatarURL VARCHAR(255),
     FOREIGN KEY (AccountID) REFERENCES Account(AccountID)
 );
-
--- 3. Post
+-- 4. PostCategory
+CREATE TABLE PostCategory (
+    CategoryID INT AUTO_INCREMENT PRIMARY KEY,
+    CategoryName VARCHAR(100) NOT NULL
+);
 CREATE TABLE Post (
     PostID INT AUTO_INCREMENT PRIMARY KEY,
     AuthorID INT NOT NULL,
     Content TEXT,
     PostTime DATETIME DEFAULT CURRENT_TIMESTAMP,
     SharedFromPostID INT NULL,
+    CategoryID INT NULL,
     FOREIGN KEY (AuthorID) REFERENCES Account(AccountID),
-    FOREIGN KEY (SharedFromPostID) REFERENCES Post(PostID)
+    FOREIGN KEY (SharedFromPostID) REFERENCES Post(PostID),
+    FOREIGN KEY (CategoryID) REFERENCES PostCategory(CategoryID)
 );
 
--- 4. PostCategory
-CREATE TABLE PostCategory (
-    CategoryID INT AUTO_INCREMENT PRIMARY KEY,
-    CategoryName VARCHAR(100) NOT NULL
-);
+
+
 
 -- 5. SavedPost
 CREATE TABLE SavedPost (
