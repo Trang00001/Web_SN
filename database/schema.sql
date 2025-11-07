@@ -29,10 +29,8 @@ CREATE TABLE Post (
     AuthorID INT NOT NULL,
     Content TEXT,
     PostTime DATETIME DEFAULT CURRENT_TIMESTAMP,
-    CategoryID INT DEFAULT 1,
     SharedFromPostID INT NULL,
     FOREIGN KEY (AuthorID) REFERENCES Account(AccountID),
-    FOREIGN KEY (CategoryID) REFERENCES PostCategory(CategoryID),
     FOREIGN KEY (SharedFromPostID) REFERENCES Post(PostID)
 );
 
@@ -102,7 +100,7 @@ CREATE TABLE Friendship (
     Account2ID INT,
     FriendshipDate DATETIME DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (Account1ID, Account2ID),
-    FOREIGN KEY (Account1ID) REFERENCES Account(AccountID),
+FOREIGN KEY (Account1ID) REFERENCES Account(AccountID),
     FOREIGN KEY (Account2ID) REFERENCES Account(AccountID)
 );
 
