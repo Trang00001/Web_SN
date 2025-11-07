@@ -40,11 +40,6 @@ DROP PROCEDURE IF EXISTS sp_MarkNotificationAsRead;
 DROP PROCEDURE IF EXISTS sp_DeleteNotification;
 DROP PROCEDURE IF EXISTS sp_SearchUsers;
 DROP PROCEDURE IF EXISTS sp_SearchPosts;
-DROP PROCEDURE IF EXISTS sp_GetCommentsByPostId;
-DROP PROCEDURE IF EXISTS sp_SuggestFriends;
-DROP PROCEDURE IF EXISTS sp_GetFriendList;
-DROP PROCEDURE IF EXISTS sp_DeleteMessage;
-DROP PROCEDURE IF EXISTS sp_GetMessagesByChatId
 
 -- =============================
 -- 1️⃣ NHÓM XÁC THỰC & TÀI KHOẢN
@@ -305,39 +300,34 @@ BEGIN
 END //
 DELIMITER ;
 
--- DELIMITER //
--- CREATE PROCEDURE sp_AcceptFriendRequest(IN p_requestID INT)
--- BEGIN
---     UPDATE FriendRequest SET Status = 'Accepted' WHERE RequestID = p_requestID;
--- END //
--- DELIMITER ;
-DROP PROCEDURE IF EXISTS sp_AcceptFriendRequest;
+-- DROP PROCEDURE IF EXISTS sp_AcceptFriendRequest;
 DELIMITER //
 CREATE PROCEDURE sp_AcceptFriendRequest(IN p_requestID INT)
 BEGIN
     DECLARE v_senderID INT;
     DECLARE v_receiverID INT;
 
-    -- Lấy sender và receiver từ FriendRequest
+    -- Lấy sender và receiver
     SELECT SenderID, ReceiverID
     INTO v_senderID, v_receiverID
     FROM FriendRequest
     WHERE RequestID = p_requestID;
 
-    -- Cập nhật trạng thái Accepted
-    UPDATE FriendRequest
-    SET Status = 'Accepted'
-    WHERE RequestID = p_requestID;
-
-    -- Thêm bạn bè 1 chiều vào Friendship
     IF v_senderID IS NOT NULL AND v_receiverID IS NOT NULL THEN
+        -- Cập nhật trạng thái
+        UPDATE FriendRequest 
+        SET Status = 'Accepted' 
+        WHERE RequestID = p_requestID;
+
+        -- Thêm bạn bè 1 chiều (ví dụ: người gửi là bạn của người nhận)
         INSERT IGNORE INTO Friendship (Account1ID, Account2ID)
         VALUES (v_senderID, v_receiverID);
-    END IF;
 
-    -- Xóa request sau khi đã accept (nếu muốn)
-    DELETE FROM FriendRequest WHERE RequestID = p_requestID;
-END
+        -- Xóa lời mời kết bạn sau khi đã xử lý (tùy chọn)
+        DELETE FROM FriendRequest 
+        WHERE RequestID = p_requestID;
+    END IF;
+END //
 DELIMITER ;
 
 
@@ -379,37 +369,36 @@ BEGIN
 END //
 DELIMITER ;
 
-USE SocialNetworkDB;
-DELIMITER //
+-- Suggest Procedure
 
-DELIMITER //
+DELIMITER $$
 
 CREATE PROCEDURE sp_SuggestFriends(IN currentUserID INT)
 BEGIN
     SELECT DISTINCT 
         a.AccountID, 
-        a.Username, 
-        a.AvatarURL
+        a.Username
     FROM Account a
-    WHERE a.AccountID <> currentUserID
-      AND a.AccountID NOT IN (
-            SELECT CASE 
-                     WHEN f.Account1ID = currentUserID THEN f.Account2ID 
-                     ELSE f.Account1ID 
-                   END AS FriendID
+    WHERE 
+        a.AccountID <> currentUserID
+        AND a.AccountID NOT IN (
+            SELECT 
+                CASE 
+                    WHEN f.Account1ID = currentUserID THEN f.Account2ID 
+                    ELSE f.Account1ID 
+                END
             FROM Friendship f
             WHERE currentUserID IN (f.Account1ID, f.Account2ID)
-      )
-      AND a.AccountID NOT IN (
+        )
+        AND a.AccountID NOT IN (
             SELECT ReceiverID FROM FriendRequest WHERE SenderID = currentUserID
             UNION
             SELECT SenderID FROM FriendRequest WHERE ReceiverID = currentUserID
-      )
+        )
     LIMIT 10;
-END //
+END$$
 
 DELIMITER ;
-
 
 
 
