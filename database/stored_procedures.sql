@@ -374,49 +374,41 @@ BEGIN
 END //
 DELIMITER ;
 
+-- Suggest Procedure
+
 USE SocialNetworkDB;
-DELIMITER //
+
+DROP PROCEDURE IF EXISTS sp_SuggestFriends;
+
+DELIMITER $$
 
 CREATE PROCEDURE sp_SuggestFriends(IN currentUserID INT)
 BEGIN
     SELECT DISTINCT 
         a.AccountID, 
-        a.Username, 
-        a.AvatarURL
+        a.Username
     FROM Account a
     WHERE 
         a.AccountID <> currentUserID
-        -- Không phải bạn hiện tại
         AND a.AccountID NOT IN (
             SELECT 
                 CASE 
                     WHEN f.Account1ID = currentUserID THEN f.Account2ID 
                     ELSE f.Account1ID 
-                END AS FriendID
+                END
             FROM Friendship f
             WHERE currentUserID IN (f.Account1ID, f.Account2ID)
         )
-        -- Không có lời mời đang chờ
         AND a.AccountID NOT IN (
             SELECT ReceiverID FROM FriendRequest WHERE SenderID = currentUserID
             UNION
             SELECT SenderID FROM FriendRequest WHERE ReceiverID = currentUserID
-        -- )
-        -- -- Có bạn chung
-        -- AND EXISTS (
-        --     SELECT 1
-        --     FROM Friendship f1
-        --     JOIN Friendship f2 
-        --         ON (f1.Account2ID = f2.Account2ID OR f1.Account1ID = f2.Account1ID)
-        --     WHERE 
-        --         currentUserID IN (f1.Account1ID, f1.Account2ID)
-        --         AND a.AccountID IN (f2.Account1ID, f2.Account2ID)
-        --         AND f1.Account1ID <> f1.Account2ID
-        -- )
+        )
     LIMIT 10;
-END //
+END$$
 
 DELIMITER ;
+
 
 
 
