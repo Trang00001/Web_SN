@@ -6,7 +6,7 @@
 
     <!-- Logo --> 
     <a class="navbar-brand" href="/">
-      <i class="fa-brands fa-instagram"></i> MySocial
+      <i></i> MySocial
     </a>
 
     <!-- Toggle khi mobile -->
