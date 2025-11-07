@@ -102,7 +102,7 @@ CREATE TABLE Friendship (
     Account2ID INT,
     FriendshipDate DATETIME DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (Account1ID, Account2ID),
-    FOREIGN KEY (Account1ID) REFERENCES Account(AccountID),
+FOREIGN KEY (Account1ID) REFERENCES Account(AccountID),
     FOREIGN KEY (Account2ID) REFERENCES Account(AccountID)
 );
 
