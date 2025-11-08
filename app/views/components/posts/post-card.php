@@ -115,6 +115,25 @@ $hasMultipleImages = $imageCount > 1;
                     <i class="fas fa-ellipsis-h"></i>
                 </button>
                 <ul class="dropdown-menu dropdown-menu-end">
+                    <?php
+                    // Kiểm tra xem user hiện tại có phải chủ bài viết không
+                    $current_user = $_SESSION['user_name'] ?? '';
+                    $is_owner = ($current_user === $username);
+                    
+                    if ($is_owner):
+                    ?>
+                    <li>
+                        <a class="dropdown-item edit-post-btn" href="#" data-post-id="<?= $post_id ?>">
+                            <i class="fas fa-edit me-2"></i>Chỉnh sửa
+                        </a>
+                    </li>
+                    <li>
+                        <a class="dropdown-item delete-post-btn text-danger" href="#" data-post-id="<?= $post_id ?>">
+                            <i class="fas fa-trash me-2"></i>Xóa bài viết
+                        </a>
+                    </li>
+                    <li><hr class="dropdown-divider"></li>
+                    <?php endif; ?>
                     <li>
                         <a class="dropdown-item save-post-btn" href="#" data-post-id="<?= $post_id ?>">
                             <i class="far fa-bookmark me-2"></i>Lưu bài viết

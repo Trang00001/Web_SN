@@ -257,6 +257,28 @@ try {
         </div>
     </div>
 
+    <!-- Edit Post Modal -->
+    <div class="modal fade" id="editPostModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Chỉnh sửa bài viết</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form id="edit-post-form">
+                    <div class="modal-body">
+                        <input type="hidden" id="edit-post-id">
+                        <textarea id="edit-post-content" class="form-control" rows="5" placeholder="Bạn đang nghĩ gì?" required></textarea>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                        <button type="submit" id="edit-post-submit" class="btn btn-primary">Lưu thay đổi</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <!-- Image Modal (Shared) -->
     <div class="modal fade" id="imageModal" tabindex="-1">
         <div class="modal-dialog modal-lg modal-dialog-centered">

@@ -179,9 +179,35 @@ class PostController {
      */
     public function deletePost($postId, $userId) {
         try {
-            // TODO: Verify user owns the post
-            // For now, just delete
+            // Xóa các bản ghi liên quan trước (saved posts, likes, comments, images)
+            $db = new Database();
+            $conn = $db->getConnection();
             
+            // Xóa saved posts
+            $stmt = $conn->prepare("DELETE FROM SavedPost WHERE PostID = ?");
+            $stmt->bind_param('i', $postId);
+            $stmt->execute();
+            $stmt->close();
+            
+            // Xóa likes
+            $stmt = $conn->prepare("DELETE FROM PostLike WHERE PostID = ?");
+            $stmt->bind_param('i', $postId);
+            $stmt->execute();
+            $stmt->close();
+            
+            // Xóa comments
+            $stmt = $conn->prepare("DELETE FROM Comment WHERE PostID = ?");
+            $stmt->bind_param('i', $postId);
+            $stmt->execute();
+            $stmt->close();
+            
+            // Xóa images
+            $stmt = $conn->prepare("DELETE FROM Image WHERE PostID = ?");
+            $stmt->bind_param('i', $postId);
+            $stmt->execute();
+            $stmt->close();
+            
+            // Cuối cùng xóa post
             $postModel = new Post(0);
             $postModel->setPostID($postId);
             $result = $postModel->delete();
@@ -193,6 +219,43 @@ class PostController {
             
         } catch (Exception $e) {
             error_log("PostController::deletePost() - Error: " . $e->getMessage());
+            return [
+                'success' => false,
+                'error' => 'Không thể xóa bài viết: ' . $e->getMessage()
+            ];
+        }
+    }
+    
+    /**
+     * Cập nhật nội dung bài viết
+     * @param int $postId
+     * @param int $userId (để verify ownership)
+     * @param string $content
+     * @return array
+     */
+    public function updatePost($postId, $userId, $content) {
+        try {
+            // Validate
+            if (empty($content)) {
+                return [
+                    'success' => false,
+                    'error' => 'Nội dung không được để trống'
+                ];
+            }
+            
+            // Update post
+            $postModel = new Post(0);
+            $postModel->setPostID($postId);
+            $postModel->setContent($content);
+            $result = $postModel->update();
+            
+            return [
+                'success' => $result,
+                'message' => $result ? 'Đã cập nhật bài viết' : 'Không thể cập nhật bài viết'
+            ];
+            
+        } catch (Exception $e) {
+            error_log("PostController::updatePost() - Error: " . $e->getMessage());
             return [
                 'success' => false,
                 'error' => $e->getMessage()
