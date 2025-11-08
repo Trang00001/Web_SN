@@ -9,9 +9,17 @@
  * @output JSON: { "success": boolean, "message"?: string, "error"?: string }
  */
 
+// Bắt đầu output buffering để tránh output trước header
+ob_start();
+error_reporting(0);
+ini_set('display_errors', 0);
+
 session_start();
 
 require_once '../../../app/controllers/PostController.php';
+
+// Clear any output buffer
+ob_clean();
 
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: POST, OPTIONS');
@@ -73,4 +81,4 @@ echo json_encode([
     'success' => true,
     'message' => $result['message'] ?? 'Đã xóa bài viết'
 ]);
-
+exit;
